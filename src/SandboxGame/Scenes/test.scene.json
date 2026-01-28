@@ -1,0 +1,21 @@
+﻿{
+  "version": 1,
+  "entities": [
+    {
+      "id": "11111111-1111-1111-1111-111111111111",
+      "name": "Player",
+      "transform": {
+        "position": [ 4.0, 3.0, 0.0 ],
+        "rotationZRadians": 0.0,
+        "scale": [ 1.0, 1.0, 1.0 ]
+      },
+      "spriteRenderer": {
+        "textureKey": "Sprites/player",
+        "layer": 100,
+        "pixelsPerUnit": 100.0,
+        "tint": [ 1.0, 1.0, 1.0, 1.0 ],
+        "sourceRect": [ 0, 0, 0, 0 ]
+      }
+    }
+  ]
+}

@@ -1,16 +1,25 @@
 ﻿using Engine.Core.Components;
-using Engine.Core.Scene;
 using Engine.Core.Rendering;
+using Engine.Core.Scene;
+using Engine.Core.Serialization;
+using Engine.Core.Systems;
 using Engine.Runtime.MonoGame.Assets;
 using Engine.Runtime.MonoGame.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using SandboxGame.Systems;
+using System;
+using System.Collections.Generic;
+using System.IO;
+
 
 namespace SandboxGame;
 
 public sealed class GameApp : Game
 {
+
+    private List<ISystem> _systems = new();
     private readonly GraphicsDeviceManager _gdm;
 
     private Scene _scene = null!;
@@ -38,18 +47,17 @@ public sealed class GameApp : Game
         _renderer2D = new MonoGameRenderer2D(GraphicsDevice, _textures);
 
         _camera = new Camera2D();
-        _scene = new Scene();
 
-        _player = _scene.CreateEntity("Player");
-        _player.Transform.Position = new System.Numerics.Vector3(4f, 3f, 0f); // world units
-        _player.Transform.Scale = new System.Numerics.Vector3(1f, 1f, 1f);
+        // Load scene JSON from copied output folder:
+        var scenePath = Path.Combine(AppContext.BaseDirectory, "Scenes", "test.scene.json");
+        var json = File.ReadAllText(scenePath);
+        _scene = SceneJson.Deserialize(json);
 
-        _player.Add(new SpriteRenderer
-        {
-            TextureKey = "Sprites/player",     // Content key (no extension)
-            Layer = 100,
-            PixelsPerUnit = 100f
-        });
+        // Systems
+        _systems = new List<ISystem>
+    {
+        new PlayerMovementSystem()
+    };
     }
 
     protected override void Update(GameTime gameTime)
@@ -59,24 +67,11 @@ public sealed class GameApp : Game
 
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-        // Simple movement test:
-        var k = Keyboard.GetState();
-        var move = System.Numerics.Vector2.Zero;
-        if (k.IsKeyDown(Keys.A)) move.X -= 1f;
-        if (k.IsKeyDown(Keys.D)) move.X += 1f;
-        if (k.IsKeyDown(Keys.W)) move.Y -= 1f;
-        if (k.IsKeyDown(Keys.S)) move.Y += 1f;
-
-        if (move != System.Numerics.Vector2.Zero)
-        {
-            move = System.Numerics.Vector2.Normalize(move);
-            var p = _player.Transform.Position;
-            p.X += move.X * 3f * dt;
-            p.Y += move.Y * 3f * dt;
-            _player.Transform.Position = p;
-        }
+        foreach (var sys in _systems)
+            sys.Update(_scene, dt);
 
         _scene.Update(dt);
+
         base.Update(gameTime);
     }
 

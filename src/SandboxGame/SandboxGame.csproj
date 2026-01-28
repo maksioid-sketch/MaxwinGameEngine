@@ -30,4 +30,9 @@
     <ProjectReference Include="..\Engine.Core\Engine.Core.csproj" />
     <ProjectReference Include="..\Engine.Runtime.MonoGame\Engine.Runtime.MonoGame.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="Scenes\test.scene.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

@@ -1,20 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Engine.Core.Components;
+﻿using Engine.Core.Components;
 using Engine.Core.Math;
 
 namespace Engine.Core.Scene;
 
 public sealed class Entity
 {
-    public Guid Id { get; } = Guid.NewGuid();
+    public Guid Id { get; private set; }
     public string Name { get; set; } = "Entity";
     public Transform Transform { get; } = new();
 
     private readonly Dictionary<Type, IComponent> _components = new();
+
+    public Entity() : this(Guid.NewGuid()) { }
+
+    public Entity(Guid id)
+    {
+        Id = id;
+    }
 
     public T Add<T>(T component) where T : class, IComponent
     {
@@ -32,5 +34,11 @@ public sealed class Entity
 
         component = null;
         return false;
+    }
+
+    public T GetOrAdd<T>(Func<T> factory) where T : class, IComponent
+    {
+        if (TryGet<T>(out var existing) && existing is not null) return existing;
+        return Add(factory());
     }
 }
