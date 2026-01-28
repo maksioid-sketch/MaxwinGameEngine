@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="src/Engine.Core/Engine.Core.csproj" />
+  <Project Path="src/Engine.Runtime.MonoGame/Engine.Runtime.MonoGame.csproj" />
+  <Project Path="src/SandboxGame/SandboxGame.csproj" />
+</Solution>
