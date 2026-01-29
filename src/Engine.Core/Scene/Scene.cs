@@ -1,6 +1,9 @@
 ﻿using Engine.Core.Components;
 using Engine.Core.Rendering;
 using Engine.Core.Assets;
+using Engine.Core.Assets;
+using Engine.Core.Rendering.Queue;
+
 
 namespace Engine.Core.Scene;
 
@@ -70,4 +73,39 @@ public sealed class Scene
         var cosy_cosp = 1f - 2f * (q.Y * q.Y + q.Z * q.Z);
         return (float)System.Math.Atan2(siny_cosp, cosy_cosp);
     }
+
+    public void CollectRenderItems2D(List<RenderItem2D> output, IAssetProvider assets)
+    {
+        output.Clear();
+
+        foreach (var e in _entities)
+        {
+            if (!e.TryGet<Engine.Core.Components.SpriteRenderer>(out var sr) || sr is null)
+                continue;
+
+            if (string.IsNullOrWhiteSpace(sr.SpriteId))
+                continue;
+
+            if (!assets.TryGetSprite(sr.SpriteId, out var sprite))
+                continue;
+
+            var pos = e.Transform.Position;
+            var scale2 = new System.Numerics.Vector2(e.Transform.Scale.X, e.Transform.Scale.Y);
+            var rotZ = GetZRotationRadians(e.Transform.Rotation);
+
+            var src = sr.OverrideSourceRect ? sr.SourceRectOverride : sprite.SourceRect;
+            var ppu = sr.OverridePixelsPerUnit ? sr.PixelsPerUnitOverride : sprite.PixelsPerUnit;
+
+            output.Add(new RenderItem2D(
+                textureKey: sprite.TextureKey,
+                worldPosition: pos,
+                worldScale: scale2,
+                rotationRadians: rotZ,
+                sourceRect: src,
+                tint: sr.Tint,
+                layer: sr.Layer,
+                pixelsPerUnit: ppu));
+        }
+    }
+
 }

@@ -15,6 +15,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Engine.Core.Rendering.Queue;
+using Engine.Core.Validation;
 
 
 namespace SandboxGame;
@@ -29,6 +31,9 @@ public sealed class GameApp : Game
 
     private SpriteBatch _uiSb = null!;
     private SpriteFont _debugFont = null!;
+
+    private readonly List<RenderItem2D> _renderQueue2D = new();
+    private List<ValidationIssue> _validationIssues = new();
 
 
     // Optional: expose status for future debug overlay
@@ -91,19 +96,6 @@ public sealed class GameApp : Game
         ReloadAtlas();
         ReloadScene();
 
-        // Optional: fail-fast check AFTER both are loaded
-        var player = _scene.FindByName("Player");
-        if (player is null) throw new Exception("No entity named 'Player' in scene.");
-
-        if (!player.TryGet<Engine.Core.Components.SpriteRenderer>(out var sr) || sr is null)
-            throw new Exception("Player has no SpriteRenderer.");
-
-        if (string.IsNullOrWhiteSpace(sr.SpriteId))
-            throw new Exception("Player SpriteId is empty.");
-
-        if (!_assets.TryGetSprite(sr.SpriteId, out var def))
-            throw new Exception($"Atlas does not contain spriteId '{sr.SpriteId}'.");
-
         _hotReloadStatus = $"{_hotReloadStatus}\nScene path: {_scenePath}";
 
         _systems = new List<ISystem>
@@ -154,12 +146,28 @@ public sealed class GameApp : Game
 
         _renderer2D.Begin(_camera);
 
-        _uiSb.Begin();
-        _uiSb.DrawString(_debugFont, _hotReloadStatus, new Microsoft.Xna.Framework.Vector2(10, 10), Microsoft.Xna.Framework.Color.White);
-        _uiSb.End();
+        
 
-        _scene.Render(_renderer2D, _assets);
+        _scene.CollectRenderItems2D(_renderQueue2D, _assets);
+        _renderQueue2D.Sort(RenderItem2DComparer.Instance);
+
+        for (int i = 0; i < _renderQueue2D.Count; i++)
+        {
+            var it = _renderQueue2D[i];
+            _renderer2D.DrawSprite(
+                it.TextureKey,
+                it.WorldPosition,
+                it.WorldScale,
+                it.RotationRadians,
+                it.SourceRect,
+                it.Tint,
+                it.Layer,
+                it.PixelsPerUnit);
+        }
+
         _renderer2D.End();
+
+        DrawDebugOverlay();
 
         base.Draw(gameTime);
     }
@@ -174,6 +182,8 @@ public sealed class GameApp : Game
             var json = File.ReadAllText(_atlasPath);
             var sprites = AtlasJson.DeserializeSprites(json);
             _assets = new DictionaryAssetProvider(sprites);
+            _validationIssues = SceneValidator.Validate(_scene, _assets);
+
 
             _hotReloadStatus = $"Atlas reloaded: {DateTime.Now:T}";
         }
@@ -193,6 +203,8 @@ public sealed class GameApp : Game
 
             var json = File.ReadAllText(_scenePath);
             _scene = SceneJson.Deserialize(json);
+            _validationIssues = SceneValidator.Validate(_scene, _assets);
+
 
             _hotReloadStatus = $"Scene reloaded: {DateTime.Now:T}";
         }
@@ -211,6 +223,42 @@ public sealed class GameApp : Game
 
         base.Dispose(disposing);
     }
+
+    private void DrawDebugOverlay()
+    {
+        _uiSb.Begin();
+
+        var y = 10f;
+
+        _uiSb.DrawString(_debugFont, _hotReloadStatus, new Microsoft.Xna.Framework.Vector2(10, y), Microsoft.Xna.Framework.Color.White);
+        y += 40f;
+
+        if (_validationIssues.Count == 0)
+        {
+            _uiSb.DrawString(_debugFont, "Validation: OK", new Microsoft.Xna.Framework.Vector2(10, y), Microsoft.Xna.Framework.Color.LightGreen);
+        }
+        else
+        {
+            _uiSb.DrawString(_debugFont, $"Validation: {_validationIssues.Count} issue(s)", new Microsoft.Xna.Framework.Vector2(10, y), Microsoft.Xna.Framework.Color.Yellow);
+            y += 24f;
+
+            // Show first N issues
+            int max = System.Math.Min(_validationIssues.Count, 8);
+            for (int i = 0; i < max; i++)
+            {
+                var issue = _validationIssues[i];
+                var line = $"{issue.Severity} {issue.Code} {(issue.EntityName is null ? "" : $"[{issue.EntityName}] ")}{issue.Message}";
+                _uiSb.DrawString(_debugFont, line, new Microsoft.Xna.Framework.Vector2(10, y), Microsoft.Xna.Framework.Color.OrangeRed);
+                y += 20f;
+            }
+
+            if (_validationIssues.Count > max)
+                _uiSb.DrawString(_debugFont, $"...and {_validationIssues.Count - max} more", new Microsoft.Xna.Framework.Vector2(10, y), Microsoft.Xna.Framework.Color.OrangeRed);
+        }
+
+        _uiSb.End();
+    }
+
 
 
 }
