@@ -7,10 +7,10 @@
       "transform": {
         "position": [ 4.0, 3.0, 0.0 ],
         "rotationZRadians": 0.0,
-        "scale": [ 1.0, 1.0, 1.0 ]
+        "scale": [ 0.1, 0.1, 0.1 ]
       },
       "spriteRenderer": {
-        "textureKey": "Sprites/player",
+        "spriteId": "player",
         "layer": 100,
         "pixelsPerUnit": 100.0,
         "tint": [ 1.0, 1.0, 1.0, 1.0 ],

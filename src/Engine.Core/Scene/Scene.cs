@@ -1,5 +1,6 @@
 ﻿using Engine.Core.Components;
 using Engine.Core.Rendering;
+using Engine.Core.Assets;
 
 namespace Engine.Core.Scene;
 
@@ -31,25 +32,35 @@ public sealed class Scene
         // Keep this as “data only”. Put gameplay logic into Systems (next step).
     }
 
-    public void Render(IRenderer2D renderer2D)
+    public void Render(IRenderer2D renderer2D, IAssetProvider assets)
     {
         foreach (var e in _entities)
         {
-            if (!e.TryGet<SpriteRenderer>(out var spr) || spr is null) continue;
+            if (!e.TryGet<Components.SpriteRenderer>(out var sr) || sr is null)
+                continue;
+
+            if (string.IsNullOrWhiteSpace(sr.SpriteId))
+                continue;
+
+            if (!assets.TryGetSprite(sr.SpriteId, out var sprite))
+                continue;
 
             var pos = e.Transform.Position;
             var scale2 = new System.Numerics.Vector2(e.Transform.Scale.X, e.Transform.Scale.Y);
             var rotZ = GetZRotationRadians(e.Transform.Rotation);
 
+            var src = sr.OverrideSourceRect ? sr.SourceRectOverride : sprite.SourceRect;
+            var ppu = sr.OverridePixelsPerUnit ? sr.PixelsPerUnitOverride : sprite.PixelsPerUnit;
+
             renderer2D.DrawSprite(
-                spr.TextureKey,
+                sprite.TextureKey,
                 pos,
                 scale2,
                 rotZ,
-                spr.SourceRect,
-                spr.Tint,
-                spr.Layer,
-                spr.PixelsPerUnit);
+                src,
+                sr.Tint,
+                sr.Layer,
+                ppu);
         }
     }
 

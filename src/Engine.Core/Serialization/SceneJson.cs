@@ -72,19 +72,14 @@ public static class SceneJson
                 {
                     entity.Add(new SpriteRenderer
                     {
-                        TextureKey = e.SpriteRenderer.TextureKey ?? "",
+                        SpriteId = e.SpriteRenderer.SpriteId ?? "",
                         Layer = e.SpriteRenderer.Layer,
-                        PixelsPerUnit = e.SpriteRenderer.PixelsPerUnit,
                         Tint = new Color4(
                             e.SpriteRenderer.Tint[0],
                             e.SpriteRenderer.Tint[1],
                             e.SpriteRenderer.Tint[2],
                             e.SpriteRenderer.Tint[3]),
-                        SourceRect = new IntRect(
-                            e.SpriteRenderer.SourceRect[0],
-                            e.SpriteRenderer.SourceRect[1],
-                            e.SpriteRenderer.SourceRect[2],
-                            e.SpriteRenderer.SourceRect[3])
+                        
                     });
                 }
             }
@@ -120,11 +115,9 @@ public static class SceneJson
                 },
                 SpriteRenderer = spr is null ? null : new SpriteRendererDto
                 {
-                    TextureKey = spr.TextureKey,
+                    SpriteId = spr.SpriteId,
                     Layer = spr.Layer,
-                    PixelsPerUnit = spr.PixelsPerUnit,
                     Tint = new[] { spr.Tint.R, spr.Tint.G, spr.Tint.B, spr.Tint.A },
-                    SourceRect = new[] { spr.SourceRect.X, spr.SourceRect.Y, spr.SourceRect.W, spr.SourceRect.H }
                 }
             };
         }
@@ -146,14 +139,10 @@ public static class SceneJson
 
     private sealed class SpriteRendererDto
     {
-        public string? TextureKey { get; set; }
+        public string? SpriteId { get; set; }
         public int Layer { get; set; } = 0;
-        public float PixelsPerUnit { get; set; } = 100f;
-
+        
         // RGBA floats
         public float[] Tint { get; set; } = new float[] { 1, 1, 1, 1 };
-
-        // x,y,w,h (0,0,0,0 = full texture)
-        public int[] SourceRect { get; set; } = new int[] { 0, 0, 0, 0 };
     }
 }
