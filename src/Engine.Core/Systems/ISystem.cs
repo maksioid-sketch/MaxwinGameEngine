@@ -1,6 +1,9 @@
-﻿namespace Engine.Core.Systems;
+﻿using Engine.Core.Runtime;
+using Engine.Core.Scene;
+
+namespace Engine.Core.Systems;
 
 public interface ISystem
 {
-    void Update(Engine.Core.Scene.Scene scene, float dtSeconds);
+    void Update(Scene.Scene scene, EngineContext ctx);
 }

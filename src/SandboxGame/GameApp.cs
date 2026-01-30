@@ -6,6 +6,10 @@ using Engine.Core.Serialization;
 using Engine.Core.Systems;
 using Engine.Core.Assets;
 using Engine.Core.Assets.Animation;
+using Engine.Core.Runtime;
+using Engine.Core.Platform.Input;
+using Engine.Core.Systems.BuiltIn;
+using SandboxGame.Platform;
 
 using Engine.Runtime.MonoGame.Assets;
 using Engine.Runtime.MonoGame.Rendering;
@@ -13,7 +17,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using SandboxGame.HotReload;
-using SandboxGame.Systems;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,9 +28,15 @@ using Engine.Core.Validation;
 namespace SandboxGame;
 
 public sealed class GameApp : Game
+
 {
+
+    private MonoGameTime _time = null!;
+    private EngineServices _services = null!;
+
     private IAssetProvider _assets = null!;
     private HotReloadService? _hotReload;
+    private MonoGameInput _input = null!;
 
     private string _scenePath = "";
     private string _atlasPath = "";
@@ -68,6 +77,13 @@ public sealed class GameApp : Game
 
     protected override void LoadContent()
     {
+        _input = new MonoGameInput();
+        _time = new MonoGameTime();
+
+        // _assets must exist by now (even if empty)
+        _services = new EngineServices(_input, _time, _assets);
+
+
         _textures = new TextureStore(Content);
         _renderer2D = new MonoGameRenderer2D(GraphicsDevice, _textures);
         _camera = new Camera2D();
@@ -96,49 +112,50 @@ public sealed class GameApp : Game
         _assets = new DictionaryAssetProvider(
             new Dictionary<string, SpriteDefinition>(StringComparer.OrdinalIgnoreCase),
             new Dictionary<string, AnimationClip>(StringComparer.OrdinalIgnoreCase));
+        _services.SetAssets(_assets);
+
 
         _scene = new Engine.Core.Scene.Scene();
+
+        
 
         // Load real data
         ReloadAssets();   // loads atlas + animations, also calls RebuildSystems() inside (recommended)
         ReloadScene();    // loads scene
-        RebuildSystems(); // if you DON'T call it inside ReloadAssets(), keep this here
+        //RebuildSystems(); // if you DON'T call it inside ReloadAssets(), keep this here
 
         _hotReloadStatus = $"{_hotReloadStatus}\nScene path: {_scenePath}";
     }
 
     protected override void Update(GameTime gameTime)
     {
-        if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+        _time.Update(gameTime);
+        _input.Update();
+
+        if (_input.WasPressed(InputKey.Escape))
             Exit();
 
-
-
+        // Hot reload first
         var changes = _hotReload?.ConsumeChanges();
-
-
-
-
         if (changes is { Count: > 0 })
         {
             bool assetsChanged =
                 changes.Any(p => p.EndsWith("atlas.json", StringComparison.OrdinalIgnoreCase)) ||
                 changes.Any(p => p.EndsWith("animations.json", StringComparison.OrdinalIgnoreCase));
 
-            bool sceneChanged = changes.Any(p => p.EndsWith(".scene.json", StringComparison.OrdinalIgnoreCase));
+            bool sceneChanged =
+                changes.Any(p => p.EndsWith(".scene.json", StringComparison.OrdinalIgnoreCase));
 
-            if (assetsChanged) ReloadAssets();
+            if (assetsChanged) ReloadAssets(); // must call _services.SetAssets(_assets) inside
             if (sceneChanged) ReloadScene();
-
         }
 
+        var ctx = new EngineContext(_services);
 
-        float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        for (int i = 0; i < _systems.Count; i++)
+            _systems[i].Update(_scene, ctx);
 
-        foreach (var sys in _systems)
-            sys.Update(_scene, dt);
-
-        _scene.Update(dt);
+        _scene.Update(_time.DeltaSeconds);
 
         base.Update(gameTime);
     }
@@ -202,6 +219,10 @@ public sealed class GameApp : Game
             _validationIssues = SceneValidator.Validate(_scene, _assets);
 
             _hotReloadStatus = $"Assets reloaded: {DateTime.Now:T}";
+
+            _services.SetAssets(_assets);
+            _validationIssues = SceneValidator.Validate(_scene, _assets);
+
         }
         catch (Exception ex)
         {
@@ -293,12 +314,15 @@ public sealed class GameApp : Game
     {
         _systems = new List<ISystem>
     {
-        new SandboxGame.Systems.AnimationSystem(_assets),
-        new SandboxGame.Systems.PlayerMovementSystem()
+        new SandboxGame.Systems.AnimationSystem(),
+        new Engine.Core.Systems.BuiltIn.PlayerMovementSystem()
     };
     }
 
 
-
 }
+
+
+
+
 

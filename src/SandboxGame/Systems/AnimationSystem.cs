@@ -1,22 +1,18 @@
 ﻿using Engine.Core.Assets;
 using Engine.Core.Components;
+using Engine.Core.Runtime;
 using Engine.Core.Scene;
 using Engine.Core.Systems;
-using System;
 
 namespace SandboxGame.Systems;
 
 public sealed class AnimationSystem : ISystem
 {
-    private readonly IAssetProvider _assets;
-
-    public AnimationSystem(IAssetProvider assets)
+    public void Update(Scene scene, EngineContext ctx)
     {
-        _assets = assets;
-    }
+        float dtSeconds = ctx.DeltaSeconds;
+        IAssetProvider assets = ctx.Assets;
 
-    public void Update(Scene scene, float dtSeconds)
-    {
         foreach (var e in scene.Entities)
         {
             if (!e.TryGet<Animator>(out var anim) || anim is null) continue;
@@ -24,7 +20,7 @@ public sealed class AnimationSystem : ISystem
             if (!anim.Playing) continue;
             if (string.IsNullOrWhiteSpace(anim.ClipId)) continue;
 
-            if (!_assets.TryGetAnimation(anim.ClipId, out var clip))
+            if (!assets.TryGetAnimation(anim.ClipId, out var clip))
                 continue;
 
             if (clip.Frames.Count == 0)
@@ -32,17 +28,16 @@ public sealed class AnimationSystem : ISystem
 
             bool loop = anim.LoopOverride ? anim.Loop : clip.Loop;
 
-            float t = dtSeconds * Math.Max(0f, anim.Speed);
+            float t = dtSeconds * System.Math.Max(0f, anim.Speed);
             anim.TimeIntoFrame += t;
 
-            // Keep frame index in range
             if (anim.FrameIndex < 0) anim.FrameIndex = 0;
             if (anim.FrameIndex >= clip.Frames.Count) anim.FrameIndex = clip.Frames.Count - 1;
 
             while (true)
             {
                 var frame = clip.Frames[anim.FrameIndex];
-                float dur = Math.Max(0.0001f, frame.DurationSeconds);
+                float dur = System.Math.Max(0.0001f, frame.DurationSeconds);
 
                 if (anim.TimeIntoFrame < dur)
                     break;
@@ -66,7 +61,6 @@ public sealed class AnimationSystem : ISystem
                 }
             }
 
-            // Drive sprite from current frame
             var current = clip.Frames[anim.FrameIndex];
             if (!string.IsNullOrWhiteSpace(current.SpriteId))
                 sr.SpriteId = current.SpriteId;
