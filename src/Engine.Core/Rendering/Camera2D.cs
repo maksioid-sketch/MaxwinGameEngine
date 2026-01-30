@@ -1,37 +1,54 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace Engine.Core.Rendering;
 
 public sealed class Camera2D
 {
+    // World-space camera position (units)
     public Vector2 Position { get; set; } = Vector2.Zero;
-    public float RotationRadians { get; set; } = 0f;
+
+    // Rotation in radians (positive = CCW)
+    public float Rotation { get; set; } = 0f;
+
+    // 1 = default; >1 zooms in; <1 zooms out
     public float Zoom { get; set; } = 1f;
 
-    public int ViewportWidth { get; set; } = 1280;
-    public int ViewportHeight { get; set; } = 720;
+    // Global world→pixel scale. Example: 100 means 1 world unit = 100 pixels (at zoom=1).
+    public float PixelsPerUnit { get; set; } = 100f;
 
-    public Matrix4x4 GetViewMatrix()
+    // For pixel-art: snap final screen position to integer pixels
+    public bool PixelSnap { get; set; } = true;
+
+    // Set each frame from GraphicsDevice viewport
+    public int ViewportWidth { get; set; }
+    public int ViewportHeight { get; set; }
+
+    public Vector2 ViewportCenter => new(ViewportWidth * 0.5f, ViewportHeight * 0.5f);
+
+    public Vector2 WorldToScreen(Vector2 world)
     {
-        // World -> View (camera transform inverse)
-        var translate = Matrix4x4.CreateTranslation(-Position.X, -Position.Y, 0f);
-        var rotate = Matrix4x4.CreateRotationZ(-RotationRadians);
-        var scale = Matrix4x4.CreateScale(Zoom, Zoom, 1f);
-        return translate * rotate * scale;
+        var rel = world - Position;
+        rel = Rotate(rel, -Rotation);
+
+        var px = rel * (PixelsPerUnit * Zoom) + ViewportCenter;
+
+        if (PixelSnap)
+            px = new Vector2(MathF.Round(px.X), MathF.Round(px.Y));
+
+        return px;
     }
 
-    public Matrix4x4 GetProjectionMatrix()
+    public Vector2 ScreenToWorld(Vector2 screen)
     {
-        // Screen space: (0,0) top-left, (W,H) bottom-right
-        return Matrix4x4.CreateOrthographicOffCenter(
-            0f, ViewportWidth,
-            ViewportHeight, 0f,
-            0f, 1f);
+        var rel = (screen - ViewportCenter) / (PixelsPerUnit * Zoom);
+        rel = Rotate(rel, Rotation);
+        return rel + Position;
+    }
+
+    private static Vector2 Rotate(Vector2 v, float radians)
+    {
+        float c = MathF.Cos(radians);
+        float s = MathF.Sin(radians);
+        return new Vector2(v.X * c - v.Y * s, v.X * s + v.Y * c);
     }
 }
-
