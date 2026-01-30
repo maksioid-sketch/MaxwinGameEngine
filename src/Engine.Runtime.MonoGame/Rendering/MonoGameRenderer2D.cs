@@ -52,14 +52,16 @@ public sealed class MonoGameRenderer2D : IRenderer2D
 
 
     public void DrawSprite(
-     string textureKey,
-     System.Numerics.Vector3 worldPos,
-     System.Numerics.Vector2 worldScale,
-     float rotationRadians,
-     Engine.Core.Math.IntRect sourceRect,
-     Engine.Core.Math.Color4 tint,
-     int layer,
-     float spritePixelsPerUnit)
+    string textureKey,
+    Vector3 worldPos,
+    Vector2 worldScale,
+    float rotationRadians,
+    IntRect sourceRect,
+    Color4 tint,
+    int layer,
+    float spritePixelsPerUnit,
+    Vector2 originPixels)
+
     {
         if (!_begun) throw new InvalidOperationException("DrawSprite called before Begin.");
         if (_camera is null) throw new InvalidOperationException("Camera not set.");
@@ -89,7 +91,18 @@ public sealed class MonoGameRenderer2D : IRenderer2D
         var posXna = new Microsoft.Xna.Framework.Vector2(screenPos.X, screenPos.Y);
 
         // Origin in source pixels (center)
-        var origin = new Microsoft.Xna.Framework.Vector2(srcW * 0.5f, srcH * 0.5f);
+        Microsoft.Xna.Framework.Vector2 origin;
+
+        bool centerRequested = float.IsNaN(originPixels.X) || float.IsNaN(originPixels.Y);
+
+        if (centerRequested)
+        {
+            origin = new Microsoft.Xna.Framework.Vector2(srcW * 0.5f, srcH * 0.5f);
+        }
+        else
+        {
+            origin = new Microsoft.Xna.Framework.Vector2(originPixels.X, originPixels.Y);
+        }
 
         // Sprite rotation relative to camera
         float finalRot = rotationRadians - _camera.Rotation;

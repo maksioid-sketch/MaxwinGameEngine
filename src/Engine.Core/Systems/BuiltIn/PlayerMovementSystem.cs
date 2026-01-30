@@ -16,6 +16,14 @@ public sealed class PlayerMovementSystem : ISystem
         var player = scene.FindByName(PlayerEntityName);
         if (player is null) return;
 
+        if (ctx.Input.IsDown(InputKey.Enter))
+        {
+            const float step = MathF.PI * 0.02f; // 90 degrees
+            RotateAroundZ(player, step);
+        }
+
+
+
         var move = Vector2.Zero;
 
         if (ctx.Input.IsDown(InputKey.A) || ctx.Input.IsDown(InputKey.Left)) move.X -= 1f;
@@ -31,5 +39,20 @@ public sealed class PlayerMovementSystem : ISystem
         p.X += move.X * SpeedUnitsPerSecond * ctx.DeltaSeconds;
         p.Y += move.Y * SpeedUnitsPerSecond * ctx.DeltaSeconds;
         player.Transform.Position = p;
+        
     }
+
+    private static void RotateAroundZ(Entity e, float deltaRadians)
+    {
+        // Create a quaternion representing a Z-axis rotation
+        var delta = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, deltaRadians);
+
+        // Apply it. Order matters:
+        // delta * current = rotate in world space
+        // current * delta = rotate in local space
+        e.Transform.Rotation = Quaternion.Normalize(delta * e.Transform.Rotation);
+    }
+
+
 }
+

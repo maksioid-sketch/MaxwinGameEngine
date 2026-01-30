@@ -14,6 +14,8 @@ public readonly struct RenderItem2D
     public readonly int Layer;
     public readonly float PixelsPerUnit;
 
+    public readonly Vector2 OriginPixels; // NEW
+
     public RenderItem2D(
         string textureKey,
         Vector3 worldPosition,
@@ -22,7 +24,8 @@ public readonly struct RenderItem2D
         IntRect sourceRect,
         Color4 tint,
         int layer,
-        float pixelsPerUnit)
+        float pixelsPerUnit,
+        Vector2 originPixels)
     {
         TextureKey = textureKey;
         WorldPosition = worldPosition;
@@ -32,5 +35,6 @@ public readonly struct RenderItem2D
         Tint = tint;
         Layer = layer;
         PixelsPerUnit = pixelsPerUnit;
+        OriginPixels = originPixels;
     }
 }

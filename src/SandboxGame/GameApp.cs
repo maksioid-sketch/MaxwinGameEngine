@@ -182,7 +182,9 @@ public sealed class GameApp : Game
                 it.SourceRect,
                 it.Tint,
                 it.Layer,
-                it.PixelsPerUnit);
+                it.PixelsPerUnit,
+                it.OriginPixels);
+
         }
 
         _renderer2D.End();

@@ -1,8 +1,9 @@
-﻿using Engine.Core.Components;
+﻿using Engine.Core.Assets;
+using Engine.Core.Assets;
+using Engine.Core.Components;
 using Engine.Core.Rendering;
-using Engine.Core.Assets;
-using Engine.Core.Assets;
 using Engine.Core.Rendering.Queue;
+using System.Numerics;
 
 
 namespace Engine.Core.Scene;
@@ -55,15 +56,7 @@ public sealed class Scene
             var src = sr.OverrideSourceRect ? sr.SourceRectOverride : sprite.SourceRect;
             var ppu = sr.OverridePixelsPerUnit ? sr.PixelsPerUnitOverride : sprite.PixelsPerUnit;
 
-            renderer2D.DrawSprite(
-                sprite.TextureKey,
-                pos,
-                scale2,
-                rotZ,
-                src,
-                sr.Tint,
-                sr.Layer,
-                ppu);
+            
         }
     }
 
@@ -96,6 +89,26 @@ public sealed class Scene
             var src = sr.OverrideSourceRect ? sr.SourceRectOverride : sprite.SourceRect;
             var ppu = sr.OverridePixelsPerUnit ? sr.PixelsPerUnitOverride : sprite.PixelsPerUnit;
 
+            int w = src.W;
+            int h = src.H;
+
+            // If sourceRect is "full texture" (0,0,0,0) we can't compute center here.
+            // In that case: if DefaultOriginToCenter=true, we’ll use Vector2.Zero as “special”
+            // and let the renderer center using texture size.
+            // If DefaultOriginToCenter=false, keep (0,0) which is top-left.
+            Vector2 origin = sprite.OriginPixels;
+
+            bool srcIsFullTexture = (src.X == 0 && src.Y == 0 && src.W == 0 && src.H == 0);
+
+            if (origin == Vector2.Zero && sprite.DefaultOriginToCenter)
+            {
+                if (!srcIsFullTexture && w > 0 && h > 0)
+                    origin = new Vector2(w * 0.5f, h * 0.5f);
+                else
+                    origin = new Vector2(float.NaN, float.NaN); // signal "center in renderer"
+            }
+
+
             output.Add(new RenderItem2D(
                 textureKey: sprite.TextureKey,
                 worldPosition: pos,
@@ -104,7 +117,10 @@ public sealed class Scene
                 sourceRect: src,
                 tint: sr.Tint,
                 layer: sr.Layer,
-                pixelsPerUnit: ppu));
+                pixelsPerUnit: ppu,
+                originPixels: origin));
+
+
         }
     }
 
