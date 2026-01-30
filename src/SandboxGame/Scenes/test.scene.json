@@ -7,15 +7,23 @@
       "transform": {
         "position": [ 4.0, 3.0, 0.0 ],
         "rotationZRadians": 0.0,
-        "scale": [ 0.1, 0.1, 0.1,]
+        "scale": [ -5.0, 5.0, 1.0,]
       },
       "spriteRenderer": {
-        "spriteId": "player",
-        "layer": 100,
-        "pixelsPerUnit": 100.0,
-        "tint": [ 1.0, 1.0, 1.0, 1.0 ],
-        "sourceRect": [ 0, 0, 0, 0 ]
-      }
+      "spriteId": "player_walk_0",
+      "layer": 100,
+      "tint": [1, 1, 1, 1]
+      },
+      "animator": {
+      "clipId": "player_walk",
+      "playing": true,
+      "speed": 1.0,
+      "loopOverride": false,
+      "loop": true,
+      "frameIndex": 0,
+      "timeIntoFrame": 0.0
+    }
+
     }
   ]
 }

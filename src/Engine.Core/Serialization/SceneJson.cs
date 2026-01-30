@@ -82,6 +82,20 @@ public static class SceneJson
                         
                     });
                 }
+                if (e.Animator is not null)
+                {
+                    entity.Add(new Engine.Core.Components.Animator
+                    {
+                        ClipId = e.Animator.ClipId ?? "",
+                        Playing = e.Animator.Playing,
+                        Speed = e.Animator.Speed,
+                        LoopOverride = e.Animator.LoopOverride,
+                        Loop = e.Animator.Loop,
+                        FrameIndex = e.Animator.FrameIndex,
+                        TimeIntoFrame = e.Animator.TimeIntoFrame
+                    });
+                }
+
             }
 
             return scene;
@@ -96,10 +110,17 @@ public static class SceneJson
 
         // Optional components (add more later)
         public SpriteRendererDto? SpriteRenderer { get; set; }
+        public AnimatorDto? Animator { get; set; }
+
 
         public static EntityDto FromEntity(EntityType e)
         {
             e.TryGet<SpriteRenderer>(out var spr);
+
+            e.TryGet<Engine.Core.Components.Animator>(out var anim);
+            
+            
+
 
             var rotZ = GetZRotationRadians(e.Transform.Rotation);
 
@@ -118,6 +139,16 @@ public static class SceneJson
                     SpriteId = spr.SpriteId,
                     Layer = spr.Layer,
                     Tint = new[] { spr.Tint.R, spr.Tint.G, spr.Tint.B, spr.Tint.A },
+                },
+                Animator = anim is null ? null : new AnimatorDto
+                {
+                    ClipId = anim.ClipId,
+                    Playing = anim.Playing,
+                    Speed = anim.Speed,
+                    LoopOverride = anim.LoopOverride,
+                    Loop = anim.Loop,
+                    FrameIndex = anim.FrameIndex,
+                    TimeIntoFrame = anim.TimeIntoFrame
                 }
             };
         }
@@ -145,4 +176,18 @@ public static class SceneJson
         // RGBA floats
         public float[] Tint { get; set; } = new float[] { 1, 1, 1, 1 };
     }
+
+    private sealed class AnimatorDto
+    {
+        public string? ClipId { get; set; }
+        public bool Playing { get; set; } = true;
+        public float Speed { get; set; } = 1f;
+
+        public bool LoopOverride { get; set; } = false;
+        public bool Loop { get; set; } = true;
+
+        public int FrameIndex { get; set; } = 0;
+        public float TimeIntoFrame { get; set; } = 0f;
+    }
+
 }

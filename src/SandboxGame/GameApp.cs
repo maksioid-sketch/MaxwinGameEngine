@@ -4,6 +4,9 @@ using Engine.Core.Rendering;
 using Engine.Core.Scene;
 using Engine.Core.Serialization;
 using Engine.Core.Systems;
+using Engine.Core.Assets;
+using Engine.Core.Assets.Animation;
+
 using Engine.Runtime.MonoGame.Assets;
 using Engine.Runtime.MonoGame.Rendering;
 using Microsoft.Xna.Framework;
@@ -28,6 +31,7 @@ public sealed class GameApp : Game
 
     private string _scenePath = "";
     private string _atlasPath = "";
+    private string _animationsPath = "";
 
     private SpriteBatch _uiSb = null!;
     private SpriteFont _debugFont = null!;
@@ -69,39 +73,38 @@ public sealed class GameApp : Game
         _camera = new Camera2D();
 
         _uiSb = new SpriteBatch(GraphicsDevice);
-        _debugFont = Content.Load<SpriteFont>("DebugFont.spritefont"); // use asset name without extension in MGCB
+        _debugFont = Content.Load<SpriteFont>("DebugFont");
+
+        string watchRoot = AppContext.BaseDirectory;
+
+        #if DEBUG
+            watchRoot = SandboxGame.HotReload.DevPaths.FindProjectRoot("SandboxGame.csproj");
+            _hotReload = new SandboxGame.HotReload.HotReloadService(
+                directoryToWatch: watchRoot,
+                filters: new[] { "atlas.json", ".scene.json", "animations.json" });
+
+            _hotReloadStatus = "Hot reload: ON (watching source folder)";
+        #else
+            _hotReloadStatus = "Hot reload: OFF";
+        #endif
+
+        _scenePath = Path.Combine(watchRoot, "Scenes", "test.scene.json");
+        _atlasPath = Path.Combine(watchRoot, "Assets", "atlas.json");
+        _animationsPath = Path.Combine(watchRoot, "Assets", "animations.json");
 
         // Always initialize to non-null so later code can't explode
-        _assets = new DictionaryAssetProvider(new Dictionary<string, Engine.Core.Assets.SpriteDefinition>(StringComparer.OrdinalIgnoreCase));
+        _assets = new DictionaryAssetProvider(
+            new Dictionary<string, SpriteDefinition>(StringComparer.OrdinalIgnoreCase),
+            new Dictionary<string, AnimationClip>(StringComparer.OrdinalIgnoreCase));
+
         _scene = new Engine.Core.Scene.Scene();
 
-#if DEBUG
-        var projectRoot = SandboxGame.HotReload.DevPaths.FindProjectRoot("SandboxGame.csproj");
-        _scenePath = Path.Combine(projectRoot, "Scenes", "test.scene.json");
-        _atlasPath = Path.Combine(projectRoot, "Assets", "atlas.json");
-
-        // Watch the project root (source files)
-        _hotReload = new SandboxGame.HotReload.HotReloadService(
-            directoryToWatch: projectRoot,
-            filters: new[] { "atlas.json", ".scene.json" });
-
-        _hotReloadStatus = "Hot reload: ON (watching source folder)";
-#else
-    _scenePath = Path.Combine(AppContext.BaseDirectory, "Scenes", "test.scene.json");
-    _atlasPath = Path.Combine(AppContext.BaseDirectory, "Assets", "atlas.json");
-    _hotReloadStatus = "Hot reload: OFF";
-#endif
-
-        // Load real data (AFTER paths are set)
-        ReloadAtlas();
-        ReloadScene();
+        // Load real data
+        ReloadAssets();   // loads atlas + animations, also calls RebuildSystems() inside (recommended)
+        ReloadScene();    // loads scene
+        RebuildSystems(); // if you DON'T call it inside ReloadAssets(), keep this here
 
         _hotReloadStatus = $"{_hotReloadStatus}\nScene path: {_scenePath}";
-
-        _systems = new List<ISystem>
-    {
-        new PlayerMovementSystem()
-    };
     }
 
     protected override void Update(GameTime gameTime)
@@ -118,15 +121,15 @@ public sealed class GameApp : Game
 
         if (changes is { Count: > 0 })
         {
-            bool atlasChanged = changes.Any(p => p.EndsWith("atlas.json", StringComparison.OrdinalIgnoreCase));
+            bool assetsChanged =
+                changes.Any(p => p.EndsWith("atlas.json", StringComparison.OrdinalIgnoreCase)) ||
+                changes.Any(p => p.EndsWith("animations.json", StringComparison.OrdinalIgnoreCase));
+
             bool sceneChanged = changes.Any(p => p.EndsWith(".scene.json", StringComparison.OrdinalIgnoreCase));
 
-            // Reload atlas first, then scene (scene depends on atlas mappings)
-            if (atlasChanged)
-                ReloadAtlas();
+            if (assetsChanged) ReloadAssets();
+            if (sceneChanged) ReloadScene();
 
-            if (sceneChanged)
-                ReloadScene();
         }
 
 
@@ -172,25 +175,38 @@ public sealed class GameApp : Game
         base.Draw(gameTime);
     }
 
-    private void ReloadAtlas()
+    private void ReloadAssets()
     {
         try
         {
             if (!File.Exists(_atlasPath))
-                throw new FileNotFoundException("atlas.json not found at runtime path", _atlasPath);
+                throw new FileNotFoundException("atlas.json not found", _atlasPath);
 
-            var json = File.ReadAllText(_atlasPath);
-            var sprites = AtlasJson.DeserializeSprites(json);
-            _assets = new DictionaryAssetProvider(sprites);
+            if (!File.Exists(_animationsPath))
+                throw new FileNotFoundException("animations.json not found", _animationsPath);
+
+            // Load + parse
+            var atlasJson = File.ReadAllText(_atlasPath);
+            var sprites = AtlasJson.DeserializeSprites(atlasJson);
+
+            var animJson = File.ReadAllText(_animationsPath);
+            var clips = AnimationJson.DeserializeClips(animJson);
+
+            // Swap provider atomically
+            _assets = new DictionaryAssetProvider(sprites, clips);
+
+            // Recreate systems that depend on _assets (AnimationSystem holds _assets reference)
+            RebuildSystems();
+
+            // Revalidate with new assets
             _validationIssues = SceneValidator.Validate(_scene, _assets);
 
-
-            _hotReloadStatus = $"Atlas reloaded: {DateTime.Now:T}";
+            _hotReloadStatus = $"Assets reloaded: {DateTime.Now:T}";
         }
         catch (Exception ex)
         {
-            _hotReloadStatus = $"Atlas reload FAILED: {ex.Message}";
-            // Keep the previous _assets so the game continues running.
+            _hotReloadStatus = $"Assets reload FAILED: {ex.Message}";
+            // Keep previous _assets and systems running
         }
     }
 
@@ -203,6 +219,7 @@ public sealed class GameApp : Game
 
             var json = File.ReadAllText(_scenePath);
             _scene = SceneJson.Deserialize(json);
+
             _validationIssues = SceneValidator.Validate(_scene, _assets);
 
 
@@ -233,6 +250,18 @@ public sealed class GameApp : Game
         _uiSb.DrawString(_debugFont, _hotReloadStatus, new Microsoft.Xna.Framework.Vector2(10, y), Microsoft.Xna.Framework.Color.White);
         y += 40f;
 
+        _uiSb.DrawString(_debugFont, $"Queue: {_renderQueue2D.Count}", new Microsoft.Xna.Framework.Vector2(10, y), Microsoft.Xna.Framework.Color.White);
+        y += 20f;
+
+        var player = _scene.FindByName("Player");
+        if (player != null && player.TryGet<Engine.Core.Components.SpriteRenderer>(out var sr) && sr != null)
+        {
+            _uiSb.DrawString(_debugFont, $"Player SpriteId: {sr.SpriteId}", new Microsoft.Xna.Framework.Vector2(10, y), Microsoft.Xna.Framework.Color.White);
+            y += 20f;
+        }
+
+
+
         if (_validationIssues.Count == 0)
         {
             _uiSb.DrawString(_debugFont, "Validation: OK", new Microsoft.Xna.Framework.Vector2(10, y), Microsoft.Xna.Framework.Color.LightGreen);
@@ -257,6 +286,16 @@ public sealed class GameApp : Game
         }
 
         _uiSb.End();
+    }
+
+
+    private void RebuildSystems()
+    {
+        _systems = new List<ISystem>
+    {
+        new SandboxGame.Systems.AnimationSystem(_assets),
+        new SandboxGame.Systems.PlayerMovementSystem()
+    };
     }
 
 

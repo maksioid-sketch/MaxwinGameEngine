@@ -13,12 +13,24 @@
 
 #---------------------------------- Content ---------------------------------#
 
-#begin DebugFont.spritefont.spritefont
+#begin DebugFont.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Compressed
-/build:DebugFont.spritefont.spritefont
+/build:DebugFont.spritefont
+
+#begin Sprites/capibara.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Sprites/capibara.png
 
 #begin Sprites/player.png
 /importer:TextureImporter

@@ -1,6 +1,7 @@
 ﻿using Engine.Core.Scene;
 using Engine.Core.Systems;
 using Microsoft.Xna.Framework.Input;
+using System;
 using System.Numerics;
 
 namespace SandboxGame.Systems;
@@ -28,8 +29,14 @@ public sealed class PlayerMovementSystem : ISystem
         move = Vector2.Normalize(move);
 
         var p = player.Transform.Position;
+        var s = player.Transform.Scale;
+
+        if (move.X < 0f) s.X = Math.Abs(s.X) * -1; 
+        else if(move.X > 0f) s.X = Math.Abs(s.X);
+       
         p.X += move.X * SpeedUnitsPerSecond * dtSeconds;
         p.Y += move.Y * SpeedUnitsPerSecond * dtSeconds;
         player.Transform.Position = p;
+        player.Transform.Scale = s;
     }
 }
