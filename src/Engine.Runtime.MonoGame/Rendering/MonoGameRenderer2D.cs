@@ -91,18 +91,8 @@ public sealed class MonoGameRenderer2D : IRenderer2D
         var posXna = new Microsoft.Xna.Framework.Vector2(screenPos.X, screenPos.Y);
 
         // Origin in source pixels (center)
-        Microsoft.Xna.Framework.Vector2 origin;
+        var origin = new Microsoft.Xna.Framework.Vector2(originPixels.X, originPixels.Y);
 
-        bool centerRequested = float.IsNaN(originPixels.X) || float.IsNaN(originPixels.Y);
-
-        if (centerRequested)
-        {
-            origin = new Microsoft.Xna.Framework.Vector2(srcW * 0.5f, srcH * 0.5f);
-        }
-        else
-        {
-            origin = new Microsoft.Xna.Framework.Vector2(originPixels.X, originPixels.Y);
-        }
 
         // Sprite rotation relative to camera
         float finalRot = rotationRadians - _camera.Rotation;

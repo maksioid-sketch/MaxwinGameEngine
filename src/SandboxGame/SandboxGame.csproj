@@ -12,16 +12,12 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Assets\animations.json" />
-    <None Remove="Assets\atlas.json" />
     <None Remove="Icon.ico" />
     <None Remove="Icon.bmp" />
     <None Remove="Scenes\test.scene.json" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\animations.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\atlas.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Scenes\test.scene.json">
@@ -43,5 +39,10 @@
   <ItemGroup>
     <ProjectReference Include="..\Engine.Core\Engine.Core.csproj" />
     <ProjectReference Include="..\Engine.Runtime.MonoGame\Engine.Runtime.MonoGame.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Assets\atlas.generated.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

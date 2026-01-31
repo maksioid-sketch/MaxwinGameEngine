@@ -1,0 +1,22 @@
+﻿{
+  "sheets": [
+    {
+      "name": "Capibara Walk",
+      "textureKey": "Sprites/capibara",
+      "prefix": "player_walk",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 0,
+      "startY": 512,
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 8,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+
+      "originPixels": [32, 32],
+      "defaultOriginToCenter": false
+    }
+  ]
+}

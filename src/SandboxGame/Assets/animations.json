@@ -3,8 +3,14 @@
     "player_walk": {
       "loop": true,
       "frames": [
-        { "spriteId": "player_walk_0", "durationSeconds": 0.08 }
-        
+        { "spriteId": "player_walk_0", "durationSeconds": 0.08 },
+        { "spriteId": "player_walk_1", "durationSeconds": 0.08 },
+        { "spriteId": "player_walk_2", "durationSeconds": 0.08 },
+        { "spriteId": "player_walk_3", "durationSeconds": 0.08 },
+        { "spriteId": "player_walk_4", "durationSeconds": 0.08 },
+        { "spriteId": "player_walk_5", "durationSeconds": 0.08 },
+        { "spriteId": "player_walk_6", "durationSeconds": 0.08 },
+        { "spriteId": "player_walk_7", "durationSeconds": 0.08 }
         
       ]
     }

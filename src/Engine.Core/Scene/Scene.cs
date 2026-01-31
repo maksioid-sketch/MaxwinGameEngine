@@ -96,18 +96,24 @@ public sealed class Scene
             // In that case: if DefaultOriginToCenter=true, we’ll use Vector2.Zero as “special”
             // and let the renderer center using texture size.
             // If DefaultOriginToCenter=false, keep (0,0) which is top-left.
-            Vector2 origin = sprite.OriginPixels;
+            var origin = sprite.OriginPixels;
+
+            if (origin == System.Numerics.Vector2.Zero && sprite.DefaultOriginToCenter)
+            {
+                // Source rect is known size for sheet frames
+                if (src.W > 0 && src.H > 0)
+                    origin = new System.Numerics.Vector2(src.W * 0.5f, src.H * 0.5f);
+            }
+
 
             bool srcIsFullTexture = (src.X == 0 && src.Y == 0 && src.W == 0 && src.H == 0);
 
-            if (origin == Vector2.Zero && sprite.DefaultOriginToCenter)
+            if (origin == System.Numerics.Vector2.Zero && sprite.DefaultOriginToCenter)
             {
-                if (!srcIsFullTexture && w > 0 && h > 0)
-                    origin = new Vector2(w * 0.5f, h * 0.5f);
-                else
-                    origin = new Vector2(float.NaN, float.NaN); // signal "center in renderer"
+                // Source rect is known size for sheet frames
+                if (src.W > 0 && src.H > 0)
+                    origin = new System.Numerics.Vector2(src.W * 0.5f, src.H * 0.5f);
             }
-
 
             output.Add(new RenderItem2D(
                 textureKey: sprite.TextureKey,

@@ -97,7 +97,7 @@ public sealed class GameApp : Game
             watchRoot = SandboxGame.HotReload.DevPaths.FindProjectRoot("SandboxGame.csproj");
             _hotReload = new SandboxGame.HotReload.HotReloadService(
                 directoryToWatch: watchRoot,
-                filters: new[] { "atlas.json", ".scene.json", "animations.json" });
+                filters: new[] { "atlas.generated.json", ".scene.json", "animations.json" });
 
             _hotReloadStatus = "Hot reload: ON (watching source folder)";
         #else
@@ -105,7 +105,7 @@ public sealed class GameApp : Game
         #endif
 
         _scenePath = Path.Combine(watchRoot, "Scenes", "test.scene.json");
-        _atlasPath = Path.Combine(watchRoot, "Assets", "atlas.json");
+        _atlasPath = Path.Combine(watchRoot, "Assets", "atlas.generated.json");
         _animationsPath = Path.Combine(watchRoot, "Assets", "animations.json");
 
         // Always initialize to non-null so later code can't explode
@@ -140,7 +140,7 @@ public sealed class GameApp : Game
         if (changes is { Count: > 0 })
         {
             bool assetsChanged =
-                changes.Any(p => p.EndsWith("atlas.json", StringComparison.OrdinalIgnoreCase)) ||
+                changes.Any(p => p.EndsWith("atlas.generated.json", StringComparison.OrdinalIgnoreCase)) ||
                 changes.Any(p => p.EndsWith("animations.json", StringComparison.OrdinalIgnoreCase));
 
             bool sceneChanged =
@@ -199,7 +199,7 @@ public sealed class GameApp : Game
         try
         {
             if (!File.Exists(_atlasPath))
-                throw new FileNotFoundException("atlas.json not found", _atlasPath);
+                throw new FileNotFoundException("atlas.generated.json not found", _atlasPath);
 
             if (!File.Exists(_animationsPath))
                 throw new FileNotFoundException("animations.json not found", _animationsPath);
@@ -268,47 +268,43 @@ public sealed class GameApp : Game
     {
         _uiSb.Begin();
 
-        var y = 10f;
+        float x = 10f;
+        float y = 10f;
+        float lineH = _debugFont.LineSpacing;
 
-        _uiSb.DrawString(_debugFont, _hotReloadStatus, new Microsoft.Xna.Framework.Vector2(10, y), Microsoft.Xna.Framework.Color.White);
-        y += 40f;
+        DrawLines(_hotReloadStatus, ref y, x, lineH);
 
-        _uiSb.DrawString(_debugFont, $"Queue: {_renderQueue2D.Count}", new Microsoft.Xna.Framework.Vector2(10, y), Microsoft.Xna.Framework.Color.White);
-        y += 20f;
-
-        var player = _scene.FindByName("Player");
-        if (player != null && player.TryGet<Engine.Core.Components.SpriteRenderer>(out var sr) && sr != null)
+        // Example: draw origin of first item safely
+        if (_renderQueue2D.Count > 0)
         {
-            _uiSb.DrawString(_debugFont, $"Player SpriteId: {sr.SpriteId}", new Microsoft.Xna.Framework.Vector2(10, y), Microsoft.Xna.Framework.Color.White);
-            y += 20f;
-        }
-
-
-
-        if (_validationIssues.Count == 0)
-        {
-            _uiSb.DrawString(_debugFont, "Validation: OK", new Microsoft.Xna.Framework.Vector2(10, y), Microsoft.Xna.Framework.Color.LightGreen);
-        }
-        else
-        {
-            _uiSb.DrawString(_debugFont, $"Validation: {_validationIssues.Count} issue(s)", new Microsoft.Xna.Framework.Vector2(10, y), Microsoft.Xna.Framework.Color.Yellow);
-            y += 24f;
-
-            // Show first N issues
-            int max = System.Math.Min(_validationIssues.Count, 8);
-            for (int i = 0; i < max; i++)
-            {
-                var issue = _validationIssues[i];
-                var line = $"{issue.Severity} {issue.Code} {(issue.EntityName is null ? "" : $"[{issue.EntityName}] ")}{issue.Message}";
-                _uiSb.DrawString(_debugFont, line, new Microsoft.Xna.Framework.Vector2(10, y), Microsoft.Xna.Framework.Color.OrangeRed);
-                y += 20f;
-            }
-
-            if (_validationIssues.Count > max)
-                _uiSb.DrawString(_debugFont, $"...and {_validationIssues.Count - max} more", new Microsoft.Xna.Framework.Vector2(10, y), Microsoft.Xna.Framework.Color.OrangeRed);
+            var it = _renderQueue2D[0];
+            DrawLines($"OriginPixels: {it.OriginPixels}", ref y, x, lineH);
         }
 
         _uiSb.End();
+    }
+
+    private void DrawLines(string text, ref float y, float x, float lineH)
+    {
+        if (string.IsNullOrEmpty(text)) return;
+
+        // Normalize newlines and split
+        var lines = text.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
+
+        foreach (var raw in lines)
+        {
+            var line = FilterUnsupportedDebugChars(raw);
+            _uiSb.DrawString(_debugFont, line, new Microsoft.Xna.Framework.Vector2(x, y), Microsoft.Xna.Framework.Color.White);
+            y += lineH;
+        }
+    }
+
+    private static string FilterUnsupportedDebugChars(string s)
+    {
+        // Remove control chars that often break SpriteFont glyph lookup
+        // Keep normal ASCII printable range.
+        var chars = s.Where(c => c >= 32 && c <= 126).ToArray();
+        return new string(chars);
     }
 
 

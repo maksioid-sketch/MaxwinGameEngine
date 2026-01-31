@@ -19,7 +19,7 @@ public static class AtlasJson
         // v2 supports versioning. If version missing, assume v1.
         using var doc = JsonDocument.Parse(json);
         int version = 1;
-        if (doc.RootElement.TryGetProperty("version", out var v) && v.ValueKind == JsonValueKind.Number)
+        if (doc.RootElement.TryGetProperty("version", out var v) || (doc.RootElement.TryGetProperty("Version", out v) && v.ValueKind == JsonValueKind.Number))
             version = v.GetInt32();
 
         return version switch
