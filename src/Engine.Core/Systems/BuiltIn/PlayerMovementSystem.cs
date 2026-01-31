@@ -16,10 +16,11 @@ public sealed class PlayerMovementSystem : ISystem
         var player = scene.FindByName(PlayerEntityName);
         if (player is null) return;
 
+
         if (ctx.Input.IsDown(InputKey.Enter))
         {
             const float step = MathF.PI * 0.02f; // 90 degrees
-            RotateAroundZ(player, step);
+            //RotateAroundZ(player, step);
         }
 
 

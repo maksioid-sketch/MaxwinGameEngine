@@ -19,6 +19,209 @@
         {
           "spriteId": "player_walk_3",
           "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_walk_4",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_walk_5",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_walk_6",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_walk_7",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "player_idle": {
+      "loop": true,
+      "frames": [
+        {
+          "spriteId": "player_idle_0",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_idle_1",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_idle_2",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_idle_3",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_idle_4",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_idle_5",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_idle_6",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_idle_7",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "player_sitdown": {
+      "loop": false,
+      "frames": [
+        {
+          "spriteId": "player_sitdown_0",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_sitdown_1",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_sitdown_2",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "player_sitidle": {
+      "loop": true,
+      "frames": [
+        {
+          "spriteId": "player_sitidle_0",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_sitidle_1",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_sitidle_2",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_sitidle_3",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_sitidle_4",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_sitidle_5",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_sitidle_6",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_sitidle_7",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "player_standup": {
+      "loop": false,
+      "frames": [
+        {
+          "spriteId": "player_standup_0",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_standup_1",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_standup_2",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "player_leandown": {
+      "loop": false,
+      "frames": [
+        {
+          "spriteId": "player_leandown_0",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_leandown_1",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_leandown_2",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_leandown_3",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "player_eat": {
+      "loop": true,
+      "frames": [
+        {
+          "spriteId": "player_eat_0",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_eat_1",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_eat_2",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_eat_3",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_eat_4",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_eat_5",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_eat_6",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_eat_7",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "player_leanup": {
+      "loop": false,
+      "frames": [
+        {
+          "spriteId": "player_leanup_0",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_leanup_1",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_leanup_2",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_leanup_3",
+          "durationSeconds": 0.1
         }
       ]
     }

@@ -311,10 +311,12 @@ public sealed class GameApp : Game
     private void RebuildSystems()
     {
         _systems = new List<ISystem>
-    {
-        new SandboxGame.Systems.AnimationSystem(),
-        new Engine.Core.Systems.BuiltIn.PlayerMovementSystem()
-    };
+{
+    new Engine.Core.Systems.BuiltIn.PlayerMovementSystem(),
+    new Engine.Core.Systems.BuiltIn.PlayerCapybaraStateSystem(),
+    new SandboxGame.Systems.AnimationSystem()
+};
+
     }
 
 

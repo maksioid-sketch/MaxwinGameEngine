@@ -26,6 +26,14 @@ public sealed class AnimationSystem : ISystem
             if (clip.Frames.Count == 0)
                 continue;
 
+            if (anim.ResetRequested)
+            {
+                anim.FrameIndex = 0;
+                anim.TimeIntoFrame = 0f;
+                anim.ResetRequested = false;
+            }
+
+
             bool loop = anim.LoopOverride ? anim.Loop : clip.Loop;
 
             float t = dtSeconds * System.Math.Max(0f, anim.Speed);
@@ -50,20 +58,45 @@ public sealed class AnimationSystem : ISystem
                     if (loop)
                     {
                         anim.FrameIndex = 0;
+                        continue;
+                    }
+
+                    // Non-looping clip ended
+                    if (!string.IsNullOrWhiteSpace(anim.NextClipId) &&
+                        assets.TryGetAnimation(anim.NextClipId, out var nextClip) &&
+                        nextClip.Frames.Count > 0)
+                    {
+                        anim.ClipId = anim.NextClipId!;
+                        anim.NextClipId = null;
+
+                        anim.FrameIndex = 0;
+                        anim.TimeIntoFrame = 0f;
+                        anim.Playing = true;
+
+                        // Force sprite to the first frame of the next clip NOW
+                        var nf = nextClip.Frames[0];
+                        if (!string.IsNullOrWhiteSpace(nf.SpriteId))
+                            sr.SpriteId = nf.SpriteId;
+
+                        // IMPORTANT: stop processing dt leftovers this frame
+                        return;
                     }
                     else
                     {
+                        // No next clip: freeze on last valid frame
                         anim.FrameIndex = clip.Frames.Count - 1;
-                        anim.Playing = false;
                         anim.TimeIntoFrame = 0f;
+                        anim.Playing = false;
                         break;
                     }
                 }
+
             }
 
             var current = clip.Frames[anim.FrameIndex];
             if (!string.IsNullOrWhiteSpace(current.SpriteId))
                 sr.SpriteId = current.SpriteId;
+
         }
     }
 }

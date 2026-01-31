@@ -1,4 +1,6 @@
-﻿namespace Engine.Core.Components;
+﻿using System.Text.Json.Serialization;
+
+namespace Engine.Core.Components;
 
 public sealed class Animator : IComponent
 {
@@ -14,4 +16,12 @@ public sealed class Animator : IComponent
     // Runtime state (serialized is fine, but you can omit later if you want)
     public int FrameIndex { get; set; } = 0;
     public float TimeIntoFrame { get; set; } = 0f;
+
+
+    [JsonIgnore]
+    public string? NextClipId { get; set; } = null;
+
+    [JsonIgnore]
+    public bool ResetRequested { get; set; } = false;
+
 }
