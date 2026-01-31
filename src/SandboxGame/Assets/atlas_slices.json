@@ -3,20 +3,26 @@
     {
       "name": "Capibara Walk",
       "textureKey": "Sprites/capibara",
+
       "prefix": "player_walk",
       "idPattern": "{prefix}_{index}",
 
       "startX": 0,
-      "startY": 512,
+      "startY": 320,
       "frameWidth": 64,
       "frameHeight": 64,
-      "columns": 8,
+      "columns": 4,
       "rows": 1,
 
       "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
 
-      "originPixels": [32, 32],
-      "defaultOriginToCenter": false
+      "clip": {
+        "clipId": "player_walk",
+        "loop": true,
+        "fps": 10
+      }
     }
   ]
 }

@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "clips": {
+    "player_walk": {
+      "loop": true,
+      "frames": [
+        {
+          "spriteId": "player_walk_0",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_walk_1",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_walk_2",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "player_walk_3",
+          "durationSeconds": 0.1
+        }
+      ]
+    }
+  }
+}

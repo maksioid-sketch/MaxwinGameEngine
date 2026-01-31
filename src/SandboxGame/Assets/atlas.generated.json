@@ -5,121 +5,61 @@
       "TextureKey": "Sprites/capibara",
       "SourceRect": [
         0,
-        512,
+        320,
         64,
         64
       ],
       "PixelsPerUnit": 100,
       "OriginPixels": [
-        32,
-        32
+        0,
+        0
       ],
-      "DefaultOriginToCenter": false
+      "DefaultOriginToCenter": true
     },
     "player_walk_1": {
       "TextureKey": "Sprites/capibara",
       "SourceRect": [
         64,
-        512,
+        320,
         64,
         64
       ],
       "PixelsPerUnit": 100,
       "OriginPixels": [
-        32,
-        32
+        0,
+        0
       ],
-      "DefaultOriginToCenter": false
+      "DefaultOriginToCenter": true
     },
     "player_walk_2": {
       "TextureKey": "Sprites/capibara",
       "SourceRect": [
         128,
-        512,
+        320,
         64,
         64
       ],
       "PixelsPerUnit": 100,
       "OriginPixels": [
-        32,
-        32
+        0,
+        0
       ],
-      "DefaultOriginToCenter": false
+      "DefaultOriginToCenter": true
     },
     "player_walk_3": {
       "TextureKey": "Sprites/capibara",
       "SourceRect": [
         192,
-        512,
-        64,
-        64
-      ],
-      "PixelsPerUnit": 100,
-      "OriginPixels": [
-        32,
-        32
-      ],
-      "DefaultOriginToCenter": false
-    },
-    "player_walk_4": {
-      "TextureKey": "Sprites/capibara",
-      "SourceRect": [
-        256,
-        512,
-        64,
-        64
-      ],
-      "PixelsPerUnit": 100,
-      "OriginPixels": [
-        32,
-        32
-      ],
-      "DefaultOriginToCenter": false
-    },
-    "player_walk_5": {
-      "TextureKey": "Sprites/capibara",
-      "SourceRect": [
         320,
-        512,
         64,
         64
       ],
       "PixelsPerUnit": 100,
       "OriginPixels": [
-        32,
-        32
+        0,
+        0
       ],
-      "DefaultOriginToCenter": false
-    },
-    "player_walk_6": {
-      "TextureKey": "Sprites/capibara",
-      "SourceRect": [
-        384,
-        512,
-        64,
-        64
-      ],
-      "PixelsPerUnit": 100,
-      "OriginPixels": [
-        32,
-        32
-      ],
-      "DefaultOriginToCenter": false
-    },
-    "player_walk_7": {
-      "TextureKey": "Sprites/capibara",
-      "SourceRect": [
-        448,
-        512,
-        64,
-        64
-      ],
-      "PixelsPerUnit": 100,
-      "OriginPixels": [
-        32,
-        32
-      ],
-      "DefaultOriginToCenter": false
+      "DefaultOriginToCenter": true
     }
   }
 }

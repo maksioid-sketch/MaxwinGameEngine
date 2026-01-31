@@ -97,7 +97,7 @@ public sealed class GameApp : Game
             watchRoot = SandboxGame.HotReload.DevPaths.FindProjectRoot("SandboxGame.csproj");
             _hotReload = new SandboxGame.HotReload.HotReloadService(
                 directoryToWatch: watchRoot,
-                filters: new[] { "atlas.generated.json", ".scene.json", "animations.json" });
+                filters: new[] { "atlas.generated.json", ".scene.json", "animations.generated.json" });
 
             _hotReloadStatus = "Hot reload: ON (watching source folder)";
         #else
@@ -106,7 +106,7 @@ public sealed class GameApp : Game
 
         _scenePath = Path.Combine(watchRoot, "Scenes", "test.scene.json");
         _atlasPath = Path.Combine(watchRoot, "Assets", "atlas.generated.json");
-        _animationsPath = Path.Combine(watchRoot, "Assets", "animations.json");
+        _animationsPath = Path.Combine(watchRoot, "Assets", "animations.generated.json");
 
         // Always initialize to non-null so later code can't explode
         _assets = new DictionaryAssetProvider(
@@ -141,7 +141,7 @@ public sealed class GameApp : Game
         {
             bool assetsChanged =
                 changes.Any(p => p.EndsWith("atlas.generated.json", StringComparison.OrdinalIgnoreCase)) ||
-                changes.Any(p => p.EndsWith("animations.json", StringComparison.OrdinalIgnoreCase));
+                changes.Any(p => p.EndsWith("animations.generated.json", StringComparison.OrdinalIgnoreCase));
 
             bool sceneChanged =
                 changes.Any(p => p.EndsWith(".scene.json", StringComparison.OrdinalIgnoreCase));
@@ -202,7 +202,7 @@ public sealed class GameApp : Game
                 throw new FileNotFoundException("atlas.generated.json not found", _atlasPath);
 
             if (!File.Exists(_animationsPath))
-                throw new FileNotFoundException("animations.json not found", _animationsPath);
+                throw new FileNotFoundException("animations.generated.json not found", _animationsPath);
 
             // Load + parse
             var atlasJson = File.ReadAllText(_atlasPath);
