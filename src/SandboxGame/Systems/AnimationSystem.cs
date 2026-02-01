@@ -20,11 +20,8 @@ public sealed class AnimationSystem : ISystem
             if (!anim.Playing) continue;
             if (string.IsNullOrWhiteSpace(anim.ClipId)) continue;
 
-            if (!assets.TryGetAnimation(anim.ClipId, out var clip))
-                continue;
-
-            if (clip.Frames.Count == 0)
-                continue;
+            if (!assets.TryGetAnimation(anim.ClipId, out var clip)) continue;
+            if (clip.Frames.Count == 0) continue;
 
             if (anim.ResetRequested)
             {
@@ -32,7 +29,6 @@ public sealed class AnimationSystem : ISystem
                 anim.TimeIntoFrame = 0f;
                 anim.ResetRequested = false;
             }
-
 
             bool loop = anim.LoopOverride ? anim.Loop : clip.Loop;
 
@@ -78,8 +74,14 @@ public sealed class AnimationSystem : ISystem
                         if (!string.IsNullOrWhiteSpace(nf.SpriteId))
                             sr.SpriteId = nf.SpriteId;
 
-                        // IMPORTANT: stop processing dt leftovers this frame
-                        return;
+                        if (!string.IsNullOrWhiteSpace(anim.PendingStateId))
+                        {
+                            anim.StateId = anim.PendingStateId!;
+                            anim.PendingStateId = null;
+                        }
+
+                        // IMPORTANT: stop processing leftovers for THIS ENTITY only
+                        goto NextEntity; // or use continue with a flag; see below
                     }
                     else
                     {
@@ -87,16 +89,17 @@ public sealed class AnimationSystem : ISystem
                         anim.FrameIndex = clip.Frames.Count - 1;
                         anim.TimeIntoFrame = 0f;
                         anim.Playing = false;
-                        break;
+                        goto NextEntity;
                     }
                 }
-
             }
 
             var current = clip.Frames[anim.FrameIndex];
             if (!string.IsNullOrWhiteSpace(current.SpriteId))
                 sr.SpriteId = current.SpriteId;
 
+            NextEntity:
+            continue;
         }
     }
 }

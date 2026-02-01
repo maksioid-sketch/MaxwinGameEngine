@@ -41,6 +41,7 @@ public sealed class GameApp : Game
     private string _scenePath = "";
     private string _atlasPath = "";
     private string _animationsPath = "";
+    private string _controllersPath = "";
 
     private SpriteBatch _uiSb = null!;
     private SpriteFont _debugFont = null!;
@@ -97,7 +98,7 @@ public sealed class GameApp : Game
             watchRoot = SandboxGame.HotReload.DevPaths.FindProjectRoot("SandboxGame.csproj");
             _hotReload = new SandboxGame.HotReload.HotReloadService(
                 directoryToWatch: watchRoot,
-                filters: new[] { "atlas.generated.json", ".scene.json", "animations.generated.json" });
+                filters: new[] { "atlas.generated.json", ".scene.json", "animations.generated.json", "controllers.json" });
 
             _hotReloadStatus = "Hot reload: ON (watching source folder)";
         #else
@@ -107,12 +108,17 @@ public sealed class GameApp : Game
         _scenePath = Path.Combine(watchRoot, "Scenes", "test.scene.json");
         _atlasPath = Path.Combine(watchRoot, "Assets", "atlas.generated.json");
         _animationsPath = Path.Combine(watchRoot, "Assets", "animations.generated.json");
+        _controllersPath = Path.Combine(watchRoot, "Assets", "controllers.json");
+
 
         // Always initialize to non-null so later code can't explode
         _assets = new DictionaryAssetProvider(
             new Dictionary<string, SpriteDefinition>(StringComparer.OrdinalIgnoreCase),
-            new Dictionary<string, AnimationClip>(StringComparer.OrdinalIgnoreCase));
-        _services.SetAssets(_assets);
+            new Dictionary<string, AnimationClip>(StringComparer.OrdinalIgnoreCase),
+            new Dictionary<string, AnimatorController>(StringComparer.OrdinalIgnoreCase)
+            );
+        _services.Assets = _assets;
+
 
 
         _scene = new Engine.Core.Scene.Scene();
@@ -121,6 +127,10 @@ public sealed class GameApp : Game
 
         // Load real data
         ReloadAssets();   // loads atlas + animations, also calls RebuildSystems() inside (recommended)
+        if (!_assets.TryGetAnimation("player_idle", out var idle) || idle.Frames.Count == 0)
+            throw new Exception("Animation 'player_idle' not loaded or has 0 frames. Check animations.generated.json load path + ReloadAssets().");
+
+
         ReloadScene();    // loads scene
         //RebuildSystems(); // if you DON'T call it inside ReloadAssets(), keep this here
 
@@ -141,7 +151,8 @@ public sealed class GameApp : Game
         {
             bool assetsChanged =
                 changes.Any(p => p.EndsWith("atlas.generated.json", StringComparison.OrdinalIgnoreCase)) ||
-                changes.Any(p => p.EndsWith("animations.generated.json", StringComparison.OrdinalIgnoreCase));
+                changes.Any(p => p.EndsWith("animations.generated.json", StringComparison.OrdinalIgnoreCase)) ||
+                changes.Any(p => p.EndsWith("controllers.json", StringComparison.OrdinalIgnoreCase));
 
             bool sceneChanged =
                 changes.Any(p => p.EndsWith(".scene.json", StringComparison.OrdinalIgnoreCase));
@@ -212,8 +223,11 @@ public sealed class GameApp : Game
             var animJson = File.ReadAllText(_animationsPath);
             var clips = AnimationJson.DeserializeClips(animJson);
 
-            // Swap provider atomically
-            _assets = new DictionaryAssetProvider(sprites, clips);
+            var controllersJson = File.ReadAllText(_controllersPath);
+            var controllers = Engine.Core.Serialization.AnimatorControllerJson.DeserializeControllers(controllersJson);
+
+            _assets = new DictionaryAssetProvider(sprites, clips, controllers);
+
 
             // Recreate systems that depend on _assets (AnimationSystem holds _assets reference)
             RebuildSystems();
@@ -223,7 +237,8 @@ public sealed class GameApp : Game
 
             _hotReloadStatus = $"Assets reloaded: {DateTime.Now:T}";
 
-            _services.SetAssets(_assets);
+            _services.Assets = _assets;
+
             _validationIssues = SceneValidator.Validate(_scene, _assets);
 
         }
@@ -243,6 +258,14 @@ public sealed class GameApp : Game
 
             var json = File.ReadAllText(_scenePath);
             _scene = SceneJson.Deserialize(json);
+
+            var p = _scene.FindByName("Player");
+            if (p != null && p.TryGet<Engine.Core.Components.Animator>(out var a) && a != null)
+            {
+                if (string.IsNullOrWhiteSpace(a.ControllerId))
+                    throw new Exception("Scene loaded but Player.Animator.ControllerId is empty. SceneJson mapping is missing controllerId.");
+            }
+
 
             _validationIssues = SceneValidator.Validate(_scene, _assets);
 
@@ -273,13 +296,67 @@ public sealed class GameApp : Game
         float y = 10f;
         float lineH = _debugFont.LineSpacing;
 
+        // Existing status
         DrawLines(_hotReloadStatus, ref y, x, lineH);
 
-        // Example: draw origin of first item safely
+        // ---- NEW: Time + Assets sanity ----
+        DrawLine($"dt={_services.Time.DeltaSeconds:0.0000} total={_services.Time.TotalSeconds:0.00}", ref y, x, lineH);
+
+        bool hasIdle = _services.Assets.TryGetAnimation("player_idle", out var idleClip);
+        DrawLine($"assets: idleClip={hasIdle} frames={(hasIdle ? idleClip.Frames.Count : 0)}", ref y, x, lineH);
+
+        // ---- NEW: Player animator state ----
+        var player = _scene.FindByName("Player");
+        if (player is null)
+        {
+            DrawLine("Player entity: NOT FOUND", ref y, x, lineH);
+        }
+        else if (!player.TryGet<Engine.Core.Components.Animator>(out var anim) || anim is null)
+        {
+            DrawLine("Player Animator: MISSING", ref y, x, lineH);
+        }
+        else
+        {
+
+            bool hasCtrl = false;
+            string initial = "-";
+            int stateCount = 0;
+
+            if (!string.IsNullOrWhiteSpace(anim.ControllerId) &&
+                _services.Assets.TryGetController(anim.ControllerId, out var tmpCtrl))
+            {
+                hasCtrl = true;
+                initial = tmpCtrl.InitialState ?? "-";
+                stateCount = tmpCtrl.States?.Count ?? 0;
+            }
+
+            DrawLine($"ControllerId={anim.ControllerId} hasCtrl={hasCtrl}", ref y, x, lineH);
+            if (hasCtrl)
+                DrawLine($"Ctrl initial={initial} states={stateCount}", ref y, x, lineH);
+
+
+            DrawLine($"Animator: clip={anim.ClipId} playing={anim.Playing} speed={anim.Speed:0.00}", ref y, x, lineH);
+            DrawLine($"Animator: frame={anim.FrameIndex} t={anim.TimeIntoFrame:0.000} reset={anim.ResetRequested}", ref y, x, lineH);
+            DrawLine($"Animator: state={anim.StateId} pending={anim.PendingStateId ?? "-"} next={anim.NextClipId ?? "-"}", ref y, x, lineH);
+
+            var hasCur = false;
+            var curFrames = 0;
+
+            if (!string.IsNullOrWhiteSpace(anim.ClipId) && _services.Assets.TryGetAnimation(anim.ClipId, out var tmp))
+            {
+                hasCur = true;
+                curFrames = tmp.Frames.Count;
+            }
+
+            DrawLine($"assets: currentClip={hasCur} curFrames={curFrames}", ref y, x, lineH);
+
+        }
+
+        // Existing: render item origin
         if (_renderQueue2D.Count > 0)
         {
             var it = _renderQueue2D[0];
-            DrawLines($"OriginPixels: {it.OriginPixels}", ref y, x, lineH);
+            DrawLine($"RenderItem: origin={it.OriginPixels}", ref y, x, lineH);
         }
 
         _uiSb.End();
@@ -299,6 +376,13 @@ public sealed class GameApp : Game
             y += lineH;
         }
     }
+    private void DrawLine(string line, ref float y, float x, float lineH)
+    {
+        line = FilterUnsupportedDebugChars(line ?? "");
+        _uiSb.DrawString(_debugFont, line, new Microsoft.Xna.Framework.Vector2(x, y), Microsoft.Xna.Framework.Color.White);
+        y += lineH;
+    }
+
 
     private static string FilterUnsupportedDebugChars(string s)
     {
@@ -314,9 +398,10 @@ public sealed class GameApp : Game
         _systems = new List<ISystem>
 {
     new Engine.Core.Systems.BuiltIn.PlayerMovementSystem(),
-    new Engine.Core.Systems.BuiltIn.PlayerCapybaraStateSystem(),
+    new SandboxGame.Systems.AnimatorControllerSystem(() => _assets),
     new SandboxGame.Systems.AnimationSystem()
 };
+
 
     }
 

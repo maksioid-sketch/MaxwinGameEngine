@@ -7,22 +7,20 @@
       "transform": {
         "position": [ 0.0, 0.0, 0.0 ],
         "rotationZRadians": 0.0,
-        "scale": [ 5.0, 5.0, 1.0,]
+        "scale": [ 5.0, 5.0, 1.0]
       },
       "spriteRenderer": {
-      "spriteId": "player_idle_0",
-      "layer": 100,
-      "tint": [1, 1, 1, 1]
+          "spriteId": "player_idle_0",
+          "layer": 100,
+          "tint": [1, 1, 1, 1]
       },
       "animator": {
-      "clipId": "player_idle",
-      "playing": true,
-      "speed": 1.0,
-      "loopOverride": false,
-      "loop": true,
-      "frameIndex": 0,
-      "timeIntoFrame": 0.0
-    }
+          "controllerId": "player",
+          "clipId": "",
+          "playing": true,
+          "speed": 1.0
+        }
+
 
     }
   ]

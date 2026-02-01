@@ -4,7 +4,7 @@ namespace Engine.Core.Components;
 
 public sealed class Animator : IComponent
 {
-    // Which clip to play (from animations.json)
+    // Which clip to play (from animations.generated.json)
     public string ClipId { get; set; } = "";
 
     public bool Playing { get; set; } = true;
@@ -24,4 +24,9 @@ public sealed class Animator : IComponent
     [JsonIgnore]
     public bool ResetRequested { get; set; } = false;
 
+
+    public string ControllerId { get; set; } = ""; // e.g. "player"
+
+    [JsonIgnore] public string StateId { get; set; } = "";        // current controller state
+    [JsonIgnore] public string? PendingStateId { get; set; } = null; // set while a transition clip is playing
 }

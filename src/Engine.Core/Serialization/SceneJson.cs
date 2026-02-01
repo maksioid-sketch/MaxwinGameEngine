@@ -86,6 +86,7 @@ public static class SceneJson
                 {
                     entity.Add(new Engine.Core.Components.Animator
                     {
+                        ControllerId = e.Animator.ControllerId ?? "",
                         ClipId = e.Animator.ClipId ?? "",
                         Playing = e.Animator.Playing,
                         Speed = e.Animator.Speed,
@@ -179,6 +180,7 @@ public static class SceneJson
 
     private sealed class AnimatorDto
     {
+        public string? ControllerId { get; set; }
         public string? ClipId { get; set; }
         public bool Playing { get; set; } = true;
         public float Speed { get; set; } = 1f;

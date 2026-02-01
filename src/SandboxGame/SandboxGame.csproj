@@ -11,15 +11,11 @@
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="Assets\animations.json" />
     <None Remove="Icon.ico" />
     <None Remove="Icon.bmp" />
     <None Remove="Scenes\test.scene.json" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Assets\animations.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="Scenes\test.scene.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
