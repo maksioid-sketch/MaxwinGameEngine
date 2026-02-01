@@ -13,6 +13,12 @@
   <ItemGroup>
     <None Remove="Icon.ico" />
     <None Remove="Icon.bmp" />
+    <None Remove="Scenes\test.scene.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Scenes\test.scene.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Icon.ico">
@@ -29,5 +35,10 @@
   <ItemGroup>
     <ProjectReference Include="..\Engine.Core\Engine.Core.csproj" />
     <ProjectReference Include="..\Engine.Runtime.MonoGame\Engine.Runtime.MonoGame.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Assets\atlas.generated.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

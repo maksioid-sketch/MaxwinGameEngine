@@ -1,0 +1,67 @@
+﻿{
+  "version": 1,
+  "controllers": {
+    "player": {
+      "initialState": "idle",
+      "states": {
+        "idle": { "clipId": "player_idle" },
+        "walk": { "clipId": "player_walk" },
+        "sitidle": { "clipId": "player_sitidle" },
+        "eat": { "clipId": "player_eat" }
+      },
+      "transitions": [
+        {
+          "from": "idle",
+          "to": "walk",
+          "when": { "downAny": ["W","A","S","D","Up","Left","Down","Right"] }
+        },
+        {
+          "from": "walk",
+          "to": "idle",
+          "when": { "noneDown": ["W","A","S","D","Up","Left","Down","Right"] }
+        },
+
+        {
+          "from": "idle",
+          "to": "sitidle",
+          "transitionClipId": "player_sitdown",
+          "when": { "pressedAny": ["Space"] }
+        },
+        {
+          "from": "walk",
+          "to": "sitidle",
+          "transitionClipId": "player_sitdown",
+          "when": { "pressedAny": ["Space"] }
+        },
+
+        {
+          "from": "sitidle",
+          "to": "idle",
+          "transitionClipId": "player_standup",
+          "when": { "pressedAny": ["Space"] }
+        },
+        {
+          "from": "eat",
+          "to": "idle",
+          "transitionClipId": "player_leanup",
+          "when": { "pressedAny": ["Enter"] }
+        },
+
+        {
+          "from": "idle",
+          "to": "eat",
+          "transitionClipId": "player_leandown",
+          "when": { "pressedAny": ["Enter"] }
+        },
+        {
+          "from": "eat",
+          "to": "walk",
+          "transitionClipId": "player_leanup",
+          "when": { "downAny": ["W","A","S","D","Up","Left","Down","Right"]}
+        }
+        
+        
+      ]
+    }
+  }
+}

@@ -1,0 +1,28 @@
+﻿{
+  "version": 1,
+  "entities": [
+    {
+      "id": "11111111-1111-1111-1111-111111111111",
+      "name": "Player",
+      "transform": {
+        "position": [ 0.0, 0.0, 0.0 ],
+        "rotationZRadians": 0.0,
+        "scale": [ 5.0, 5.0, 1.0]
+      },
+      "spriteRenderer": {
+          "spriteId": "player_idle_0",
+          "layer": 100,
+          "tint": [1, 1, 1, 1]
+      },
+      "animator": {
+          "controllerId": "player",
+          "clipId": "",
+          "playing": true,
+          "speed": 1.0
+        }
+
+
+    }
+  ]
+}
+ 

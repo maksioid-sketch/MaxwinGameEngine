@@ -1,0 +1,695 @@
+{
+  "Version": 2,
+  "Sprites": {
+    "player_walk_0": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        0,
+        512,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_walk_1": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        64,
+        512,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_walk_2": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        128,
+        512,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_walk_3": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        192,
+        512,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_walk_4": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        256,
+        512,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_walk_5": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        320,
+        512,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_walk_6": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        384,
+        512,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_walk_7": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        448,
+        512,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_idle_0": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        0,
+        64,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_idle_1": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_idle_2": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        128,
+        64,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_idle_3": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        192,
+        64,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_idle_4": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        256,
+        64,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_idle_5": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        320,
+        64,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_idle_6": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        384,
+        64,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_idle_7": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        448,
+        64,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_sitdown_0": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        0,
+        128,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_sitdown_1": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        64,
+        128,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_sitdown_2": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        128,
+        128,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_sitidle_0": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        0,
+        192,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_sitidle_1": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        64,
+        192,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_sitidle_2": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        128,
+        192,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_sitidle_3": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        192,
+        192,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_sitidle_4": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        256,
+        192,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_sitidle_5": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        320,
+        192,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_sitidle_6": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        384,
+        192,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_sitidle_7": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        448,
+        192,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_standup_0": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        0,
+        256,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_standup_1": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        64,
+        256,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_standup_2": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        128,
+        256,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_leandown_0": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        0,
+        320,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_leandown_1": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        64,
+        320,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_leandown_2": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        128,
+        320,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_leandown_3": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        192,
+        320,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_eat_0": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        0,
+        384,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_eat_1": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        64,
+        384,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_eat_2": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        128,
+        384,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_eat_3": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        192,
+        384,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_eat_4": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        256,
+        384,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_eat_5": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        320,
+        384,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_eat_6": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        384,
+        384,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_eat_7": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        448,
+        384,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_leanup_0": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        0,
+        448,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_leanup_1": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        64,
+        448,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_leanup_2": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        128,
+        448,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "player_leanup_3": {
+      "TextureKey": "Sprites/capibara",
+      "SourceRect": [
+        192,
+        448,
+        64,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    }
+  }
+}

@@ -1,0 +1,203 @@
+﻿{
+  "sheets": [
+    {
+      "name": "Capibara Walk",
+      "textureKey": "Sprites/capibara",
+
+      "prefix": "player_walk",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 0,
+      "startY": 512,
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 8,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "player_walk",
+        "loop": true,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Capibara Idle",
+      "textureKey": "Sprites/capibara",
+
+      "prefix": "player_idle",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 0,
+      "startY": 64,
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 8,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "player_idle",
+        "loop": true,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Capibara Sit Down",
+      "textureKey": "Sprites/capibara",
+
+      "prefix": "player_sitdown",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 0,
+      "startY": 128,
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 3,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "player_sitdown",
+        "loop": false,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Capibara Sit Idle",
+      "textureKey": "Sprites/capibara",
+
+      "prefix": "player_sitidle",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 0,
+      "startY": 192,
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 8,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "player_sitidle",
+        "loop": true,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Capibara Stand Up",
+      "textureKey": "Sprites/capibara",
+
+      "prefix": "player_standup",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 0,
+      "startY": 256,
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 3,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "player_standup",
+        "loop": false,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Capibara Lean Down",
+      "textureKey": "Sprites/capibara",
+
+      "prefix": "player_leandown",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 0,
+      "startY": 320,
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 4,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "player_leandown",
+        "loop": false,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Capibara Eat",
+      "textureKey": "Sprites/capibara",
+
+      "prefix": "player_eat",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 0,
+      "startY": 384,
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 8,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "player_eat",
+        "loop": true,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Capibara Lean Up",
+      "textureKey": "Sprites/capibara",
+
+      "prefix": "player_leanup",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 0,
+      "startY": 448,
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 4,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "player_leanup",
+        "loop": false,
+        "fps": 10
+      }
+    }
+  ]
+}

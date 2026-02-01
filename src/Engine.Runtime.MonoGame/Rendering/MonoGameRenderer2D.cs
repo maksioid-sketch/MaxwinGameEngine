@@ -17,6 +17,8 @@ public sealed class MonoGameRenderer2D : IRenderer2D
     private readonly GraphicsDevice _gd;
     private readonly SpriteBatch _sb;
     private readonly TextureStore _textures;
+    private Engine.Core.Rendering.Camera2D? _camera;
+
 
     private XnaMatrix _viewProj;
     private bool _begun;
@@ -28,94 +30,101 @@ public sealed class MonoGameRenderer2D : IRenderer2D
         _textures = textures;
     }
 
-    public void Begin(Camera2D camera)
+    public void Begin(Engine.Core.Rendering.Camera2D camera)
     {
         if (_begun) throw new InvalidOperationException("Renderer2D.Begin called twice.");
 
         camera.ViewportWidth = _gd.Viewport.Width;
         camera.ViewportHeight = _gd.Viewport.Height;
 
-        // IMPORTANT:
-        // SpriteBatch already handles projection; only pass a view/world transform here.
-        var view = camera.GetViewMatrix();
+        _camera = camera;
 
         _sb.Begin(
-            sortMode: SpriteSortMode.BackToFront,
+            sortMode: SpriteSortMode.Deferred,
             blendState: BlendState.AlphaBlend,
-            samplerState: SamplerState.PointClamp,
+            samplerState: SamplerState.PointClamp, // pixel-art friendly
             depthStencilState: DepthStencilState.None,
-            rasterizerState: RasterizerState.CullNone,
-            effect: null,
-            transformMatrix: view.ToXna());
+            rasterizerState: RasterizerState.CullNone);
 
         _begun = true;
     }
 
 
+
     public void DrawSprite(
-        string textureKey,
-        Vector3 worldPosition,      // System.Numerics.Vector3
-        Vector2 worldScale,         // System.Numerics.Vector2
-        float rotationRadians,
-        IntRect sourceRect,
-        Color4 tint,
-        int layer,
-        float pixelsPerUnit)
+    string textureKey,
+    Vector3 worldPos,
+    Vector2 worldScale,
+    float rotationRadians,
+    IntRect sourceRect,
+    Color4 tint,
+    int layer,
+    float spritePixelsPerUnit,
+    Vector2 originPixels,
+    Engine.Core.Rendering.SpriteFlip flip
+)
 
     {
-        if (!_begun) throw new InvalidOperationException("Call Begin() before DrawSprite().");
+        if (!_begun) throw new InvalidOperationException("DrawSprite called before Begin.");
+        if (_camera is null) throw new InvalidOperationException("Camera not set.");
+        if (string.IsNullOrWhiteSpace(textureKey)) return;
 
         var tex = _textures.Get(textureKey);
+        if (tex is null)
+            throw new InvalidOperationException($"TextureStore returned null for key '{textureKey}'.");
 
-        XnaRectangle? src = null;
-        if (!sourceRect.IsEmpty)
-            src = new XnaRectangle(sourceRect.X, sourceRect.Y, sourceRect.W, sourceRect.H);
+        // Source rect: [0,0,0,0] means full texture
+        Microsoft.Xna.Framework.Rectangle? src = null;
+        if (!(sourceRect.X == 0 && sourceRect.Y == 0 && sourceRect.W == 0 && sourceRect.H == 0))
+            src = new Microsoft.Xna.Framework.Rectangle(sourceRect.X, sourceRect.Y, sourceRect.W, sourceRect.H);
 
-        // Convert world units -> pixels:
-        // A sprite rendered at scale 1.0 will be (tex.Width / PPU, tex.Height / PPU) world units.
-        var baseScaleX = (tex.Width / pixelsPerUnit) * worldScale.X;
-        var baseScaleY = (tex.Height / pixelsPerUnit) * worldScale.Y;
+        int srcW = src?.Width ?? tex.Width;
+        int srcH = src?.Height ?? tex.Height;
 
-        // SpriteBatch.Draw uses a destination scale relative to texture size if you use origin + scale overload.
-        // We'll draw using position in world units, with scale in world units mapped to pixels via PPU:
-        // easiest: draw in "world units" directly by scaling by (PPU/texSize) is messy.
-        // Instead: treat world units as pixels by using transformMatrix. But we used an ortho in pixel space.
-        // So: convert worldPosition (units) to pixels:
-        var px = worldPosition.X * pixelsPerUnit;
-        var py = worldPosition.Y * pixelsPerUnit;
+        // Convert sprite PPU to screen scaling using camera global PPU:
+        float ppuRatio = _camera.PixelsPerUnit / System.MathF.Max(0.0001f, spritePixelsPerUnit);
 
-        var pos = new Vector2(px, py);
+        var scale = new Microsoft.Xna.Framework.Vector2(
+            worldScale.X * ppuRatio * _camera.Zoom,
+            worldScale.Y * ppuRatio * _camera.Zoom);
 
-        // Scale in pixels relative to texture size:
-        var sx = (baseScaleX * pixelsPerUnit) / tex.Width;
-        var sy = (baseScaleY * pixelsPerUnit) / tex.Height;
+        // World -> screen pixels
+        var screenPos = _camera.WorldToScreen(new System.Numerics.Vector2(worldPos.X, worldPos.Y));
+        var posXna = new Microsoft.Xna.Framework.Vector2(screenPos.X, screenPos.Y);
 
-        // Center origin:
-        var origin = src.HasValue
-            ? new Vector2(src.Value.Width * 0.5f, src.Value.Height * 0.5f)
-            : new Vector2(tex.Width * 0.5f, tex.Height * 0.5f);
+        // Origin in source pixels (center)
+        var origin = new Microsoft.Xna.Framework.Vector2(originPixels.X, originPixels.Y);
 
-        // Layer: SpriteBatch expects 0..1 (BackToFront sort). Map int layers.
-        // Higher layer = drawn later (front). Clamp.
-        float depth = System.Math.Clamp(layer / 1000f, 0f, 1f);
+
+        // Sprite rotation relative to camera
+        float finalRot = rotationRadians - _camera.Rotation;
+
+        var effects = SpriteEffects.None;
+        if ((flip & Engine.Core.Rendering.SpriteFlip.X) != 0) effects |= SpriteEffects.FlipHorizontally;
+        if ((flip & Engine.Core.Rendering.SpriteFlip.Y) != 0) effects |= SpriteEffects.FlipVertically;
+
 
         _sb.Draw(
-            texture: tex,
-            position: pos,
-            sourceRectangle: src,
-            color: tint.ToXna(),
-            rotation: rotationRadians,
-            origin: origin,
-            scale: new Vector2(sx, sy),
-            effects: SpriteEffects.None,
-            layerDepth: depth);
+            tex,
+            posXna,
+            src,
+            new Microsoft.Xna.Framework.Color(tint.R, tint.G, tint.B, tint.A),
+            finalRot,
+            origin,
+            scale,
+            effects,
+            0f);
     }
+
 
     public void End()
     {
-        if (!_begun) return;
+        if (!_begun) throw new InvalidOperationException("Renderer2D.End called before Begin.");
+
         _sb.End();
         _begun = false;
+        _camera = null;
     }
+
 }
 
