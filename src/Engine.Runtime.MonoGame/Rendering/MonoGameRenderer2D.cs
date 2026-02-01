@@ -60,7 +60,9 @@ public sealed class MonoGameRenderer2D : IRenderer2D
     Color4 tint,
     int layer,
     float spritePixelsPerUnit,
-    Vector2 originPixels)
+    Vector2 originPixels,
+    Engine.Core.Rendering.SpriteFlip flip
+)
 
     {
         if (!_begun) throw new InvalidOperationException("DrawSprite called before Begin.");
@@ -97,6 +99,11 @@ public sealed class MonoGameRenderer2D : IRenderer2D
         // Sprite rotation relative to camera
         float finalRot = rotationRadians - _camera.Rotation;
 
+        var effects = SpriteEffects.None;
+        if ((flip & Engine.Core.Rendering.SpriteFlip.X) != 0) effects |= SpriteEffects.FlipHorizontally;
+        if ((flip & Engine.Core.Rendering.SpriteFlip.Y) != 0) effects |= SpriteEffects.FlipVertically;
+
+
         _sb.Draw(
             tex,
             posXna,
@@ -105,7 +112,7 @@ public sealed class MonoGameRenderer2D : IRenderer2D
             finalRot,
             origin,
             scale,
-            SpriteEffects.None,
+            effects,
             0f);
     }
 

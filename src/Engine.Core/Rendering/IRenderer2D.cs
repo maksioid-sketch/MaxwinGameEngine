@@ -17,5 +17,7 @@ public interface IRenderer2D
         Color4 tint,
         int layer,
         float spritePixelsPerUnit,
-        Vector2 originPixels);
+        Vector2 originPixels,
+        Engine.Core.Rendering.SpriteFlip flip
+        );
 }

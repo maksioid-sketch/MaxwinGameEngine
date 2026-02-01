@@ -124,7 +124,9 @@ public sealed class Scene
                 tint: sr.Tint,
                 layer: sr.Layer,
                 pixelsPerUnit: ppu,
-                originPixels: origin));
+                originPixels: origin,
+                flip: sr.Flip
+                ));
 
 
         }

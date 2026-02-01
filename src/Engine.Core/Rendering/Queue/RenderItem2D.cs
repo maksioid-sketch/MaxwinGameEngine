@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using Engine.Core.Math;
 
+
 namespace Engine.Core.Rendering.Queue;
 
 public readonly struct RenderItem2D
@@ -13,8 +14,9 @@ public readonly struct RenderItem2D
     public readonly Color4 Tint;
     public readonly int Layer;
     public readonly float PixelsPerUnit;
+    public readonly Vector2 OriginPixels;
+    public readonly Engine.Core.Rendering.SpriteFlip Flip;
 
-    public readonly Vector2 OriginPixels; // NEW
 
     public RenderItem2D(
         string textureKey,
@@ -25,7 +27,8 @@ public readonly struct RenderItem2D
         Color4 tint,
         int layer,
         float pixelsPerUnit,
-        Vector2 originPixels)
+        Vector2 originPixels,
+        Engine.Core.Rendering.SpriteFlip flip)
     {
         TextureKey = textureKey;
         WorldPosition = worldPosition;
@@ -36,5 +39,6 @@ public readonly struct RenderItem2D
         Layer = layer;
         PixelsPerUnit = pixelsPerUnit;
         OriginPixels = originPixels;
+        Flip = flip;
     }
 }

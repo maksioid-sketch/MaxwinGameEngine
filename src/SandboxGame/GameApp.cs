@@ -183,7 +183,8 @@ public sealed class GameApp : Game
                 it.Tint,
                 it.Layer,
                 it.PixelsPerUnit,
-                it.OriginPixels);
+                it.OriginPixels,
+                it.Flip);
 
         }
 

@@ -1,4 +1,5 @@
 ﻿using Engine.Core.Math;
+using Engine.Core.Rendering;
 
 namespace Engine.Core.Components;
 
@@ -17,4 +18,6 @@ public sealed class SpriteRenderer : IComponent
 
     public bool OverridePixelsPerUnit { get; set; } = false;
     public float PixelsPerUnitOverride { get; set; } = 100f;
+
+    public SpriteFlip Flip { get; set; } = SpriteFlip.None;
 }
