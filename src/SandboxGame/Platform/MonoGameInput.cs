@@ -43,6 +43,7 @@ public sealed class MonoGameInput : IInput
         InputKey.Space => Keys.Space,
         InputKey.Escape => Keys.Escape,
         InputKey.Enter => Keys.Enter,
+        InputKey.E => Keys.E,
 
         _ => Keys.None
     };

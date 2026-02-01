@@ -6,6 +6,7 @@ using Engine.Core.Runtime;
 using Engine.Core.Scene;
 using Engine.Core.Systems;
 using System;
+using System.Collections.Generic;
 
 namespace SandboxGame.Systems;
 
@@ -30,10 +31,6 @@ public sealed class AnimatorControllerSystem : ISystem
             if (!assets.TryGetController(anim.ControllerId, out var controller)) continue;
             if (controller.States.Count == 0) continue;
 
-            // If a transition is in progress, do not override it (no interruptions yet)
-            if (!string.IsNullOrWhiteSpace(anim.PendingStateId))
-                continue;
-
             // Initialize on first run
             if (string.IsNullOrWhiteSpace(anim.StateId))
             {
@@ -41,25 +38,61 @@ public sealed class AnimatorControllerSystem : ISystem
 
                 if (controller.States.TryGetValue(anim.StateId, out var st) && !string.IsNullOrWhiteSpace(st.ClipId))
                 {
-                    SetClip(anim, st.ClipId, restart: true);
+                    SetClip(anim, st.ClipId, restart: true, speed: st.Speed);
                 }
 
                 continue;
             }
 
-            // Evaluate transitions in order (first match wins)
+            // If a transition clip is playing, normally do not override it.
+            // But allow interrupts for transitions explicitly marked CanInterrupt=true.
+            bool inTransition = !string.IsNullOrWhiteSpace(anim.PendingStateId);
+
+            // Keep Animator.Speed in sync with the ACTIVE state when not in a transition clip.
+            // This fixes the "transition speed leaked into next state" problem.
+            if (!inTransition && controller.States.TryGetValue(anim.StateId, out var currentState))
+            {
+                float mul = anim.GetFloat("speedMul", 1f); // optional param (default 1)
+                anim.Speed = MathF.Max(0f, currentState.Speed * mul);
+            }
+
+            // Build candidate transitions:
+            // - From current state
+            // - From "*" (Any State)
+            // Priority: higher first, then stable list order
+            var candidates = new List<(int index, ControllerTransition t)>(controller.Transitions.Count);
             for (int i = 0; i < controller.Transitions.Count; i++)
             {
                 var t = controller.Transitions[i];
 
-                if (!t.From.Equals(anim.StateId, StringComparison.OrdinalIgnoreCase))
-                    continue;
+                bool fromMatches =
+                    t.From.Equals("*", StringComparison.OrdinalIgnoreCase) ||
+                    t.From.Equals(anim.StateId, StringComparison.OrdinalIgnoreCase);
 
-                if (!Matches(t.When, ctx.Input))
-                    continue;
+                if (!fromMatches) continue;
 
+                if (inTransition && !t.CanInterrupt) continue;
+
+                candidates.Add((i, t));
+            }
+
+            candidates.Sort((a, b) =>
+            {
+                int pr = b.t.Priority.CompareTo(a.t.Priority);
+                return pr != 0 ? pr : a.index.CompareTo(b.index);
+            });
+
+            // Evaluate transitions (first match wins)
+            foreach (var (_, t) in candidates)
+            {
                 if (!controller.States.TryGetValue(t.To, out var toState) || string.IsNullOrWhiteSpace(toState.ClipId))
                     continue;
+
+                if (!TransitionMatches(t, anim, ctx.Input))
+                    continue;
+
+                // If this transition uses a trigger condition, consume it now (on TAKE).
+                ConsumeTriggersUsedByTransition(t, anim);
 
                 // ---------- TRANSITION CLIP ----------
                 if (!string.IsNullOrWhiteSpace(t.TransitionClipId))
@@ -71,29 +104,32 @@ public sealed class AnimatorControllerSystem : ISystem
                     anim.PendingStateId = t.To;
                     anim.NextClipId = toState.ClipId;
 
-                    SetClip(anim, t.TransitionClipId!, restart: true);
+                    SetClip(anim, t.TransitionClipId!, restart: true, speed: t.TransitionSpeed);
                     break;
                 }
 
                 // ---------- DIRECT SWITCH ----------
-                // Commit state immediately
                 anim.StateId = t.To;
 
                 // Clear any stale "transition" bookkeeping
                 anim.PendingStateId = null;
                 anim.NextClipId = null;
 
-                // Only restart when the clip actually changes
-                SetClip(anim, toState.ClipId, restart: false);
+                // Apply state speed now
+                float mul = anim.GetFloat("speedMul", 1f);
+                SetClip(anim, toState.ClipId, restart: false, speed: MathF.Max(0f, toState.Speed * mul));
                 break;
             }
         }
     }
 
-    private static void SetClip(Animator anim, string clipId, bool restart)
+    private static void SetClip(Animator anim, string clipId, bool restart, float speed)
     {
         if (string.IsNullOrWhiteSpace(clipId))
             return;
+
+        // Apply speed (used by AnimationSystem)
+        anim.Speed = MathF.Max(0f, speed);
 
         // If clip changes -> restart. If same clip -> only restart if requested.
         bool changed = !string.Equals(anim.ClipId, clipId, StringComparison.OrdinalIgnoreCase);
@@ -112,6 +148,87 @@ public sealed class AnimatorControllerSystem : ISystem
         // Only restart if explicitly asked (usually false for idle/walk, true for transitions)
         if (restart)
             anim.ResetRequested = true;
+    }
+
+    private static bool TransitionMatches(ControllerTransition t, Animator anim, IInput input)
+    {
+        // New flexible conditions (v2)
+        if (t.Conditions is { Count: > 0 })
+        {
+            for (int i = 0; i < t.Conditions.Count; i++)
+            {
+                if (!ConditionMet(t.Conditions[i], anim, input))
+                    return false;
+            }
+            return true;
+        }
+
+        // Legacy (v1) input-only "when"
+        return Matches(t.When, input);
+    }
+
+    private static void ConsumeTriggersUsedByTransition(ControllerTransition t, Animator anim)
+    {
+        if (t.Conditions is not { Count: > 0 }) return;
+
+        for (int i = 0; i < t.Conditions.Count; i++)
+        {
+            var c = t.Conditions[i];
+            if (!string.IsNullOrWhiteSpace(c.Trigger))
+                anim.ConsumeTrigger(c.Trigger!);
+        }
+    }
+
+    private static bool ConditionMet(TransitionCondition c, Animator anim, IInput input)
+    {
+        // Trigger presence check (consumed on take)
+        if (!string.IsNullOrWhiteSpace(c.Trigger))
+            return anim.HasTrigger(c.Trigger!);
+
+        // Bool param
+        if (!string.IsNullOrWhiteSpace(c.Bool))
+            return anim.GetBool(c.Bool!) == c.BoolValue;
+
+        // Float param compare
+        if (!string.IsNullOrWhiteSpace(c.Float))
+        {
+            float v = anim.GetFloat(c.Float!);
+            return c.Op switch
+            {
+                CompareOp.Eq => v == c.Value,
+                CompareOp.Ne => v != c.Value,
+                CompareOp.Gt => v > c.Value,
+                CompareOp.Ge => v >= c.Value,
+                CompareOp.Lt => v < c.Value,
+                CompareOp.Le => v <= c.Value,
+                _ => false
+            };
+        }
+
+        // Input checks (optional)
+        if (c.PressedAny is { Length: > 0 })
+        {
+            bool any = false;
+            for (int i = 0; i < c.PressedAny.Length; i++)
+                any |= WasPressed(input, c.PressedAny[i]);
+            if (!any) return false;
+        }
+
+        if (c.DownAny is { Length: > 0 })
+        {
+            bool any = false;
+            for (int i = 0; i < c.DownAny.Length; i++)
+                any |= IsDown(input, c.DownAny[i]);
+            if (!any) return false;
+        }
+
+        if (c.NoneDown is { Length: > 0 })
+        {
+            for (int i = 0; i < c.NoneDown.Length; i++)
+                if (IsDown(input, c.NoneDown[i])) return false;
+        }
+
+        return true; // empty condition == always true
     }
 
     private static bool Matches(TransitionWhen w, IInput input)

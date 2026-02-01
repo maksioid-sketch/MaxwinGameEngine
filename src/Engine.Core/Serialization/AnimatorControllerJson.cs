@@ -1,5 +1,7 @@
 ﻿using System.Text.Json;
 using Engine.Core.Assets.Animation;
+using System.Text.Json.Serialization;
+
 
 namespace Engine.Core.Serialization;
 
@@ -9,8 +11,15 @@ public static class AnimatorControllerJson
     {
         PropertyNameCaseInsensitive = true,
         AllowTrailingCommas = true,
-        ReadCommentHandling = JsonCommentHandling.Skip
+        ReadCommentHandling = JsonCommentHandling.Skip,
+        Converters =
+    {
+        // Allow enums like CompareOp to be read from strings: "Gt", "Le", etc.
+        new JsonStringEnumConverter()
+    }
     };
+
+
 
     public static Dictionary<string, AnimatorController> DeserializeControllers(string json)
     {

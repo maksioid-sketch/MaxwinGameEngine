@@ -123,12 +123,11 @@ public sealed class GameApp : Game
 
         _scene = new Engine.Core.Scene.Scene();
 
-        
+
 
         // Load real data
-        ReloadAssets();   // loads atlas + animations, also calls RebuildSystems() inside (recommended)
-        if (!_assets.TryGetAnimation("player_idle", out var idle) || idle.Frames.Count == 0)
-            throw new Exception("Animation 'player_idle' not loaded or has 0 frames. Check animations.generated.json load path + ReloadAssets().");
+        ReloadAssets(throwOnFailure: true);   // fail loudly on startup so you see the real error
+
 
 
         ReloadScene();    // loads scene
@@ -206,7 +205,7 @@ public sealed class GameApp : Game
         base.Draw(gameTime);
     }
 
-    private void ReloadAssets()
+    private void ReloadAssets(bool throwOnFailure = false)
     {
         try
         {
@@ -216,18 +215,27 @@ public sealed class GameApp : Game
             if (!File.Exists(_animationsPath))
                 throw new FileNotFoundException("animations.generated.json not found", _animationsPath);
 
+            if (!File.Exists(_controllersPath))
+                throw new FileNotFoundException("controllers.json not found", _controllersPath);
+
             // Load + parse
-            var atlasJson = File.ReadAllText(_atlasPath);
+            static string ReadJsonNoBom(string path)
+            {
+                var s = File.ReadAllText(path);
+                return s.TrimStart('\uFEFF'); // remove UTF-8 BOM if present
+            }
+
+            var atlasJson = ReadJsonNoBom(_atlasPath);
             var sprites = AtlasJson.DeserializeSprites(atlasJson);
 
-            var animJson = File.ReadAllText(_animationsPath);
+            var animJson = ReadJsonNoBom(_animationsPath);
             var clips = AnimationJson.DeserializeClips(animJson);
 
-            var controllersJson = File.ReadAllText(_controllersPath);
+            var controllersJson = ReadJsonNoBom(_controllersPath);
             var controllers = Engine.Core.Serialization.AnimatorControllerJson.DeserializeControllers(controllersJson);
 
-            _assets = new DictionaryAssetProvider(sprites, clips, controllers);
 
+            _assets = new DictionaryAssetProvider(sprites, clips, controllers);
 
             // Recreate systems that depend on _assets (AnimationSystem holds _assets reference)
             RebuildSystems();
@@ -236,15 +244,20 @@ public sealed class GameApp : Game
             _validationIssues = SceneValidator.Validate(_scene, _assets);
 
             _hotReloadStatus = $"Assets reloaded: {DateTime.Now:T}";
-
             _services.Assets = _assets;
-
-            _validationIssues = SceneValidator.Validate(_scene, _assets);
-
         }
         catch (Exception ex)
         {
-            _hotReloadStatus = $"Assets reload FAILED: {ex.Message}";
+            _hotReloadStatus =
+                "Assets reload FAILED:\n" +
+                $"{ex.GetType().Name}: {ex.Message}\n" +
+                $"atlas: {_atlasPath}\n" +
+                $"anim:  {_animationsPath}\n" +
+                $"ctrl:  {_controllersPath}";
+
+            if (throwOnFailure)
+                throw new Exception(_hotReloadStatus, ex);
+
             // Keep previous _assets and systems running
         }
     }
