@@ -100,6 +100,13 @@ public sealed class AnimatorControllerSystem : ISystem
 
                 ConsumeTriggersUsedByTransition(t, anim);
 
+
+                // One-shot overrides for the NEXT clip switch only
+                anim.PendingCrossFadeSeconds = (t.CrossFadeSeconds >= 0f) ? t.CrossFadeSeconds : null;
+                anim.PendingFreezeDuringCrossFade = t.FreezeDuringCrossFade; // null means "use default"
+
+
+
                 // Transition clip
                 if (!string.IsNullOrWhiteSpace(t.TransitionClipId))
                 {
@@ -112,6 +119,8 @@ public sealed class AnimatorControllerSystem : ISystem
                     SetClip(anim, t.TransitionClipId!, restart: true, speed: t.TransitionSpeed);
                     break;
                 }
+
+               
 
                 // Direct switch
                 anim.StateId = t.To;

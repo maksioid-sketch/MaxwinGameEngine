@@ -10,40 +10,34 @@ public sealed class AnimatorController
 public sealed class ControllerState
 {
     public string ClipId { get; set; } = "";
-
-    // Multiplies Animator.Speed while this state is active (1 = normal)
     public float Speed { get; set; } = 1f;
 }
 
 public sealed class ControllerTransition
 {
-    // Use "*" to mean Any State
     public string From { get; set; } = "";
     public string To { get; set; } = "";
 
-    // Optional: plays this non-looping clip first, then auto-switches to To state's clip.
     public string? TransitionClipId { get; set; } = null;
-
-    // Optional speed while playing TransitionClipId (ignored for direct switches)
     public float TransitionSpeed { get; set; } = 1f;
 
-    // Higher wins
     public int Priority { get; set; } = 0;
-
-    // Allow transition while transition clip is playing
     public bool CanInterrupt { get; set; } = false;
 
-    // NEW: robustness
-    // If >= 0: require animator.NormalizedTime >= ExitTime to allow this transition
+    // Robustness
     public float ExitTime { get; set; } = -1f;
-
-    // If > 0: require animator.StateTimeSeconds >= MinTimeInState
     public float MinTimeInState { get; set; } = 0f;
 
-    // Flexible conditions (AND across all)
+    // NEW: if >= 0, overrides Animator.CrossFadeSeconds for this switch
+    public float CrossFadeSeconds { get; set; } = -1f;
+
+    // Optional: if set in json, overrides freeze behavior for this transition only
+    public bool? FreezeDuringCrossFade { get; set; } = null;
+
+
     public List<TransitionCondition>? Conditions { get; set; } = null;
 
-    // Legacy input-only (backward compatible)
+    // Back-compat input-only
     public TransitionWhen When { get; set; } = new();
 }
 
@@ -54,10 +48,9 @@ public enum CompareOp
 
 public sealed class TransitionCondition
 {
-    // One-shot event name (consumed only when the transition is taken)
     public string? Trigger { get; set; } = null;
 
-    // NEW: clip finished signal (true = require ClipFinishedThisFrame)
+    // Finished signal
     public bool? Finished { get; set; } = null;
 
     public string? Bool { get; set; } = null;
@@ -67,7 +60,6 @@ public sealed class TransitionCondition
     public CompareOp Op { get; set; } = CompareOp.Gt;
     public float Value { get; set; } = 0f;
 
-    // Optional input checks usable as a condition
     public string[]? PressedAny { get; set; } = null;
     public string[]? DownAny { get; set; } = null;
     public string[]? NoneDown { get; set; } = null;

@@ -8,13 +8,15 @@
         "walk": { "clipId": "player_walk", "speed": 1.1 },
         "sitidle": { "clipId": "player_sitidle", "speed": 1.0 },
         "eat": { "clipId": "player_eat", "speed": 1.0 },
-        "hurt": { "clipId": "player_sitdown", "speed": 2.0 }
+        "hurt": { "clipId": "player_sitdown", "speed": 0.5 }
       },
       "transitions": [
           //Example "non-input" event transition (you can test it with E right now):
         {
           "from": "*",
           "to": "hurt",
+          "crossFadeSeconds": 0.8,
+          "freezeDuringCrossFade": false,
           "priority": 200,
           "canInterrupt": true,
           "minTimeInState": 0.05,
@@ -25,6 +27,7 @@
         {
           "from": "hurt",
           "to": "idle",
+          "crossFadeSeconds": 0.8,
           "conditions": [
             { "finished": true }
           ]

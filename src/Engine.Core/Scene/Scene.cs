@@ -86,34 +86,95 @@ public sealed class Scene
             var scale2 = new System.Numerics.Vector2(e.Transform.Scale.X, e.Transform.Scale.Y);
             var rotZ = GetZRotationRadians(e.Transform.Rotation);
 
+            System.Numerics.Vector2 ComputeOrigin(Engine.Core.Assets.SpriteDefinition s, Engine.Core.Math.IntRect src)
+            {
+                var origin = s.OriginPixels;
+
+                if (origin == System.Numerics.Vector2.Zero && s.DefaultOriginToCenter)
+                {
+                    if (src.W > 0 && src.H > 0)
+                        origin = new System.Numerics.Vector2(src.W * 0.5f, src.H * 0.5f);
+                }
+
+                return origin;
+            }
+
+            // Base tint premultiplied by its OWN alpha (important for BlendState.AlphaBlend)
+            var baseTintPremul = new Engine.Core.Math.Color4(
+                sr.Tint.R * sr.Tint.A,
+                sr.Tint.G * sr.Tint.A,
+                sr.Tint.B * sr.Tint.A,
+                sr.Tint.A
+            );
+
+            if (sr.PreviousSpriteId is not null &&
+                sr.CrossFadeDurationSeconds > 0f &&
+                sr.CrossFadeElapsedSeconds < sr.CrossFadeDurationSeconds &&
+                assets.TryGetSprite(sr.PreviousSpriteId, out var prevSprite))
+            {
+                float t = sr.CrossFadeElapsedSeconds / sr.CrossFadeDurationSeconds;
+                if (t < 0f) t = 0f;
+                if (t > 1f) t = 1f;
+
+                float oldK = 1f - t;
+                float newK = t;
+
+                // Apply weights in premultiplied space
+                var oldTint = new Engine.Core.Math.Color4(
+                    baseTintPremul.R * oldK,
+                    baseTintPremul.G * oldK,
+                    baseTintPremul.B * oldK,
+                    baseTintPremul.A * oldK
+                );
+
+                var newTint = new Engine.Core.Math.Color4(
+                    baseTintPremul.R * newK,
+                    baseTintPremul.G * newK,
+                    baseTintPremul.B * newK,
+                    baseTintPremul.A * newK
+                );
+
+                var prevSrc = sr.OverrideSourceRect ? sr.SourceRectOverride : prevSprite.SourceRect;
+                var prevPpu = sr.OverridePixelsPerUnit ? sr.PixelsPerUnitOverride : prevSprite.PixelsPerUnit;
+                var prevOrigin = ComputeOrigin(prevSprite, prevSrc);
+
+                output.Add(new RenderItem2D(
+                    textureKey: prevSprite.TextureKey,
+                    worldPosition: new System.Numerics.Vector3(pos.X, pos.Y, pos.Z - 0.0001f),
+                    worldScale: scale2,
+                    rotationRadians: rotZ,
+                    sourceRect: prevSrc,
+                    tint: oldTint,
+                    layer: sr.Layer,
+                    pixelsPerUnit: prevPpu,
+                    originPixels: prevOrigin,
+                    flip: sr.Flip
+                ));
+
+                var srcNow = sr.OverrideSourceRect ? sr.SourceRectOverride : sprite.SourceRect;
+                var ppuNow = sr.OverridePixelsPerUnit ? sr.PixelsPerUnitOverride : sprite.PixelsPerUnit;
+                var originNow = ComputeOrigin(sprite, srcNow);
+
+                output.Add(new RenderItem2D(
+                    textureKey: sprite.TextureKey,
+                    worldPosition: pos,
+                    worldScale: scale2,
+                    rotationRadians: rotZ,
+                    sourceRect: srcNow,
+                    tint: newTint,
+                    layer: sr.Layer,
+                    pixelsPerUnit: ppuNow,
+                    originPixels: originNow,
+                    flip: sr.Flip
+                ));
+
+                continue;
+            }
+
+            // Normal draw: use premultiplied tint as well (fixes subtle brightening whenever A != 1)
             var src = sr.OverrideSourceRect ? sr.SourceRectOverride : sprite.SourceRect;
             var ppu = sr.OverridePixelsPerUnit ? sr.PixelsPerUnitOverride : sprite.PixelsPerUnit;
-
-            int w = src.W;
-            int h = src.H;
-
-            // If sourceRect is "full texture" (0,0,0,0) we can't compute center here.
-            // In that case: if DefaultOriginToCenter=true, we’ll use Vector2.Zero as “special”
-            // and let the renderer center using texture size.
-            // If DefaultOriginToCenter=false, keep (0,0) which is top-left.
-            var origin = sprite.OriginPixels;
-
-            if (origin == System.Numerics.Vector2.Zero && sprite.DefaultOriginToCenter)
-            {
-                // Source rect is known size for sheet frames
-                if (src.W > 0 && src.H > 0)
-                    origin = new System.Numerics.Vector2(src.W * 0.5f, src.H * 0.5f);
-            }
-
-
-            bool srcIsFullTexture = (src.X == 0 && src.Y == 0 && src.W == 0 && src.H == 0);
-
-            if (origin == System.Numerics.Vector2.Zero && sprite.DefaultOriginToCenter)
-            {
-                // Source rect is known size for sheet frames
-                if (src.W > 0 && src.H > 0)
-                    origin = new System.Numerics.Vector2(src.W * 0.5f, src.H * 0.5f);
-            }
+            var origin2 = ComputeOrigin(sprite, src);
 
             output.Add(new RenderItem2D(
                 textureKey: sprite.TextureKey,
@@ -121,14 +182,12 @@ public sealed class Scene
                 worldScale: scale2,
                 rotationRadians: rotZ,
                 sourceRect: src,
-                tint: sr.Tint,
+                tint: baseTintPremul,
                 layer: sr.Layer,
                 pixelsPerUnit: ppu,
-                originPixels: origin,
+                originPixels: origin2,
                 flip: sr.Flip
-                ));
-
-
+            ));
         }
     }
 
