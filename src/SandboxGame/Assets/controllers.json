@@ -4,8 +4,8 @@
     "player": {
       "initialState": "idle",
       "states": {
-        "idle": { "clipId": "player_idle", "speed": 1.0 },
-        "walk": { "clipId": "player_walk", "speed": 1.1 },
+        "idle": { "clipId": "human_idle", "speed": 1.0 },
+        "walk": { "clipId": "human_walk", "speed": 1.1 },
         "sitidle": { "clipId": "player_sitidle", "speed": 1.0 },
         "eat": { "clipId": "player_eat", "speed": 1.0 },
         "hurt": { "clipId": "player_sitdown", "speed": 0.5 }

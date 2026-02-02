@@ -224,6 +224,328 @@
           "durationSeconds": 0.1
         }
       ]
+    },
+    "human_idle": {
+      "loop": false,
+      "frames": [
+        {
+          "spriteId": "human_idle_0",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "human_walk": {
+      "loop": true,
+      "frames": [
+        {
+          "spriteId": "human_walk_0",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_walk_1",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_walk_2",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_walk_3",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_walk_4",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_walk_5",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "human_crouch": {
+      "loop": false,
+      "frames": [
+        {
+          "spriteId": "human_crouch_0",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_crouch_1",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_crouch_2",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "human_stand": {
+      "loop": false,
+      "frames": [
+        {
+          "spriteId": "human_stand_0",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "human_damage_high": {
+      "loop": false,
+      "frames": [
+        {
+          "spriteId": "human_damage_high_0",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_damage_high_1",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "human_damage_low": {
+      "loop": false,
+      "frames": [
+        {
+          "spriteId": "human_damage_low_0",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_damage_low_1",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "human_damage_crouch": {
+      "loop": false,
+      "frames": [
+        {
+          "spriteId": "human_damage_crouch_0",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_damage_crouch_1",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "human_jump": {
+      "loop": false,
+      "frames": [
+        {
+          "spriteId": "human_jump_0",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_jump_1",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_jump_2",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "human_vert_strike_stand": {
+      "loop": false,
+      "frames": [
+        {
+          "spriteId": "human_vert_strike_stand_0",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_vert_strike_stand_1",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_vert_strike_stand_2",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_vert_strike_stand_3",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "human_vert_strike_crouch": {
+      "loop": false,
+      "frames": [
+        {
+          "spriteId": "human_vert_strike_crouch_0",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_vert_strike_crouch_1",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_vert_strike_crouch_2",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_vert_strike_crouch_3",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "human_vert_strike_air": {
+      "loop": false,
+      "frames": [
+        {
+          "spriteId": "human_vert_strike_air_0",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_vert_strike_air_1",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_vert_strike_air_2",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_vert_strike_air_3",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "human_hor_strike_stand": {
+      "loop": false,
+      "frames": [
+        {
+          "spriteId": "human_hor_strike_stand_0",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_hor_strike_stand_1",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_hor_strike_stand_2",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "human_hor_strike_crouch": {
+      "loop": false,
+      "frames": [
+        {
+          "spriteId": "human_hor_strike_crouch_0",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_hor_strike_crouch_1",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_hor_strike_crouch_2",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "human_hor_strike_air": {
+      "loop": false,
+      "frames": [
+        {
+          "spriteId": "human_hor_strike_air_0",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_hor_strike_air_1",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_hor_strike_air_2",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "human_punch_stand": {
+      "loop": false,
+      "frames": [
+        {
+          "spriteId": "human_punch_stand_0",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_punch_stand_1",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "human_punch_crouch": {
+      "loop": false,
+      "frames": [
+        {
+          "spriteId": "human_punch_crouch_0",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_punch_crouch_1",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "human_punch_air": {
+      "loop": false,
+      "frames": [
+        {
+          "spriteId": "human_punch_air_0",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_punch_air_1",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "human_guard_stand": {
+      "loop": false,
+      "frames": [
+        {
+          "spriteId": "human_guard_stand_0",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "human_guard_crouch": {
+      "loop": false,
+      "frames": [
+        {
+          "spriteId": "human_guard_crouch_0",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "human_guard_air": {
+      "loop": false,
+      "frames": [
+        {
+          "spriteId": "human_guard_air_0",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "human_damage_air": {
+      "loop": false,
+      "frames": [
+        {
+          "spriteId": "human_damage_air_0",
+          "durationSeconds": 0.1
+        },
+        {
+          "spriteId": "human_damage_air_1",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "human_dead": {
+      "loop": false,
+      "frames": [
+        {
+          "spriteId": "human_dead_0",
+          "durationSeconds": 0.1
+        }
+      ]
     }
   }
 }
