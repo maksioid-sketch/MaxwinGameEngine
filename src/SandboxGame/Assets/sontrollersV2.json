@@ -1,0 +1,113 @@
+﻿{
+  "version": 2,
+  "controllers": {
+    "player": {
+      "initialState": "idle",
+      "states": {
+        "idle": { "clipId": "player_idle", "speed": 1.0 },
+        "walk": { "clipId": "player_walk", "speed": 1.1 },
+        "sitidle": { "clipId": "player_sitidle", "speed": 1.0 },
+        "eat": { "clipId": "player_eat", "speed": 1.0 },
+        "hurt": { "clipId": "player_sitdown", "speed": 0.5 }
+      },
+      "transitions": [
+          //Example "non-input" event transition (you can test it with E right now):
+        {
+          "from": "*",
+          "to": "hurt",
+          "crossFadeSeconds": 0.8,
+          "freezeDuringCrossFade": false,
+          "priority": 200,
+          "canInterrupt": true,
+          "minTimeInState": 0.05,
+          "conditions": [
+            { "trigger": "damaged" }
+          ]
+        },
+        {
+          "from": "hurt",
+          "to": "idle",
+          "crossFadeSeconds": 0.8,
+          "conditions": [
+            { "finished": true }
+          ]
+        },
+
+
+        {
+          "from": "idle",
+          "to": "walk",
+          "conditions": [
+            { "float": "speed", "op": "Gt", "value": 0.01 }
+          ]
+        },
+        {
+          "from": "walk",
+          "to": "idle",
+          "conditions": [
+            { "float": "speed", "op": "Le", "value": 0.01 }
+          ]
+        },
+
+        {
+          "from": "idle",
+          "to": "sitidle",
+          "transitionClipId": "player_sitdown",
+          "transitionSpeed": 1.0,
+          "conditions": [
+            { "pressedAny": ["Space"] }
+          ]
+        },
+        {
+          "from": "walk",
+          "to": "sitidle",
+          "transitionClipId": "player_sitdown",
+          "transitionSpeed": 1.0,
+          "conditions": [
+            { "pressedAny": ["Space"] }
+          ]
+        },
+
+        {
+          "from": "sitidle",
+          "to": "idle",
+          "transitionClipId": "player_standup",
+          "transitionSpeed": 1.0,
+          "conditions": [
+            { "pressedAny": ["Space"] }
+          ]
+        },
+
+        {
+          "from": "eat",
+          "to": "idle",
+          "transitionClipId": "player_leanup",
+          "transitionSpeed": 1.0,
+          "conditions": [
+            { "pressedAny": ["Enter"] }
+          ]
+        },
+
+        {
+          "from": "idle",
+          "to": "eat",
+          "transitionClipId": "player_leandown",
+          "transitionSpeed": 1.0,
+          "conditions": [
+            { "pressedAny": ["Enter"] }
+          ]
+        },
+        {
+          "from": "eat",
+          "to": "walk",
+          "transitionClipId": "player_leanup",
+          "transitionSpeed": 3.0,
+          "conditions": [
+            { "float": "speed", "op": "Gt", "value": 0.01 }
+          ]
+        }
+        
+      ]
+    }
+  }
+}

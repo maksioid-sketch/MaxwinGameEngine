@@ -20,10 +20,10 @@ public sealed class AnimationSystem : ISystem
             if (!e.TryGet<SpriteRenderer>(out var sr) || sr is null) continue;
             if (string.IsNullOrWhiteSpace(anim.ClipId)) continue;
 
-            // advance crossfade timer (purely visual)
+            // Visual crossfade timer
             sr.UpdateCrossFade(dtSeconds);
 
-            // one-frame latch cleared each update (set to true when a non-looping clip ends)
+            // Clear one-frame latch
             anim.ClipFinishedThisFrame = false;
 
             // If a crossfade-freeze is active for this specific switch, hold animation time
@@ -35,13 +35,8 @@ public sealed class AnimationSystem : ISystem
                 // Keep sprite at current frame (no time advance)
                 if (assets.TryGetAnimation(anim.ClipId, out var holdClip) && holdClip.Frames.Count > 0)
                 {
-                    int idx = anim.FrameIndex;
-                    if (idx < 0) idx = 0;
-                    if (idx >= holdClip.Frames.Count) idx = holdClip.Frames.Count - 1;
-
-                    var f = holdClip.Frames[idx];
-                    if (!string.IsNullOrWhiteSpace(f.SpriteId))
-                        sr.SpriteId = f.SpriteId;
+                    ClampFrameIndex(anim, holdClip.Frames.Count);
+                    ApplySprite(sr, holdClip, anim.FrameIndex);
                 }
 
                 anim.LastClipId = anim.ClipId;
@@ -51,7 +46,6 @@ public sealed class AnimationSystem : ISystem
             if (!assets.TryGetAnimation(anim.ClipId, out var clip)) continue;
             if (clip.Frames.Count == 0) continue;
 
-            // Detect clip change (crossfade only on clip switches, not frame changes)
             bool clipChanged = !string.Equals(anim.LastClipId, anim.ClipId, StringComparison.OrdinalIgnoreCase);
 
             // Compute clip length (seconds)
@@ -64,167 +58,266 @@ public sealed class AnimationSystem : ISystem
             // Reset requested by controller/logic
             if (anim.ResetRequested)
             {
-                anim.FrameIndex = 0;
-                anim.TimeIntoFrame = 0f;
-                anim.ClipTimeSeconds = 0f;
+                ResetToStartBasedOnDirection(anim, clip);
                 anim.ResetRequested = false;
             }
 
             if (!anim.Playing)
             {
+                ClampFrameIndex(anim, clip.Frames.Count);
+                ApplySprite(sr, clip, anim.FrameIndex);
                 anim.LastClipId = anim.ClipId;
                 continue;
             }
 
             bool loop = anim.LoopOverride ? anim.Loop : clip.Loop;
 
-            float scaledDt = dtSeconds * Math.Max(0f, anim.Speed);
+            // Direction is controlled by anim.Speed sign
+            float scaledDt = dtSeconds * anim.Speed; // can be negative
             anim.TimeIntoFrame += scaledDt;
             anim.ClipTimeSeconds += scaledDt;
 
-            if (anim.FrameIndex < 0) anim.FrameIndex = 0;
-            if (anim.FrameIndex >= clip.Frames.Count) anim.FrameIndex = clip.Frames.Count - 1;
+            ClampFrameIndex(anim, clip.Frames.Count);
 
-            while (true)
+            if (scaledDt >= 0f)
             {
-                var frame = clip.Frames[anim.FrameIndex];
-                float dur = Math.Max(0.0001f, frame.DurationSeconds);
-
-                if (anim.TimeIntoFrame < dur)
-                    break;
-
-                anim.TimeIntoFrame -= dur;
-                anim.FrameIndex++;
-
-                if (anim.FrameIndex >= clip.Frames.Count)
-                {
-                    if (loop)
-                    {
-                        anim.FrameIndex = 0;
-
-                        if (anim.ClipLengthSeconds > 0f)
-                            anim.ClipTimeSeconds %= anim.ClipLengthSeconds;
-
-                        continue;
-                    }
-
-                    // Non-looping clip ended THIS FRAME
-                    anim.ClipFinishedThisFrame = true;
-                    anim.ClipTimeSeconds = anim.ClipLengthSeconds;
-
-                    // If there is a queued next clip (transition-clip behavior), switch now
-                    if (!string.IsNullOrWhiteSpace(anim.NextClipId) &&
-                        assets.TryGetAnimation(anim.NextClipId, out var nextClip) &&
-                        nextClip.Frames.Count > 0)
-                    {
-                        string prevSpriteId = sr.SpriteId;
-
-                        anim.ClipId = anim.NextClipId!;
-                        anim.NextClipId = null;
-
-                        anim.FrameIndex = 0;
-                        anim.TimeIntoFrame = 0f;
-                        anim.ClipTimeSeconds = 0f;
-                        anim.Playing = true;
-
-                        // Apply first frame sprite of next clip immediately
-                        var nf = nextClip.Frames[0];
-                        if (!string.IsNullOrWhiteSpace(nf.SpriteId))
-                        {
-                            sr.SpriteId = nf.SpriteId;
-
-                            StartCrossFadeIfNeeded(anim, sr, prevSpriteId);
-                        }
-                        else
-                        {
-                            // Even if sprite id is empty, consume pending overrides so they don't leak
-                            ConsumePendingFadeOverrides(anim);
-                            anim.CrossFadeHoldSeconds = 0f;
-                        }
-
-                        // Commit pending controller state
-                        if (!string.IsNullOrWhiteSpace(anim.PendingStateId))
-                        {
-                            anim.StateId = anim.PendingStateId!;
-                            anim.PendingStateId = null;
-                            anim.StateTimeSeconds = 0f;
-                        }
-
-                        anim.LastClipId = anim.ClipId;
-                        goto NextEntity;
-                    }
-
-                    // No next clip: freeze on last frame and stop playing
-                    anim.FrameIndex = clip.Frames.Count - 1;
-                    anim.TimeIntoFrame = 0f;
-                    anim.Playing = false;
-
-                    anim.LastClipId = anim.ClipId;
-                    goto NextEntity;
-                }
-            }
-
-            // Apply current frame sprite
-            var current = clip.Frames[anim.FrameIndex];
-            if (!string.IsNullOrWhiteSpace(current.SpriteId))
-            {
-                string prevSpriteId = sr.SpriteId;
-                sr.SpriteId = current.SpriteId;
-
-                // Crossfade only when the clip changes
-                if (clipChanged &&
-                    !string.IsNullOrWhiteSpace(prevSpriteId) &&
-                    !string.Equals(prevSpriteId, sr.SpriteId, StringComparison.OrdinalIgnoreCase))
-                {
-                    StartCrossFadeIfNeeded(anim, sr, prevSpriteId);
-                }
-                else
-                {
-                    // No crossfade started this tick -> consume pending overrides so they don't leak
-                    // (this matters if a transition wanted a fade but sprite id didn't actually change)
-                    ConsumePendingFadeOverrides(anim);
-                    anim.CrossFadeHoldSeconds = 0f;
-                }
+                StepForward(anim, sr, assets, clip, loop, clipChanged);
             }
             else
             {
-                // No sprite id, still consume pending overrides
-                ConsumePendingFadeOverrides(anim);
-                anim.CrossFadeHoldSeconds = 0f;
+                StepBackward(anim, sr, assets, clip, loop, clipChanged);
             }
 
             anim.LastClipId = anim.ClipId;
-
-        NextEntity:
-            continue;
         }
     }
 
-    private static void StartCrossFadeIfNeeded(Animator anim, SpriteRenderer sr, string prevSpriteId)
+    private static void StepForward(
+        Animator anim,
+        SpriteRenderer sr,
+        IAssetProvider assets,
+        Engine.Core.Assets.Animation.AnimationClip clip,
+        bool loop,
+        bool clipChanged)
     {
-        // Resolve effective fade + freeze for THIS switch
-        float fade = anim.PendingCrossFadeSeconds ?? anim.DefaultCrossFadeSeconds;
-        bool freeze = anim.PendingFreezeDuringCrossFade ?? anim.DefaultFreezeDuringCrossFade;
-
-        // Consume one-shot overrides (critical so they don't persist)
-        ConsumePendingFadeOverrides(anim);
-
-        if (!string.IsNullOrWhiteSpace(prevSpriteId) &&
-            !string.Equals(prevSpriteId, sr.SpriteId, StringComparison.OrdinalIgnoreCase) &&
-            fade > 0f)
+        while (true)
         {
-            sr.StartCrossFade(prevSpriteId, fade);
-            anim.CrossFadeHoldSeconds = freeze ? sr.CrossFadeDurationSeconds : 0f;
+            var frame = clip.Frames[anim.FrameIndex];
+            float dur = Math.Max(0.0001f, frame.DurationSeconds);
+
+            if (anim.TimeIntoFrame < dur)
+                break;
+
+            anim.TimeIntoFrame -= dur;
+            anim.FrameIndex++;
+
+            if (anim.FrameIndex >= clip.Frames.Count)
+            {
+                if (loop)
+                {
+                    anim.FrameIndex = 0;
+                    if (anim.ClipLengthSeconds > 0f)
+                        anim.ClipTimeSeconds %= anim.ClipLengthSeconds;
+                    continue;
+                }
+
+                // Finished (hit end)
+                anim.ClipFinishedThisFrame = true;
+                anim.ClipTimeSeconds = anim.ClipLengthSeconds;
+
+                if (TrySwitchToNextClip(anim, sr, assets))
+                {
+                    // on switch, treat it like a clip change for crossfade
+                    // (TrySwitchToNextClip already applied sprite)
+                    return;
+                }
+
+                // Stop on last frame
+                anim.FrameIndex = clip.Frames.Count - 1;
+                anim.TimeIntoFrame = 0f;
+                anim.Playing = false;
+                ApplySprite(sr, clip, anim.FrameIndex);
+                return;
+            }
+        }
+
+        ApplySprite(sr, clip, anim.FrameIndex);
+
+        // Crossfade only when clip changes (not on frame changes)
+        if (clipChanged)
+            StartCrossFadeIfNeeded(anim, sr, previousSpriteId: null); // consumed safely; see function
+    }
+
+    private static void StepBackward(
+        Animator anim,
+        SpriteRenderer sr,
+        IAssetProvider assets,
+        Engine.Core.Assets.Animation.AnimationClip clip,
+        bool loop,
+        bool clipChanged)
+    {
+        // In reverse, TimeIntoFrame counts down.
+        while (true)
+        {
+            if (anim.TimeIntoFrame >= 0f)
+                break;
+
+            // step to previous frame
+            anim.FrameIndex--;
+
+            if (anim.FrameIndex < 0)
+            {
+                if (loop)
+                {
+                    anim.FrameIndex = clip.Frames.Count - 1;
+                    float lastDur = Math.Max(0.0001f, clip.Frames[anim.FrameIndex].DurationSeconds);
+                    anim.TimeIntoFrame += lastDur;
+
+                    if (anim.ClipLengthSeconds > 0f)
+                    {
+                        // wrap time toward end
+                        anim.ClipTimeSeconds = anim.ClipLengthSeconds + (anim.ClipTimeSeconds % anim.ClipLengthSeconds);
+                        if (anim.ClipTimeSeconds > anim.ClipLengthSeconds) anim.ClipTimeSeconds %= anim.ClipLengthSeconds;
+                    }
+
+                    continue;
+                }
+
+                // Finished (hit beginning)
+                anim.ClipFinishedThisFrame = true;
+                anim.ClipTimeSeconds = 0f;
+
+                if (TrySwitchToNextClip(anim, sr, assets))
+                {
+                    return;
+                }
+
+                // Stop on first frame
+                anim.FrameIndex = 0;
+                anim.TimeIntoFrame = 0f;
+                anim.Playing = false;
+                ApplySprite(sr, clip, anim.FrameIndex);
+                return;
+            }
+
+            float dur = Math.Max(0.0001f, clip.Frames[anim.FrameIndex].DurationSeconds);
+            anim.TimeIntoFrame += dur;
+        }
+
+        ApplySprite(sr, clip, anim.FrameIndex);
+
+        if (clipChanged)
+            StartCrossFadeIfNeeded(anim, sr, previousSpriteId: null);
+    }
+
+    private static bool TrySwitchToNextClip(Animator anim, SpriteRenderer sr, IAssetProvider assets)
+    {
+        if (string.IsNullOrWhiteSpace(anim.NextClipId))
+        {
+            ConsumePendingFadeOverrides(anim);
+            anim.CrossFadeHoldSeconds = 0f;
+            return false;
+        }
+
+        if (!assets.TryGetAnimation(anim.NextClipId, out var nextClip) || nextClip.Frames.Count == 0)
+        {
+            ConsumePendingFadeOverrides(anim);
+            anim.CrossFadeHoldSeconds = 0f;
+            return false;
+        }
+
+        string prevSpriteId = sr.SpriteId;
+
+        anim.ClipId = anim.NextClipId!;
+        anim.NextClipId = null;
+
+        // Start new clip from start/end depending on direction
+        ResetToStartBasedOnDirection(anim, nextClip);
+
+        anim.Playing = true;
+
+        // Force sprite now
+        ApplySprite(sr, nextClip, anim.FrameIndex);
+
+        // Crossfade if sprite changed
+        if (!string.IsNullOrWhiteSpace(prevSpriteId) &&
+            !string.Equals(prevSpriteId, sr.SpriteId, StringComparison.OrdinalIgnoreCase))
+        {
+            StartCrossFadeIfNeeded(anim, sr, prevSpriteId);
         }
         else
         {
+            ConsumePendingFadeOverrides(anim);
             anim.CrossFadeHoldSeconds = 0f;
         }
+
+        // Commit pending controller state (transition clip finished)
+        if (!string.IsNullOrWhiteSpace(anim.PendingStateId))
+        {
+            anim.StateId = anim.PendingStateId!;
+            anim.PendingStateId = null;
+            anim.StateTimeSeconds = 0f;
+        }
+
+        return true;
+    }
+
+    private static void ResetToStartBasedOnDirection(Animator anim, Engine.Core.Assets.Animation.AnimationClip clip)
+    {
+        if (anim.Speed >= 0f)
+        {
+            anim.FrameIndex = 0;
+            anim.TimeIntoFrame = 0f;
+            anim.ClipTimeSeconds = 0f;
+        }
+        else
+        {
+            anim.FrameIndex = clip.Frames.Count - 1;
+            float dur = Math.Max(0.0001f, clip.Frames[anim.FrameIndex].DurationSeconds);
+            // Start “inside” the last frame, so stepping backwards works immediately
+            anim.TimeIntoFrame = dur;
+            anim.ClipTimeSeconds = anim.ClipLengthSeconds;
+        }
+    }
+
+    private static void StartCrossFadeIfNeeded(Animator anim, SpriteRenderer sr, string? previousSpriteId)
+    {
+        // If previousSpriteId is null, we still must consume pending overrides to prevent leaks.
+        float fade = anim.PendingCrossFadeSeconds ?? anim.DefaultCrossFadeSeconds;
+        bool freeze = anim.PendingFreezeDuringCrossFade ?? anim.DefaultFreezeDuringCrossFade;
+
+        ConsumePendingFadeOverrides(anim);
+
+        if (string.IsNullOrWhiteSpace(previousSpriteId) || fade <= 0f)
+        {
+            anim.CrossFadeHoldSeconds = 0f;
+            return;
+        }
+
+        sr.StartCrossFade(previousSpriteId, fade);
+        anim.CrossFadeHoldSeconds = freeze ? sr.CrossFadeDurationSeconds : 0f;
     }
 
     private static void ConsumePendingFadeOverrides(Animator anim)
     {
         anim.PendingCrossFadeSeconds = null;
         anim.PendingFreezeDuringCrossFade = null;
+    }
+
+    private static void ClampFrameIndex(Animator anim, int frameCount)
+    {
+        if (frameCount <= 0) { anim.FrameIndex = 0; return; }
+        if (anim.FrameIndex < 0) anim.FrameIndex = 0;
+        if (anim.FrameIndex >= frameCount) anim.FrameIndex = frameCount - 1;
+    }
+
+    private static void ApplySprite(SpriteRenderer sr, Engine.Core.Assets.Animation.AnimationClip clip, int frameIndex)
+    {
+        if (frameIndex < 0) frameIndex = 0;
+        if (frameIndex >= clip.Frames.Count) frameIndex = clip.Frames.Count - 1;
+
+        var f = clip.Frames[frameIndex];
+        if (!string.IsNullOrWhiteSpace(f.SpriteId))
+            sr.SpriteId = f.SpriteId;
     }
 }

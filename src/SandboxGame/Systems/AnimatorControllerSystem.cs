@@ -57,7 +57,8 @@ public sealed class AnimatorControllerSystem : ISystem
             if (!inTransition && controller.States.TryGetValue(anim.StateId, out var currentState))
             {
                 float mul = anim.GetFloat("speedMul", 1f);
-                anim.Speed = MathF.Max(0f, currentState.Speed * mul);
+                anim.Speed = currentState.Speed * mul; // allow negative for reverse playback
+
             }
 
             // Build candidates (current state + AnyState)
@@ -130,7 +131,7 @@ public sealed class AnimatorControllerSystem : ISystem
                 anim.NextClipId = null;
 
                 float mul = anim.GetFloat("speedMul", 1f);
-                SetClip(anim, toState.ClipId, restart: false, speed: MathF.Max(0f, toState.Speed * mul));
+                SetClip(anim, toState.ClipId, restart: false, speed: toState.Speed * mul);
                 break;
             }
 
@@ -144,7 +145,8 @@ public sealed class AnimatorControllerSystem : ISystem
         if (string.IsNullOrWhiteSpace(clipId))
             return;
 
-        anim.Speed = MathF.Max(0f, speed);
+        anim.Speed = speed; // allow negative
+
 
         bool changed = !string.Equals(anim.ClipId, clipId, StringComparison.OrdinalIgnoreCase);
 

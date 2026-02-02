@@ -45,6 +45,10 @@
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 
+		<None Update="Assets\sontrollersV2.json">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+
 		<None Update="Assets\controllers.json">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>

@@ -4,12 +4,13 @@ using Engine.Core.Rendering;
 using Engine.Core.Scene;
 using Engine.Core.Serialization;
 using Engine.Core.Systems;
-using Engine.Core.Assets;
 using Engine.Core.Assets.Animation;
 using Engine.Core.Runtime;
 using Engine.Core.Platform.Input;
 using Engine.Core.Systems.BuiltIn;
 using SandboxGame.Platform;
+using Engine.Core.Runtime.Events;
+
 
 using Engine.Runtime.MonoGame.Assets;
 using Engine.Runtime.MonoGame.Rendering;
@@ -82,7 +83,8 @@ public sealed class GameApp : Game
         _time = new MonoGameTime();
 
         // _assets must exist by now (even if empty)
-        _services = new EngineServices(_input, _time, _assets);
+        _services = new EngineServices(_input, _time, _assets, new EventBus());
+
 
 
         _textures = new TextureStore(Content);
@@ -160,6 +162,7 @@ public sealed class GameApp : Game
             if (sceneChanged) ReloadScene();
         }
 
+        _services.Events.Clear();
         var ctx = new EngineContext(_services);
 
         for (int i = 0; i < _systems.Count; i++)
@@ -409,11 +412,17 @@ public sealed class GameApp : Game
     private void RebuildSystems()
     {
         _systems = new List<ISystem>
-{
-    new Engine.Core.Systems.BuiltIn.PlayerMovementSystem(),
-    new SandboxGame.Systems.AnimatorControllerSystem(() => _assets),
-    new SandboxGame.Systems.AnimationSystem()
-};
+        {
+            new Engine.Core.Systems.BuiltIn.PlayerMovementSystem(),
+
+            // Demo: E -> DamageEvent -> Animator trigger
+            new SandboxGame.Systems.DebugDamageInputSystem(),
+            new SandboxGame.Systems.DamageToAnimatorTriggerSystem(),
+
+            new SandboxGame.Systems.AnimatorControllerSystem(() => _assets),
+            new SandboxGame.Systems.AnimationSystem()
+        };
+
 
 
     }

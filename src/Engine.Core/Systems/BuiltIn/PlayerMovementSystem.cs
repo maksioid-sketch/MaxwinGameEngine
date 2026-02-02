@@ -62,9 +62,7 @@ public sealed class PlayerMovementSystem : ISystem
         {
             anim.Floats[SpeedParamName] = speed;
 
-            // Example non-input "event" trigger for testing
-            if (!string.IsNullOrWhiteSpace(DamageTriggerName) && ctx.Input.WasPressed(InputKey.E))
-                anim.SetTrigger(DamageTriggerName);
+           
         }
     }
 }
