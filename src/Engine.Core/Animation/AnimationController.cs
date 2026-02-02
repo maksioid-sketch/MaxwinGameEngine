@@ -27,16 +27,23 @@ public sealed class ControllerTransition
     // Optional speed while playing TransitionClipId (ignored for direct switches)
     public float TransitionSpeed { get; set; } = 1f;
 
-    // Higher wins (useful when multiple transitions match)
+    // Higher wins
     public int Priority { get; set; } = 0;
 
-    // If true, a transition can fire even while a transition clip is already playing
+    // Allow transition while transition clip is playing
     public bool CanInterrupt { get; set; } = false;
 
-    // New flexible condition list (AND across all conditions)
+    // NEW: robustness
+    // If >= 0: require animator.NormalizedTime >= ExitTime to allow this transition
+    public float ExitTime { get; set; } = -1f;
+
+    // If > 0: require animator.StateTimeSeconds >= MinTimeInState
+    public float MinTimeInState { get; set; } = 0f;
+
+    // Flexible conditions (AND across all)
     public List<TransitionCondition>? Conditions { get; set; } = null;
 
-    // Legacy (v1) input-only conditions; kept for backward compatibility
+    // Legacy input-only (backward compatible)
     public TransitionWhen When { get; set; } = new();
 }
 
@@ -50,6 +57,9 @@ public sealed class TransitionCondition
     // One-shot event name (consumed only when the transition is taken)
     public string? Trigger { get; set; } = null;
 
+    // NEW: clip finished signal (true = require ClipFinishedThisFrame)
+    public bool? Finished { get; set; } = null;
+
     public string? Bool { get; set; } = null;
     public bool BoolValue { get; set; } = true;
 
@@ -57,7 +67,7 @@ public sealed class TransitionCondition
     public CompareOp Op { get; set; } = CompareOp.Gt;
     public float Value { get; set; } = 0f;
 
-    // Optional: legacy input checks usable as a condition
+    // Optional input checks usable as a condition
     public string[]? PressedAny { get; set; } = null;
     public string[]? DownAny { get; set; } = null;
     public string[]? NoneDown { get; set; } = null;

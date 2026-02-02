@@ -7,21 +7,30 @@
         "idle": { "clipId": "player_idle", "speed": 1.0 },
         "walk": { "clipId": "player_walk", "speed": 1.1 },
         "sitidle": { "clipId": "player_sitidle", "speed": 1.0 },
-        "eat": { "clipId": "player_eat", "speed": 1.0 }
+        "eat": { "clipId": "player_eat", "speed": 1.0 },
+        "hurt": { "clipId": "player_sitdown", "speed": 2.0 }
       },
       "transitions": [
           //Example "non-input" event transition (you can test it with E right now):
         {
           "from": "*",
-          "to": "idle",
-          "priority": 100,
+          "to": "hurt",
+          "priority": 200,
           "canInterrupt": true,
-          "transitionClipId": "player_standup",
-          "transitionSpeed": 1.2,
+          "minTimeInState": 0.05,
           "conditions": [
             { "trigger": "damaged" }
           ]
         },
+        {
+          "from": "hurt",
+          "to": "idle",
+          "conditions": [
+            { "finished": true }
+          ]
+        },
+
+
         {
           "from": "idle",
           "to": "walk",

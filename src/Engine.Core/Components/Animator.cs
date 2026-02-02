@@ -15,32 +15,32 @@ public sealed class Animator : IComponent
 
     public float Speed { get; set; } = 1f; // 1.0 = normal speed
 
-    // Runtime state (serialized is fine, but you can omit later if you want)
+    // Runtime playback state
     public int FrameIndex { get; set; } = 0;
     public float TimeIntoFrame { get; set; } = 0f;
 
-    [JsonIgnore]
-    public string? NextClipId { get; set; } = null;
-
-    [JsonIgnore]
-    public bool ResetRequested { get; set; } = false;
+    [JsonIgnore] public string? NextClipId { get; set; } = null;
+    [JsonIgnore] public bool ResetRequested { get; set; } = false;
 
     // ----------------------------
-    // Controller + parameters
+    // Controller state
     // ----------------------------
     public string ControllerId { get; set; } = ""; // e.g. "player"
 
-    [JsonIgnore] public string StateId { get; set; } = "";           // current controller state
-    [JsonIgnore] public string? PendingStateId { get; set; } = null; // set while a transition clip is playing
+    [JsonIgnore] public string StateId { get; set; } = "";
+    [JsonIgnore] public string? PendingStateId { get; set; } = null;
 
-    // Generic parameter store (scene-serializable)
+    // ----------------------------
+    // Parameters (serializable)
+    // ----------------------------
     public Dictionary<string, float> Floats { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public Dictionary<string, bool> Bools { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public Dictionary<string, int> Ints { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
-    // One-shot events (runtime only)
-    [JsonIgnore]
-    private readonly HashSet<string> _triggers = new(StringComparer.OrdinalIgnoreCase);
+    // ----------------------------
+    // Triggers (runtime-only)
+    // ----------------------------
+    [JsonIgnore] private readonly HashSet<string> _triggers = new(StringComparer.OrdinalIgnoreCase);
 
     public void SetTrigger(string name)
     {
@@ -62,4 +62,18 @@ public sealed class Animator : IComponent
 
     public int GetInt(string name, int fallback = 0)
         => Ints.TryGetValue(name, out var v) ? v : fallback;
+
+    // ----------------------------
+    // NEW: robust timing signals
+    // ----------------------------
+    [JsonIgnore] public bool ClipFinishedThisFrame { get; set; } = false;
+
+    [JsonIgnore] public float ClipTimeSeconds { get; set; } = 0f;
+    [JsonIgnore] public float ClipLengthSeconds { get; set; } = 0f;
+
+    [JsonIgnore] public float StateTimeSeconds { get; set; } = 0f;
+
+    [JsonIgnore]
+    public float NormalizedTime
+        => ClipLengthSeconds > 0f ? MathF.Min(1f, MathF.Max(0f, ClipTimeSeconds / ClipLengthSeconds)) : 0f;
 }
