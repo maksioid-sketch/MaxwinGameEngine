@@ -1,9 +1,10 @@
-﻿using System;
-using Engine.Core.Components;
+﻿using Engine.Core.Components;
 using Engine.Core.Runtime;
+using Engine.Core.Runtime.Debug;
 using Engine.Core.Scene;
 using Engine.Core.Systems;
 using SandboxGame.Events;
+using System;
 
 namespace SandboxGame.Systems;
 
@@ -31,7 +32,7 @@ public sealed class DamageToAnimatorTriggerSystem : ISystem
             if (target.TryGet<Animator>(out var anim) && anim is not null)
                 anim.SetTrigger(TriggerName);
 
-            Console.WriteLine("Damage event count: " + ctx.Events.Read<DamageEvent>().Count);
+            DebugPrint.Print("Damaged!", 1.5f);
 
         }
     }
