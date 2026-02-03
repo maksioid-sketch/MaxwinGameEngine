@@ -56,13 +56,22 @@ public sealed class PlayerMovementSystem : ISystem
                     sr.Flip = Engine.Core.Rendering.SpriteFlip.None;
             }
         }
+        bool crouch = false;
+        bool guard = false;
+        if (ctx.Input.IsDown(InputKey.Shift)) crouch = true; else crouch = false;
+        if (ctx.Input.IsDown(InputKey.E)) guard = true; else guard = false;
+
+
+
 
         // Write parameters for the animation controller (works even if movement later becomes AI-driven)
         if (player.TryGet<Animator>(out var anim) && anim != null)
         {
             anim.Floats[SpeedParamName] = speed;
+            anim.Bools["grounded"] = true;
+            anim.Bools["crouch"] = crouch;
+            anim.Bools["guard"] = guard;
 
-           
         }
     }
 }

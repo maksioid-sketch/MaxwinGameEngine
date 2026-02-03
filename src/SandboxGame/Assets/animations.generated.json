@@ -539,10 +539,28 @@
       ]
     },
     "human_dead": {
-      "loop": false,
+      "loop": true,
       "frames": [
         {
           "spriteId": "human_dead_0",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "human_crouch_idle": {
+      "loop": true,
+      "frames": [
+        {
+          "spriteId": "human_crouch_idle_0",
+          "durationSeconds": 0.1
+        }
+      ]
+    },
+    "human_jump_idle": {
+      "loop": true,
+      "frames": [
+        {
+          "spriteId": "human_jump_idle_0",
           "durationSeconds": 0.1
         }
       ]

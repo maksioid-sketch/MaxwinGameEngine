@@ -4,109 +4,383 @@
     "player": {
       "initialState": "idle",
       "states": {
-        "idle": { "clipId": "human_idle", "speed": 1.0 },
-        "walk": { "clipId": "human_walk", "speed": 1.1 },
-        "sitidle": { "clipId": "player_sitidle", "speed": 1.0 },
-        "eat": { "clipId": "player_eat", "speed": 1.0 },
-        "hurt": { "clipId": "player_sitdown", "speed": 0.5 }
+        "idle":            { "clipId": "human_idle", "speed": 1.0 },
+        "walk":            { "clipId": "human_walk", "speed": 1.0 },
+
+        "crouch_down":          { "clipId": "human_crouch", "speed": 1.0 },
+        "crouch_idle":          { "clipId": "human_crouch_idle", "speed": 1.0 },
+        "crouch_up":          { "clipId": "human_crouch", "speed": -1.0 },
+
+        "stand":           { "clipId": "human_stand", "speed": 1.0 },
+
+        "jump":            { "clipId": "human_jump", "speed": 1.0 },
+
+        "punch_stand":     { "clipId": "human_punch_stand", "speed": 1.0 },
+        "punch_crouch":    { "clipId": "human_punch_crouch", "speed": 1.0 },
+        "punch_air":       { "clipId": "human_punch_air", "speed": 1.0 },
+
+        "hstrike_stand":   { "clipId": "human_hor_strike_stand", "speed": 1.0 },
+        "hstrike_crouch":  { "clipId": "human_hor_strike_crouch", "speed": 1.0 },
+        "hstrike_air":     { "clipId": "human_hor_strike_air", "speed": 1.0 },
+
+        "vstrike_stand":   { "clipId": "human_vert_strike_stand", "speed": 1.0 },
+        "vstrike_crouch":  { "clipId": "human_vert_strike_crouch", "speed": 1.0 },
+        "vstrike_air":     { "clipId": "human_vert_strike_air", "speed": 1.0 },
+
+        "guard_stand":     { "clipId": "human_guard_stand", "speed": 1.0 },
+        "guard_crouch":    { "clipId": "human_guard_crouch", "speed": 1.0 },
+        "guard_air":       { "clipId": "human_guard_air", "speed": 1.0 },
+
+        "damage_high":     { "clipId": "human_damage_high", "speed": 1.0 },
+        "damage_low":      { "clipId": "human_damage_low", "speed": 1.0 },
+        "damage_crouch":   { "clipId": "human_damage_crouch", "speed": 1.0 },
+        "damage_air":      { "clipId": "human_damage_air", "speed": 1.0 },
+
+        "dead":            { "clipId": "human_dead", "speed": 1.0 }
       },
+
       "transitions": [
-          //Example "non-input" event transition (you can test it with E right now):
+        // -------------------------
+        // DEAD (highest priority)
+        // -------------------------
         {
           "from": "*",
-          "to": "hurt",
-          "crossFadeSeconds": 0.8,
-          "freezeDuringCrossFade": false,
+          "to": "dead",
+          "priority": 1000,
+          "canInterrupt": true,
+          "crossFadeSeconds": 0.0,
+          "conditions": [
+            { "trigger": "dead" }
+          ]
+        },
+
+        // -------------------------
+        // DAMAGE REACTIONS
+        // Priority is high so it overrides attacks/locomotion.
+        // -------------------------
+        {
+          "from": "*",
+          "to": "damage_air",
+          "priority": 900,
+          "canInterrupt": true,
+          "crossFadeSeconds": 0.0,
+          "conditions": [
+            { "trigger": "damaged" },
+            { "bool": "grounded", "boolValue": false }
+          ]
+        },
+        {
+          "from": "*",
+          "to": "damage_crouch",
+          "priority": 890,
+          "canInterrupt": true,
+          "crossFadeSeconds": 0.0,
+          "conditions": [
+            { "trigger": "damaged1" },
+            { "bool": "grounded", "boolValue": true },
+            { "bool": "crouch", "boolValue": true }
+          ]
+        },
+        {
+          "from": "*",
+          "to": "damage_high",
+          "priority": 880,
+          "canInterrupt": true,
+          "crossFadeSeconds": 0.0,
+          "conditions": [
+            { "trigger": "damagedHigh" },
+            { "bool": "grounded", "boolValue": true },
+            { "bool": "crouch", "boolValue": false }
+          ]
+        },
+        {
+          "from": "*",
+          "to": "damage_low",
+          "priority": 870,
+          "canInterrupt": true,
+          "crossFadeSeconds": 0.0,
+          "conditions": [
+            { "trigger": "damagedLow" },
+            { "bool": "grounded", "boolValue": true },
+            { "bool": "crouch", "boolValue": false }
+          ]
+        },
+
+        // Damage returns to locomotion when finished
+        { "from": "damage_air",    "to": "jump",   "priority": 50, "conditions": [ { "finished": true } ] },
+        { "from": "damage_crouch", "to": "crouch", "priority": 50, "conditions": [ { "finished": true } ] },
+        { "from": "damage_high",   "to": "idle",   "priority": 50, "conditions": [ { "finished": true } ] },
+        { "from": "damage_low",    "to": "idle",   "priority": 50, "conditions": [ { "finished": true } ] },
+
+        // -------------------------
+        // JUMP / AIR (simple)
+        // -------------------------
+        {
+          "from": "*",
+          "to": "jump",
+          "priority": 400,
+          "canInterrupt": true,
+          "conditions": [
+            { "bool": "grounded", "boolValue": false }
+          ]
+        },
+
+        // When grounded again, go to crouch or locomotion
+        {
+          "from": "jump",
+          "to": "crouch",
+          "priority": 60,
+          "conditions": [
+            { "bool": "grounded", "boolValue": true },
+            { "bool": "crouch", "boolValue": true }
+          ]
+        },
+        {
+          "from": "jump",
+          "to": "idle",
+          "priority": 59,
+          "conditions": [
+            { "bool": "grounded", "boolValue": true },
+            { "bool": "crouch", "boolValue": false }
+          ]
+        },
+
+        // -------------------------
+        // GUARD (use trigger "guard" to enter, trigger "unguard" to leave)
+        // -------------------------
+        {
+          "from": "*",
+          "to": "guard_air",
+          "priority": 300,
+          "canInterrupt": true,
+          "conditions": [
+            { "bool": "guard","boolValue": true  },
+            { "bool": "grounded", "boolValue": false }
+          ]
+        },
+        {
+          "from": "*",
+          "to": "guard_crouch",
+          "priority": 295,
+          "canInterrupt": true,
+          "conditions": [
+            { "bool": "guard","boolValue": true },
+            { "bool": "grounded", "boolValue": true },
+            { "bool": "crouch", "boolValue": true }
+          ]
+        },
+        {
+          "from": "*",
+          "to": "guard_stand",
+          "priority": 290,
+          "canInterrupt": true,
+          "conditions": [
+            { "bool": "guard","boolValue": true  },
+            { "bool": "grounded", "boolValue": true },
+            { "bool": "crouch", "boolValue": false }
+          ]
+        },
+
+        { "from": "guard_air",    "to": "jump",   "priority": 40, "conditions": [ { "bool": "guard","boolValue": false  } ] },
+        { "from": "guard_crouch", "to": "crouch_idle", "priority": 40, "conditions": [ { "bool": "guard","boolValue": false } ] },
+        { "from": "guard_stand",  "to": "idle",   "priority": 40, "conditions": [ { "bool": "guard","boolValue": false } ] },
+
+        // -------------------------
+        // ATTACKS (one-shots)
+        // Use triggers: punch, hstrike, vstrike
+        // -------------------------
+        {
+          "from": "*",
+          "to": "punch_air",
+          "priority": 220,
+          "canInterrupt": true,
+          "crossFadeSeconds": 0.0,
+          "conditions": [
+            { "pressedAny": ["Space"] },
+            { "bool": "grounded", "boolValue": false }
+          ]
+        },
+        {
+          "from": "*",
+          "to": "punch_crouch",
+          "priority": 215,
+          "canInterrupt": true,
+          "crossFadeSeconds": 0.0,
+          "conditions": [
+            {"pressedAny": ["Z"] },
+            { "bool": "grounded", "boolValue": true },
+            { "bool": "crouch", "boolValue": true }
+          ]
+        },
+        {
+          "from": "*",
+          "to": "punch_stand",
+          "priority": 210,
+          "canInterrupt": true,
+          "crossFadeSeconds": 0.0,
+          "conditions": [
+            { "pressedAny": ["Z"] },
+            { "bool": "grounded", "boolValue": true },
+            { "bool": "crouch", "boolValue": false }
+          ]
+        },
+
+        {
+          "from": "*",
+          "to": "hstrike_air",
+          "priority": 205,
+          "canInterrupt": true,
+          "crossFadeSeconds": 0.0,
+          "conditions": [
+            { "pressedAny": ["X"] },
+            { "bool": "grounded", "boolValue": false }
+          ]
+        },
+        {
+          "from": "*",
+          "to": "hstrike_crouch",
           "priority": 200,
           "canInterrupt": true,
+          "crossFadeSeconds": 0.0,
+          "conditions": [
+            {"pressedAny": ["X"]},
+            { "bool": "grounded", "boolValue": true },
+            { "bool": "crouch", "boolValue": true }
+          ]
+        },
+        {
+          "from": "*",
+          "to": "hstrike_stand",
+          "priority": 195,
+          "canInterrupt": true,
+          "crossFadeSeconds": 0.0,
+          "conditions": [
+            { "pressedAny": ["X"] },
+            { "bool": "grounded", "boolValue": true },
+            { "bool": "crouch", "boolValue": false }
+          ]
+        },
+
+        {
+          "from": "*",
+          "to": "vstrike_air",
+          "priority": 190,
+          "canInterrupt": true,
+          "crossFadeSeconds": 0.0,
+          "conditions": [
+            { "pressedAny": ["C"] },
+            { "bool": "grounded", "boolValue": false }
+          ]
+        },
+        {
+          "from": "*",
+          "to": "vstrike_crouch",
+          "priority": 185,
+          "canInterrupt": true,
+          "crossFadeSeconds": 0.0,
+          "conditions": [
+            { "pressedAny": ["C"] },
+            { "bool": "grounded", "boolValue": true },
+            { "bool": "crouch", "boolValue": true }
+          ]
+        },
+        {
+          "from": "*",
+          "to": "vstrike_stand",
+          "priority": 180,
+          "canInterrupt": true,
+          "crossFadeSeconds": 0.0,
+          "conditions": [
+            { "pressedAny": ["C"] },
+            { "bool": "grounded", "boolValue": true },
+            { "bool": "crouch", "boolValue": false }
+          ]
+        },
+
+        // Attacks return when finished (choose target based on grounded/crouch)
+        { "from": "punch_air",     "to": "jump",   "priority": 50, "conditions": [ { "finished": true } ] },
+        { "from": "hstrike_air",   "to": "jump",   "priority": 50, "conditions": [ { "finished": true } ] },
+        { "from": "vstrike_air",   "to": "jump",   "priority": 50, "conditions": [ { "finished": true } ] },
+
+        { "from": "punch_crouch",  "to": "crouch_idle", "priority": 50, "conditions": [ { "finished": true } ] },
+        { "from": "hstrike_crouch","to": "crouch_idle", "priority": 50, "conditions": [ { "finished": true } ] },
+        { "from": "vstrike_crouch","to": "crouch_idle", "priority": 50, "conditions": [ { "finished": true } ] },
+
+        { "from": "punch_stand",   "to": "idle",   "priority": 50, "conditions": [ { "finished": true } ] },
+        { "from": "hstrike_stand", "to": "idle",   "priority": 50, "conditions": [ { "finished": true } ] },
+        { "from": "vstrike_stand", "to": "idle",   "priority": 50, "conditions": [ { "finished": true } ] },
+
+        // -------------------------
+        // CROUCH / STAND (bool)
+        // -------------------------
+        {
+          "from": "idle",
+          "to": "crouch_idle",
+          "priority": 120,
           "minTimeInState": 0.05,
+          "transitionClipId": "human_crouch",
+          "transitionSpeed": 2.0,
           "conditions": [
-            { "trigger": "damaged" }
+            { "bool": "grounded", "boolValue": true },
+            { "bool": "crouch", "boolValue": true }
           ]
         },
         {
-          "from": "hurt",
+          "from": "crouch_idle",
           "to": "idle",
-          "crossFadeSeconds": 0.8,
+          "priority": 119,
+          "minTimeInState": 0.05,
+          "transitionClipId": "human_crouch",
+          "transitionSpeed": -2.0,
           "conditions": [
-            { "finished": true }
+            { "bool": "grounded", "boolValue": true },
+            { "bool": "crouch", "boolValue": false }
           ]
         },
+        
 
-
+        // -------------------------
+        // LOCOMOTION (speed)
+        // Use hysteresis to avoid jitter:
+        //   idle -> walk at > 0.10
+        //   walk -> idle at <= 0.05
+        // -------------------------
         {
           "from": "idle",
           "to": "walk",
+          "priority": 10,
+          "minTimeInState": 0.08,
+          "crossFadeSeconds": 0.06,
           "conditions": [
-            { "float": "speed", "op": "Gt", "value": 0.01 }
+            { "bool": "grounded", "boolValue": true },
+            { "bool": "crouch", "boolValue": false },
+            { "float": "speed", "op": "Gt", "value": 0.10 }
           ]
         },
         {
           "from": "walk",
           "to": "idle",
+          "priority": 10,
+          "minTimeInState": 0.08,
+          "crossFadeSeconds": 0.06,
           "conditions": [
-            { "float": "speed", "op": "Le", "value": 0.01 }
+            { "bool": "grounded", "boolValue": true },
+            { "bool": "crouch", "boolValue": false },
+            { "float": "speed", "op": "Le", "value": 0.05 }
           ]
         },
 
+        // If you stop crouching while moving, go to walk (optional)
         {
-          "from": "idle",
-          "to": "sitidle",
-          "transitionClipId": "player_sitdown",
-          "transitionSpeed": 1.0,
-          "conditions": [
-            { "pressedAny": ["Space"] }
-          ]
-        },
-        {
-          "from": "walk",
-          "to": "sitidle",
-          "transitionClipId": "player_sitdown",
-          "transitionSpeed": 1.0,
-          "conditions": [
-            { "pressedAny": ["Space"] }
-          ]
-        },
-
-        {
-          "from": "sitidle",
-          "to": "idle",
-          "transitionClipId": "player_standup",
-          "transitionSpeed": 1.0,
-          "conditions": [
-            { "pressedAny": ["Space"] }
-          ]
-        },
-
-        {
-          "from": "eat",
-          "to": "idle",
-          "transitionClipId": "player_leanup",
-          "transitionSpeed": 1.0,
-          "conditions": [
-            { "pressedAny": ["Enter"] }
-          ]
-        },
-
-        {
-          "from": "idle",
-          "to": "eat",
-          "transitionClipId": "player_leandown",
-          "transitionSpeed": 1.0,
-          "conditions": [
-            { "pressedAny": ["Enter"] }
-          ]
-        },
-        {
-          "from": "eat",
+          "from": "crouch",
           "to": "walk",
-          "transitionClipId": "player_leanup",
-          "transitionSpeed": 3.0,
+          "priority": 9,
           "conditions": [
-            { "float": "speed", "op": "Gt", "value": 0.01 }
+            { "bool": "grounded", "boolValue": true },
+            { "bool": "crouch", "boolValue": false },
+            { "float": "speed", "op": "Gt", "value": 0.10 }
           ]
         }
-        
       ]
     }
   }

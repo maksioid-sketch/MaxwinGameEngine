@@ -1061,8 +1061,8 @@
       ],
       "PixelsPerUnit": 100,
       "OriginPixels": [
-        0,
-        0
+        17,
+        32
       ],
       "DefaultOriginToCenter": true
     },
@@ -1076,8 +1076,8 @@
       ],
       "PixelsPerUnit": 100,
       "OriginPixels": [
-        0,
-        0
+        17,
+        32
       ],
       "DefaultOriginToCenter": true
     },
@@ -1091,8 +1091,8 @@
       ],
       "PixelsPerUnit": 100,
       "OriginPixels": [
-        0,
-        0
+        17,
+        32
       ],
       "DefaultOriginToCenter": true
     },
@@ -1106,8 +1106,8 @@
       ],
       "PixelsPerUnit": 100,
       "OriginPixels": [
-        0,
-        0
+        17,
+        32
       ],
       "DefaultOriginToCenter": true
     },
@@ -1226,8 +1226,8 @@
       ],
       "PixelsPerUnit": 100,
       "OriginPixels": [
-        0,
-        0
+        14,
+        32
       ],
       "DefaultOriginToCenter": true
     },
@@ -1241,8 +1241,8 @@
       ],
       "PixelsPerUnit": 100,
       "OriginPixels": [
-        0,
-        0
+        14,
+        32
       ],
       "DefaultOriginToCenter": true
     },
@@ -1256,8 +1256,8 @@
       ],
       "PixelsPerUnit": 100,
       "OriginPixels": [
-        0,
-        0
+        14,
+        32
       ],
       "DefaultOriginToCenter": true
     },
@@ -1346,8 +1346,8 @@
       ],
       "PixelsPerUnit": 100,
       "OriginPixels": [
-        0,
-        0
+        14,
+        32
       ],
       "DefaultOriginToCenter": true
     },
@@ -1361,8 +1361,8 @@
       ],
       "PixelsPerUnit": 100,
       "OriginPixels": [
-        0,
-        0
+        14,
+        32
       ],
       "DefaultOriginToCenter": true
     },
@@ -1476,6 +1476,36 @@
       "SourceRect": [
         128,
         320,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_crouch_idle_0": {
+      "TextureKey": "Sprites/human",
+      "SourceRect": [
+        288,
+        0,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_jump_idle_0": {
+      "TextureKey": "Sprites/human",
+      "SourceRect": [
+        288,
+        64,
         32,
         64
       ],

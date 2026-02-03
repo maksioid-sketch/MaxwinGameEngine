@@ -440,7 +440,7 @@
       "rows": 1,
 
       "pixelsPerUnit": 100.0,
-      "originPixels": [0, 0],
+      "originPixels": [17, 32],
       "defaultOriginToCenter": true,
 
       "clip": {
@@ -518,7 +518,7 @@
       "rows": 1,
 
       "pixelsPerUnit": 100.0,
-      "originPixels": [0, 0],
+      "originPixels": [14, 32],
       "defaultOriginToCenter": true,
 
       "clip": {
@@ -594,7 +594,7 @@
       "rows": 1,
 
       "pixelsPerUnit": 100.0,
-      "originPixels": [0, 0],
+      "originPixels": [14, 32],
       "defaultOriginToCenter": true,
 
       "clip": {
@@ -751,10 +751,63 @@
 
       "clip": {
         "clipId": "human_dead",
-        "loop": false,
+        "loop": true,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Human Crouch Idle",
+      "textureKey": "Sprites/human",
+
+      "prefix": "human_crouch_idle",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 288,
+      "startY": 0,
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "columns": 1,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_crouch_idle",
+        "loop": true,
+        "fps": 10
+      }
+    }, 
+
+    {
+      "name": "Human Jump Idle",
+      "textureKey": "Sprites/human",
+
+      "prefix": "human_jump_idle",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 288,
+      "startY": 64,
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "columns": 1,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_jump_idle",
+        "loop": true,
         "fps": 10
       }
     }
+
+
+
 
 
 

@@ -31,38 +31,37 @@ public sealed class AnimatorControllerSystem : ISystem
             if (!assets.TryGetController(anim.ControllerId, out var controller)) continue;
             if (controller.States.Count == 0) continue;
 
-            // NEW: time in current controller state
+            // Track time spent in current controller state
             if (!string.IsNullOrWhiteSpace(anim.StateId))
                 anim.StateTimeSeconds += ctx.DeltaSeconds;
 
-            bool inTransition = !string.IsNullOrWhiteSpace(anim.PendingStateId);
+            bool inTransitionClip = !string.IsNullOrWhiteSpace(anim.PendingStateId);
 
-            // Initialize
+            // Initialize controller state
             if (string.IsNullOrWhiteSpace(anim.StateId))
             {
                 anim.StateId = controller.InitialState;
                 anim.StateTimeSeconds = 0f;
 
-                if (controller.States.TryGetValue(anim.StateId, out var st) && !string.IsNullOrWhiteSpace(st.ClipId))
+                if (controller.States.TryGetValue(anim.StateId, out var st) &&
+                    !string.IsNullOrWhiteSpace(st.ClipId))
                 {
                     SetClip(anim, st.ClipId, restart: true, speed: st.Speed);
                 }
 
-                // clear finished latch (if any)
-                anim.ClipFinishedThisFrame = false;
                 continue;
             }
 
-            // Keep speed synced to active state when not in transition clip
-            if (!inTransition && controller.States.TryGetValue(anim.StateId, out var currentState))
+            // Keep speed synced to active state's speed (only when NOT playing a transition clip)
+            if (!inTransitionClip && controller.States.TryGetValue(anim.StateId, out var currentState))
             {
                 float mul = anim.GetFloat("speedMul", 1f);
-                anim.Speed = currentState.Speed * mul; // allow negative for reverse playback
-
+                anim.Speed = currentState.Speed * mul; // allow negative for reverse
             }
 
-            // Build candidates (current state + AnyState)
+            // Build candidate transitions (from current state + AnyState '*')
             var candidates = new List<(int idx, ControllerTransition t)>(controller.Transitions.Count);
+
             for (int i = 0; i < controller.Transitions.Count; i++)
             {
                 var t = controller.Transitions[i];
@@ -72,58 +71,67 @@ public sealed class AnimatorControllerSystem : ISystem
                     t.From.Equals(anim.StateId, StringComparison.OrdinalIgnoreCase);
 
                 if (!fromMatches) continue;
-                if (inTransition && !t.CanInterrupt) continue;
 
-                // NEW: min time in state
+                // If we're currently in a transition clip, only allow interrupts
+                if (inTransitionClip && !t.CanInterrupt) continue;
+
+                // Min time in the CURRENT controller state
                 if (t.MinTimeInState > 0f && anim.StateTimeSeconds < t.MinTimeInState)
                     continue;
 
-                // NEW: exit time (normalized 0..1)
+                // Optional exit time (normalized 0..1)
                 if (t.ExitTime >= 0f && anim.NormalizedTime < t.ExitTime)
                     continue;
 
                 candidates.Add((i, t));
             }
 
+            // Sort by priority desc, stable by JSON order (idx asc)
             candidates.Sort((a, b) =>
             {
                 int pr = b.t.Priority.CompareTo(a.t.Priority);
                 return pr != 0 ? pr : a.idx.CompareTo(b.idx);
             });
 
-            foreach (var (_, t) in candidates)
+            // Evaluate candidates
+            for (int ci = 0; ci < candidates.Count; ci++)
             {
+                var t = candidates[ci].t;
+
                 if (!controller.States.TryGetValue(t.To, out var toState) || string.IsNullOrWhiteSpace(toState.ClipId))
                     continue;
 
                 if (!TransitionMatches(t, anim, ctx.Input))
                     continue;
 
+                // Consume triggers used by this transition
                 ConsumeTriggersUsedByTransition(t, anim);
-
 
                 // One-shot overrides for the NEXT clip switch only
                 anim.PendingCrossFadeSeconds = (t.CrossFadeSeconds >= 0f) ? t.CrossFadeSeconds : null;
-                anim.PendingFreezeDuringCrossFade = t.FreezeDuringCrossFade; // null means "use default"
+                anim.PendingFreezeDuringCrossFade = t.FreezeDuringCrossFade; // null means use default
 
-
-
-                // Transition clip
+                // --- Transition clip path ---
                 if (!string.IsNullOrWhiteSpace(t.TransitionClipId))
                 {
+                    // If already playing the same transition clip, do nothing
                     if (string.Equals(anim.ClipId, t.TransitionClipId, StringComparison.OrdinalIgnoreCase) && anim.Playing)
                         break;
 
+                    // Queue destination and play transition clip now
                     anim.PendingStateId = t.To;
                     anim.NextClipId = toState.ClipId;
 
+                    // IMPORTANT: restart transition clip so it plays from start/end (depending on speed sign)
                     SetClip(anim, t.TransitionClipId!, restart: true, speed: t.TransitionSpeed);
+
+                    // Reset state timer so minTimeInState doesn't instantly allow flip-flop via AnyState rules
+                    anim.StateTimeSeconds = 0f;
+
                     break;
                 }
 
-               
-
-                // Direct switch
+                // --- Direct switch path ---
                 anim.StateId = t.To;
                 anim.StateTimeSeconds = 0f;
 
@@ -131,12 +139,16 @@ public sealed class AnimatorControllerSystem : ISystem
                 anim.NextClipId = null;
 
                 float mul = anim.GetFloat("speedMul", 1f);
-                SetClip(anim, toState.ClipId, restart: false, speed: toState.Speed * mul);
+
+                // restart true is usually correct on state change
+                SetClip(anim, toState.ClipId, restart: true, speed: toState.Speed * mul);
+
                 break;
             }
 
-            // NEW: clip-finished is a one-frame latch (set by AnimationSystem last frame)
-            anim.ClipFinishedThisFrame = false;
+            // DO NOT clear ClipFinishedThisFrame here.
+            // AnimationSystem owns setting it and it must persist for one full frame
+            // so { "finished": true } conditions can be observed.
         }
     }
 
@@ -145,8 +157,8 @@ public sealed class AnimatorControllerSystem : ISystem
         if (string.IsNullOrWhiteSpace(clipId))
             return;
 
-        anim.Speed = speed; // allow negative
-
+        // allow negative speed for reverse playback
+        anim.Speed = speed;
 
         bool changed = !string.Equals(anim.ClipId, clipId, StringComparison.OrdinalIgnoreCase);
 
@@ -154,11 +166,14 @@ public sealed class AnimatorControllerSystem : ISystem
         {
             anim.ClipId = clipId;
             anim.Playing = true;
+
+            // Direction-aware restart is handled in AnimationSystem using ResetRequested + Speed sign
             anim.ResetRequested = true;
 
             // reset timing
             anim.ClipTimeSeconds = 0f;
-            anim.ClipFinishedThisFrame = false;
+
+            // Do NOT touch ClipFinishedThisFrame here; AnimationSystem sets/clears it.
             return;
         }
 
@@ -168,7 +183,6 @@ public sealed class AnimatorControllerSystem : ISystem
         {
             anim.ResetRequested = true;
             anim.ClipTimeSeconds = 0f;
-            anim.ClipFinishedThisFrame = false;
         }
     }
 
