@@ -35,6 +35,11 @@ public sealed class Animator : IComponent
     // Triggers (runtime-only)
     [JsonIgnore] private readonly HashSet<string> _triggers = new(StringComparer.OrdinalIgnoreCase);
 
+    // --- Animation notifier runtime tracking ---
+    [JsonIgnore] public string LastNotifyClipId { get; set; } = "";
+    [JsonIgnore] public int LastNotifyFrameIndex { get; set; } = -1;
+
+
     public void SetTrigger(string name)
     {
         if (string.IsNullOrWhiteSpace(name)) return;

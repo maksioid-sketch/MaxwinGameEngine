@@ -467,7 +467,10 @@ public sealed class GameApp : Game
             new SandboxGame.Systems.DamageToAnimatorTriggerSystem(),
 
             new SandboxGame.Systems.AnimatorControllerSystem(() => _assets),
-            new SandboxGame.Systems.AnimationSystem()
+            new SandboxGame.Systems.AnimationSystem(),
+             
+            new Engine.Core.Systems.BuiltIn.AnimationNotifierSystem(),
+            new SandboxGame.Systems.AnimationNotifyDebugSystem()
         };
 
 

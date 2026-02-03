@@ -30,7 +30,9 @@ public static class AnimationJson
                 Loop = c.Loop,
                 Frames = c.Frames.Select(f => new AnimationFrame(
                     f.SpriteId ?? "",
-                    f.DurationSeconds)).ToList()
+                    f.DurationSeconds,
+                    f.Events
+                )).ToList()
             };
 
             dict[clipId] = clip;
@@ -54,5 +56,8 @@ public static class AnimationJson
     {
         public string? SpriteId { get; set; }
         public float DurationSeconds { get; set; } = 0.1f;
+
+        // NEW: optional notifiers per frame
+        public string[]? Events { get; set; } = null;
     }
 }
