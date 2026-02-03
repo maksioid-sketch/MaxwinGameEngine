@@ -692,7 +692,7 @@
       "DefaultOriginToCenter": true
     },
     "human_idle_0": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         0,
         0,
@@ -707,7 +707,7 @@
       "DefaultOriginToCenter": true
     },
     "human_walk_0": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         32,
         0,
@@ -722,7 +722,7 @@
       "DefaultOriginToCenter": true
     },
     "human_walk_1": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         64,
         0,
@@ -737,7 +737,7 @@
       "DefaultOriginToCenter": true
     },
     "human_walk_2": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         96,
         0,
@@ -752,7 +752,7 @@
       "DefaultOriginToCenter": true
     },
     "human_walk_3": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         128,
         0,
@@ -767,7 +767,7 @@
       "DefaultOriginToCenter": true
     },
     "human_walk_4": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         160,
         0,
@@ -782,7 +782,7 @@
       "DefaultOriginToCenter": true
     },
     "human_walk_5": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         192,
         0,
@@ -797,7 +797,7 @@
       "DefaultOriginToCenter": true
     },
     "human_crouch_0": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         224,
         0,
@@ -812,7 +812,7 @@
       "DefaultOriginToCenter": true
     },
     "human_crouch_1": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         256,
         0,
@@ -827,7 +827,7 @@
       "DefaultOriginToCenter": true
     },
     "human_crouch_2": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         288,
         0,
@@ -842,7 +842,7 @@
       "DefaultOriginToCenter": true
     },
     "human_stand_0": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         0,
         64,
@@ -857,7 +857,7 @@
       "DefaultOriginToCenter": true
     },
     "human_damage_high_0": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         32,
         64,
@@ -872,7 +872,7 @@
       "DefaultOriginToCenter": true
     },
     "human_damage_high_1": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         64,
         64,
@@ -887,7 +887,7 @@
       "DefaultOriginToCenter": true
     },
     "human_damage_low_0": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         96,
         64,
@@ -902,7 +902,7 @@
       "DefaultOriginToCenter": true
     },
     "human_damage_low_1": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         128,
         64,
@@ -917,7 +917,7 @@
       "DefaultOriginToCenter": true
     },
     "human_damage_crouch_0": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         160,
         64,
@@ -932,7 +932,7 @@
       "DefaultOriginToCenter": true
     },
     "human_damage_crouch_1": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         192,
         64,
@@ -947,7 +947,7 @@
       "DefaultOriginToCenter": true
     },
     "human_jump_0": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         224,
         64,
@@ -962,7 +962,7 @@
       "DefaultOriginToCenter": true
     },
     "human_jump_1": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         256,
         64,
@@ -977,7 +977,7 @@
       "DefaultOriginToCenter": true
     },
     "human_jump_2": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         288,
         64,
@@ -992,7 +992,7 @@
       "DefaultOriginToCenter": true
     },
     "human_vert_strike_stand_0": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         0,
         128,
@@ -1007,7 +1007,7 @@
       "DefaultOriginToCenter": true
     },
     "human_vert_strike_stand_1": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         32,
         128,
@@ -1022,7 +1022,7 @@
       "DefaultOriginToCenter": true
     },
     "human_vert_strike_stand_2": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         64,
         128,
@@ -1037,7 +1037,7 @@
       "DefaultOriginToCenter": true
     },
     "human_vert_strike_stand_3": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         96,
         128,
@@ -1052,7 +1052,7 @@
       "DefaultOriginToCenter": true
     },
     "human_vert_strike_crouch_0": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         0,
         192,
@@ -1067,7 +1067,7 @@
       "DefaultOriginToCenter": true
     },
     "human_vert_strike_crouch_1": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         32,
         192,
@@ -1082,7 +1082,7 @@
       "DefaultOriginToCenter": true
     },
     "human_vert_strike_crouch_2": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         64,
         192,
@@ -1097,7 +1097,7 @@
       "DefaultOriginToCenter": true
     },
     "human_vert_strike_crouch_3": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         96,
         192,
@@ -1112,7 +1112,7 @@
       "DefaultOriginToCenter": true
     },
     "human_vert_strike_air_0": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         0,
         256,
@@ -1127,7 +1127,7 @@
       "DefaultOriginToCenter": true
     },
     "human_vert_strike_air_1": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         32,
         256,
@@ -1142,7 +1142,7 @@
       "DefaultOriginToCenter": true
     },
     "human_vert_strike_air_2": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         64,
         256,
@@ -1157,7 +1157,7 @@
       "DefaultOriginToCenter": true
     },
     "human_vert_strike_air_3": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         96,
         256,
@@ -1172,7 +1172,7 @@
       "DefaultOriginToCenter": true
     },
     "human_hor_strike_stand_0": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         128,
         128,
@@ -1187,7 +1187,7 @@
       "DefaultOriginToCenter": true
     },
     "human_hor_strike_stand_1": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         160,
         128,
@@ -1202,7 +1202,7 @@
       "DefaultOriginToCenter": true
     },
     "human_hor_strike_stand_2": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         192,
         128,
@@ -1217,7 +1217,7 @@
       "DefaultOriginToCenter": true
     },
     "human_hor_strike_crouch_0": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         128,
         192,
@@ -1232,7 +1232,7 @@
       "DefaultOriginToCenter": true
     },
     "human_hor_strike_crouch_1": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         160,
         192,
@@ -1247,7 +1247,7 @@
       "DefaultOriginToCenter": true
     },
     "human_hor_strike_crouch_2": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         192,
         192,
@@ -1262,7 +1262,7 @@
       "DefaultOriginToCenter": true
     },
     "human_hor_strike_air_0": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         128,
         256,
@@ -1277,7 +1277,7 @@
       "DefaultOriginToCenter": true
     },
     "human_hor_strike_air_1": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         160,
         256,
@@ -1292,7 +1292,7 @@
       "DefaultOriginToCenter": true
     },
     "human_hor_strike_air_2": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         192,
         256,
@@ -1307,7 +1307,7 @@
       "DefaultOriginToCenter": true
     },
     "human_punch_stand_0": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         224,
         128,
@@ -1322,7 +1322,7 @@
       "DefaultOriginToCenter": true
     },
     "human_punch_stand_1": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         256,
         128,
@@ -1337,7 +1337,7 @@
       "DefaultOriginToCenter": true
     },
     "human_punch_crouch_0": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         224,
         192,
@@ -1352,7 +1352,7 @@
       "DefaultOriginToCenter": true
     },
     "human_punch_crouch_1": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         256,
         192,
@@ -1367,7 +1367,7 @@
       "DefaultOriginToCenter": true
     },
     "human_punch_air_0": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         224,
         256,
@@ -1382,7 +1382,7 @@
       "DefaultOriginToCenter": true
     },
     "human_punch_air_1": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         256,
         256,
@@ -1397,7 +1397,7 @@
       "DefaultOriginToCenter": true
     },
     "human_guard_stand_0": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         288,
         128,
@@ -1412,7 +1412,7 @@
       "DefaultOriginToCenter": true
     },
     "human_guard_crouch_0": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         288,
         192,
@@ -1427,7 +1427,7 @@
       "DefaultOriginToCenter": true
     },
     "human_guard_air_0": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         288,
         256,
@@ -1442,7 +1442,7 @@
       "DefaultOriginToCenter": true
     },
     "human_damage_air_0": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         32,
         320,
@@ -1457,7 +1457,7 @@
       "DefaultOriginToCenter": true
     },
     "human_damage_air_1": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         70,
         320,
@@ -1472,7 +1472,7 @@
       "DefaultOriginToCenter": true
     },
     "human_dead_0": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         128,
         320,
@@ -1487,7 +1487,7 @@
       "DefaultOriginToCenter": true
     },
     "human_crouch_idle_0": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         288,
         0,
@@ -1502,7 +1502,7 @@
       "DefaultOriginToCenter": true
     },
     "human_jump_idle_0": {
-      "TextureKey": "Sprites/human",
+      "TextureKey": "Sprites/advnt_full",
       "SourceRect": [
         288,
         64,

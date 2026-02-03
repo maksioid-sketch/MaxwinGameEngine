@@ -146,6 +146,7 @@ public sealed class GameApp : Game
         if (_input.WasPressed(InputKey.Escape))
             Exit();
 
+
         // Hot reload first
         var changes = _hotReload?.ConsumeChanges();
         if (changes is { Count: > 0 })

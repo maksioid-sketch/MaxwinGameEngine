@@ -31,9 +31,9 @@
         "guard_crouch":    { "clipId": "human_guard_crouch", "speed": 1.0 },
         "guard_air":       { "clipId": "human_guard_air", "speed": 1.0 },
 
-        "damage_high":     { "clipId": "human_damage_high", "speed": 1.0 },
+        "damage_high":     { "clipId": "human_damage_high", "speed": 1.4 },
         "damage_low":      { "clipId": "human_damage_low", "speed": 1.0 },
-        "damage_crouch":   { "clipId": "human_damage_crouch", "speed": 1.0 },
+        "damage_crouch":   { "clipId": "human_damage_crouch", "speed": 1.4 },
         "damage_air":      { "clipId": "human_damage_air", "speed": 1.0 },
 
         "dead":            { "clipId": "human_dead", "speed": 1.0 }
@@ -76,7 +76,7 @@
           "canInterrupt": true,
           "crossFadeSeconds": 0.0,
           "conditions": [
-            { "trigger": "damaged1" },
+            { "trigger": "damaged" },
             { "bool": "grounded", "boolValue": true },
             { "bool": "crouch", "boolValue": true }
           ]
@@ -88,9 +88,10 @@
           "canInterrupt": true,
           "crossFadeSeconds": 0.0,
           "conditions": [
-            { "trigger": "damagedHigh" },
+            { "trigger": "damaged" },
             { "bool": "grounded", "boolValue": true },
-            { "bool": "crouch", "boolValue": false }
+            { "bool": "crouch", "boolValue": false },
+             { "bool": "crouch", "boolValue": false }
           ]
         },
         {
@@ -108,7 +109,7 @@
 
         // Damage returns to locomotion when finished
         { "from": "damage_air",    "to": "jump",   "priority": 50, "conditions": [ { "finished": true } ] },
-        { "from": "damage_crouch", "to": "crouch", "priority": 50, "conditions": [ { "finished": true } ] },
+        { "from": "damage_crouch", "to": "crouch_idle", "priority": 50, "conditions": [ { "finished": true } ] },
         { "from": "damage_high",   "to": "idle",   "priority": 50, "conditions": [ { "finished": true } ] },
         { "from": "damage_low",    "to": "idle",   "priority": 50, "conditions": [ { "finished": true } ] },
 

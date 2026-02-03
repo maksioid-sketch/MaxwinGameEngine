@@ -30,6 +30,9 @@ public sealed class DamageToAnimatorTriggerSystem : ISystem
 
             if (target.TryGet<Animator>(out var anim) && anim is not null)
                 anim.SetTrigger(TriggerName);
+
+            Console.WriteLine("Damage event count: " + ctx.Events.Read<DamageEvent>().Count);
+
         }
     }
 }
