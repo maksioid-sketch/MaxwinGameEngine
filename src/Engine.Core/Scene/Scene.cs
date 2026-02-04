@@ -28,6 +28,12 @@ public sealed class Scene
         return e;
     }
 
+    public Entity InstantiatePrefab(Prefab prefab, Vector3? positionOverride = null)
+    {
+        if (prefab is null) throw new ArgumentNullException(nameof(prefab));
+        return prefab.Instantiate(this, positionOverride);
+    }
+
     public Entity? FindByName(string name) =>
         _entities.FirstOrDefault(e => string.Equals(e.Name, name, StringComparison.OrdinalIgnoreCase));
 

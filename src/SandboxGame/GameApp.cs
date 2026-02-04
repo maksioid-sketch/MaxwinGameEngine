@@ -45,6 +45,7 @@ public sealed class GameApp : Game
     private string _atlasPath = "";
     private string _animationsPath = "";
     private string _controllersPath = "";
+    private string _prefabsPath = "";
 
     private SpriteBatch _uiSb = null!;
     private SpriteFont _debugFont = null!;
@@ -107,7 +108,7 @@ public sealed class GameApp : Game
             watchRoot = SandboxGame.HotReload.DevPaths.FindProjectRoot("SandboxGame.csproj");
             _hotReload = new SandboxGame.HotReload.HotReloadService(
                 directoryToWatch: watchRoot,
-                filters: new[] { "atlas.generated.json", ".scene.json", "animations.generated.json", "controllers.json" });
+                filters: new[] { "atlas.generated.json", ".scene.json", "animations.generated.json", "controllers.json", ".prefab.json" });
 
             _hotReloadStatus = "Hot reload: ON (watching source folder)";
         #else
@@ -118,13 +119,15 @@ public sealed class GameApp : Game
         _atlasPath = Path.Combine(watchRoot, "Assets", "atlas.generated.json");
         _animationsPath = Path.Combine(watchRoot, "Assets", "animations.generated.json");
         _controllersPath = Path.Combine(watchRoot, "Assets", "controllers.json");
+        _prefabsPath = Path.Combine(watchRoot, "Assets", "Prefabs");
 
 
         // Always initialize to non-null so later code can't explode
         _assets = new DictionaryAssetProvider(
             new Dictionary<string, SpriteDefinition>(StringComparer.OrdinalIgnoreCase),
             new Dictionary<string, AnimationClip>(StringComparer.OrdinalIgnoreCase),
-            new Dictionary<string, AnimatorController>(StringComparer.OrdinalIgnoreCase)
+            new Dictionary<string, AnimatorController>(StringComparer.OrdinalIgnoreCase),
+            new Dictionary<string, Prefab>(StringComparer.OrdinalIgnoreCase)
             );
         _services.Assets = _assets;
 
@@ -170,7 +173,8 @@ public sealed class GameApp : Game
             bool assetsChanged =
                 changes.Any(p => p.EndsWith("atlas.generated.json", StringComparison.OrdinalIgnoreCase)) ||
                 changes.Any(p => p.EndsWith("animations.generated.json", StringComparison.OrdinalIgnoreCase)) ||
-                changes.Any(p => p.EndsWith("controllers.json", StringComparison.OrdinalIgnoreCase));
+                changes.Any(p => p.EndsWith("controllers.json", StringComparison.OrdinalIgnoreCase)) ||
+                changes.Any(p => p.EndsWith(".prefab.json", StringComparison.OrdinalIgnoreCase));
 
             bool sceneChanged =
                 changes.Any(p => p.EndsWith(".scene.json", StringComparison.OrdinalIgnoreCase));
@@ -254,8 +258,9 @@ public sealed class GameApp : Game
             var controllersJson = ReadJsonNoBom(_controllersPath);
             var controllers = Engine.Core.Serialization.AnimatorControllerJson.DeserializeControllers(controllersJson);
 
+            var prefabs = LoadPrefabs(_prefabsPath);
 
-            _assets = new DictionaryAssetProvider(sprites, clips, controllers);
+            _assets = new DictionaryAssetProvider(sprites, clips, controllers, prefabs);
 
             // Recreate systems that depend on _assets (AnimationSystem holds _assets reference)
             RebuildSystems();
@@ -311,6 +316,30 @@ public sealed class GameApp : Game
             // Keep the previous _scene so the game continues running.
         }
 
+    }
+
+    private static Dictionary<string, Prefab> LoadPrefabs(string prefabsPath)
+    {
+        var prefabs = new Dictionary<string, Prefab>(StringComparer.OrdinalIgnoreCase);
+
+        if (!Directory.Exists(prefabsPath))
+            return prefabs;
+
+        var files = Directory.GetFiles(prefabsPath, "*.prefab.json", SearchOption.AllDirectories);
+        for (int i = 0; i < files.Length; i++)
+        {
+            var path = files[i];
+            var json = File.ReadAllText(path);
+            var prefab = PrefabJson.Deserialize(json);
+
+            var name = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(path));
+            if (string.IsNullOrWhiteSpace(name))
+                continue;
+
+            prefabs[name] = prefab;
+        }
+
+        return prefabs;
     }
 
     protected override void Dispose(bool disposing)
@@ -479,8 +508,6 @@ public sealed class GameApp : Game
 
 
 }
-
-
 
 
 
