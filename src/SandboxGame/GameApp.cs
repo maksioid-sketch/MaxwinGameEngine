@@ -476,19 +476,6 @@ public sealed class GameApp : Game
         _uiSb.End();
     }
 
-    private void DrawRectOutline(float x, float y, float w, float h, Microsoft.Xna.Framework.Color color, int thickness)
-    {
-        if (w <= 0 || h <= 0)
-            return;
-
-        var t = Math.Max(1, thickness);
-
-        _uiSb.Draw(_debugPixel, new Rectangle((int)x, (int)y, (int)w, t), color);
-        _uiSb.Draw(_debugPixel, new Rectangle((int)x, (int)(y + h - t), (int)w, t), color);
-        _uiSb.Draw(_debugPixel, new Rectangle((int)x, (int)y, t, (int)h), color);
-        _uiSb.Draw(_debugPixel, new Rectangle((int)(x + w - t), (int)y, t, (int)h), color);
-    }
-
     private void DrawObbOutline(
         System.Numerics.Vector2 p0,
         System.Numerics.Vector2 p1,
