@@ -449,20 +449,20 @@ public sealed class GameApp : Game
 
             var scale = e.Transform.Scale;
             var size = new System.Numerics.Vector2(Math.Abs(scale.X) * box.Size.X, Math.Abs(scale.Y) * box.Size.Y);
-            var offset = new System.Numerics.Vector2(box.Offset.X * scale.X, box.Offset.Y * scale.Y);
-            var centerWorld = new System.Numerics.Vector2(e.Transform.Position.X, e.Transform.Position.Y) + offset;
+            var offsetLocal = new System.Numerics.Vector2(box.Offset.X * scale.X, box.Offset.Y * scale.Y);
+            var centerWorld = new System.Numerics.Vector2(e.Transform.Position.X, e.Transform.Position.Y);
+            var rot = GetZRotationRadians(e.Transform.Rotation);
+
+            var axisX = new System.Numerics.Vector2(MathF.Cos(rot), MathF.Sin(rot));
+            var axisY = new System.Numerics.Vector2(-axisX.Y, axisX.X);
+            var offsetWorld = axisX * offsetLocal.X + axisY * offsetLocal.Y;
+            centerWorld += offsetWorld;
 
             var half = size * 0.5f;
-            var minWorld = centerWorld - half;
-            var maxWorld = centerWorld + half;
-
-            var minScreen = _camera.WorldToScreen(minWorld);
-            var maxScreen = _camera.WorldToScreen(maxWorld);
-
-            float x = MathF.Min(minScreen.X, maxScreen.X);
-            float y = MathF.Min(minScreen.Y, maxScreen.Y);
-            float w = MathF.Abs(maxScreen.X - minScreen.X);
-            float h = MathF.Abs(maxScreen.Y - minScreen.Y);
+            var p0 = centerWorld + axisX * half.X + axisY * half.Y;
+            var p1 = centerWorld + axisX * half.X - axisY * half.Y;
+            var p2 = centerWorld - axisX * half.X - axisY * half.Y;
+            var p3 = centerWorld - axisX * half.X + axisY * half.Y;
 
             var color = collidingIds.Contains(e.Id)
                 ? Microsoft.Xna.Framework.Color.Red
@@ -470,7 +470,7 @@ public sealed class GameApp : Game
                     ? Microsoft.Xna.Framework.Color.Yellow
                     : Microsoft.Xna.Framework.Color.LimeGreen);
 
-            DrawRectOutline(x, y, w, h, color, 2);
+            DrawObbOutline(p0, p1, p2, p3, color, 2);
         }
 
         _uiSb.End();
@@ -487,6 +487,54 @@ public sealed class GameApp : Game
         _uiSb.Draw(_debugPixel, new Rectangle((int)x, (int)(y + h - t), (int)w, t), color);
         _uiSb.Draw(_debugPixel, new Rectangle((int)x, (int)y, t, (int)h), color);
         _uiSb.Draw(_debugPixel, new Rectangle((int)(x + w - t), (int)y, t, (int)h), color);
+    }
+
+    private void DrawObbOutline(
+        System.Numerics.Vector2 p0,
+        System.Numerics.Vector2 p1,
+        System.Numerics.Vector2 p2,
+        System.Numerics.Vector2 p3,
+        Microsoft.Xna.Framework.Color color,
+        float thickness)
+    {
+        var s0 = _camera.WorldToScreen(p0);
+        var s1 = _camera.WorldToScreen(p1);
+        var s2 = _camera.WorldToScreen(p2);
+        var s3 = _camera.WorldToScreen(p3);
+
+        DrawLine(s0, s1, color, thickness);
+        DrawLine(s1, s2, color, thickness);
+        DrawLine(s2, s3, color, thickness);
+        DrawLine(s3, s0, color, thickness);
+    }
+
+    private void DrawLine(System.Numerics.Vector2 a, System.Numerics.Vector2 b, Microsoft.Xna.Framework.Color color, float thickness)
+    {
+        var dir = b - a;
+        var len = dir.Length();
+        if (len <= 0.0001f)
+            return;
+
+        var angle = MathF.Atan2(dir.Y, dir.X);
+        var start = new Microsoft.Xna.Framework.Vector2(a.X, a.Y);
+
+        _uiSb.Draw(
+            _debugPixel,
+            start,
+            null,
+            color,
+            angle,
+            new Microsoft.Xna.Framework.Vector2(0f, 0.5f),
+            new Microsoft.Xna.Framework.Vector2(len, thickness),
+            SpriteEffects.None,
+            0f);
+    }
+
+    private static float GetZRotationRadians(System.Numerics.Quaternion q)
+    {
+        var siny_cosp = 2f * (q.W * q.Z + q.X * q.Y);
+        var cosy_cosp = 1f - 2f * (q.Y * q.Y + q.Z * q.Z);
+        return (float)System.Math.Atan2(siny_cosp, cosy_cosp);
     }
 
     private void PushPersistentDebugOverlay()

@@ -18,8 +18,8 @@ public sealed class AnimationNotifyDebugSystem : ISystem
         for (int i = 0; i < events.Count; i++)
         {
             var ev = events[i];
-            DebugPrint.Print($"[Notify] {ev.EntityName} :: {ev.Name} (clip={ev.ClipId} frame={ev.FrameIndex})", DefaultSeconds);
-            DebugPrint.Print("hello");
+           // DebugPrint.Print($"[Notify] {ev.EntityName} :: {ev.Name} (clip={ev.ClipId} frame={ev.FrameIndex})", DefaultSeconds);
+            DebugPrint.Print("footprint", 0.5f);
         }
     }
 }

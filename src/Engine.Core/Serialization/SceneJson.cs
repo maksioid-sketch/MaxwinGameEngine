@@ -79,8 +79,9 @@ public static class SceneJson
                     entity.Transform.Position = new Vector3(e.Transform.Position[0], e.Transform.Position[1], e.Transform.Position[2]);
                     entity.Transform.Scale = new Vector3(e.Transform.Scale[0], e.Transform.Scale[1], e.Transform.Scale[2]);
 
-                    // 2D rotation (around Z) stored as radians
-                    entity.Transform.Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, e.Transform.RotationZRadians);
+                    // 2D rotation (around Z) stored as degrees in JSON
+                    var rotRadians = GetRotationRadians(e.Transform);
+                    entity.Transform.Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, rotRadians);
                 }
 
                 // Components
@@ -165,7 +166,7 @@ public static class SceneJson
                 {
                     Position = new[] { e.Transform.Position.X, e.Transform.Position.Y, e.Transform.Position.Z },
                     Scale = new[] { e.Transform.Scale.X, e.Transform.Scale.Y, e.Transform.Scale.Z },
-                    RotationZRadians = rotZ
+                    RotationZDegrees = RadToDeg(rotZ)
                 },
                 SpriteRenderer = spr is null ? null : new SpriteRendererDto
                 {
@@ -203,7 +204,14 @@ public static class SceneJson
     private sealed class TransformDto
     {
         public float[] Position { get; set; } = new float[] { 0, 0, 0 };
+
+        [JsonPropertyName("rotationZDegrees")]
+        public float RotationZDegrees { get; set; } = 0f;
+
+        [JsonPropertyName("rotationZRadians")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public float RotationZRadians { get; set; } = 0f;
+
         public float[] Scale { get; set; } = new float[] { 1, 1, 1 };
     }
 
@@ -240,5 +248,16 @@ public static class SceneJson
         public float[] Offset { get; set; } = new float[] { 0, 0 };
         public bool IsTrigger { get; set; } = false;
     }
+
+    private static float GetRotationRadians(TransformDto t)
+    {
+        if (t.RotationZDegrees != 0f)
+            return DegToRad(t.RotationZDegrees);
+
+        return t.RotationZRadians;
+    }
+
+    private static float DegToRad(float degrees) => degrees * (MathF.PI / 180f);
+    private static float RadToDeg(float radians) => radians * (180f / MathF.PI);
 
 }

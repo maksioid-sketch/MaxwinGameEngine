@@ -85,7 +85,7 @@ public static class PrefabJson
                 {
                     Position = new[] { entity.Position.X, entity.Position.Y, entity.Position.Z },
                     Scale = new[] { entity.Scale.X, entity.Scale.Y, entity.Scale.Z },
-                    RotationZRadians = entity.RotationZRadians
+                    RotationZDegrees = RadToDeg(entity.RotationZRadians)
                 },
                 SpriteRenderer = entity.SpriteRenderer is null ? null : SpriteRendererDto.FromData(entity.SpriteRenderer),
                 Animator = entity.Animator is null ? null : AnimatorDto.FromData(entity.Animator),
@@ -101,7 +101,7 @@ public static class PrefabJson
                 Name = Name,
                 Position = new Vector3(Transform.Position[0], Transform.Position[1], Transform.Position[2]),
                 Scale = new Vector3(Transform.Scale[0], Transform.Scale[1], Transform.Scale[2]),
-                RotationZRadians = Transform.RotationZRadians,
+                RotationZRadians = GetRotationRadians(Transform),
                 SpriteRenderer = SpriteRenderer is null ? null : SpriteRenderer.ToData(),
                 Animator = Animator is null ? null : Animator.ToData(),
                 BoxCollider2D = BoxCollider2D is null ? null : BoxCollider2D.ToData()
@@ -112,7 +112,14 @@ public static class PrefabJson
     private sealed class TransformDto
     {
         public float[] Position { get; set; } = new float[] { 0, 0, 0 };
+
+        [JsonPropertyName("rotationZDegrees")]
+        public float RotationZDegrees { get; set; } = 0f;
+
+        [JsonPropertyName("rotationZRadians")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public float RotationZRadians { get; set; } = 0f;
+
         public float[] Scale { get; set; } = new float[] { 1, 1, 1 };
     }
 
@@ -232,4 +239,15 @@ public static class PrefabJson
             };
         }
     }
+
+    private static float GetRotationRadians(TransformDto t)
+    {
+        if (t.RotationZDegrees != 0f)
+            return DegToRad(t.RotationZDegrees);
+
+        return t.RotationZRadians;
+    }
+
+    private static float DegToRad(float degrees) => degrees * (MathF.PI / 180f);
+    private static float RadToDeg(float radians) => radians * (180f / MathF.PI);
 }

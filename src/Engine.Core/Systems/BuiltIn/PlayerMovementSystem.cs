@@ -18,6 +18,14 @@ public sealed class PlayerMovementSystem : ISystem
     // Optional: test trigger mapping (press E to fire "damaged")
     public string DamageTriggerName { get; set; } = "damaged";
 
+    private bool _cachedCollider;
+    private Vector2 defBoxSize;
+    private Vector2 defBoxOffset;
+
+
+
+    
+
     public void Update(Scene.Scene scene, EngineContext ctx)
     {
         var player = scene.FindByName(PlayerEntityName);
@@ -58,7 +66,38 @@ public sealed class PlayerMovementSystem : ISystem
         }
         bool crouch = false;
         bool guard = false;
+        
         if (ctx.Input.IsDown(InputKey.Shift)) crouch = true; else crouch = false;
+
+          if (player.TryGet<BoxCollider2D>(out var box) && box != null)
+        {
+            if (!_cachedCollider)
+            {
+                defBoxSize = box.Size;
+                defBoxOffset = box.Offset;
+                _cachedCollider = true;
+            }
+
+            if (crouch)
+            {
+                box.Size = new Vector2(defBoxSize.X, defBoxSize.Y * 0.70f);
+
+                // Keep bottom aligned: move collider down by half the height reduction
+                float deltaY = (defBoxSize.Y - box.Size.Y) * 0.5f;
+                box.Offset = new Vector2(defBoxOffset.X, defBoxOffset.Y + deltaY);
+            }
+            else
+            {
+                box.Size = defBoxSize;
+                box.Offset = defBoxOffset;
+            }
+        }
+
+
+            
+            
+
+
         if (ctx.Input.IsDown(InputKey.E)) guard = true; else guard = false;
 
 
