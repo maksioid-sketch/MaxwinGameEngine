@@ -21,6 +21,14 @@ public sealed class Prefab
         RootId = rootId;
     }
 
+    public PrefabEntity GetRootEntity()
+    {
+        var root = _entities.FirstOrDefault(e => e.Id == RootId);
+        if (root is null)
+            throw new InvalidOperationException("Prefab root entity was not found.");
+        return root;
+    }
+
     public static Prefab FromScene(Scene scene, Guid rootId)
     {
         if (scene.Entities.Count == 0)

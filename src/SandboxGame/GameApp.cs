@@ -110,7 +110,7 @@ public sealed class GameApp : Game
             watchRoot = SandboxGame.HotReload.DevPaths.FindProjectRoot("SandboxGame.csproj");
             _hotReload = new SandboxGame.HotReload.HotReloadService(
                 directoryToWatch: watchRoot,
-                filters: new[] { "atlas.generated.json", ".scene.json", "animations.generated.json", "controllers.json", ".prefab.json" });
+                filters: new[] { ".json" });
 
             _hotReloadStatus = "Hot reload: ON (watching source folder)";
         #else
@@ -172,17 +172,20 @@ public sealed class GameApp : Game
         var changes = _hotReload?.ConsumeChanges();
         if (changes is { Count: > 0 })
         {
-            bool assetsChanged =
-                changes.Any(p => p.EndsWith("atlas.generated.json", StringComparison.OrdinalIgnoreCase)) ||
-                changes.Any(p => p.EndsWith("animations.generated.json", StringComparison.OrdinalIgnoreCase)) ||
-                changes.Any(p => p.EndsWith("controllers.json", StringComparison.OrdinalIgnoreCase)) ||
-                changes.Any(p => p.EndsWith(".prefab.json", StringComparison.OrdinalIgnoreCase));
-
             bool sceneChanged =
                 changes.Any(p => p.EndsWith(".scene.json", StringComparison.OrdinalIgnoreCase));
 
+            bool prefabChanged =
+                changes.Any(p => p.EndsWith(".prefab.json", StringComparison.OrdinalIgnoreCase));
+
+            bool assetsChanged =
+                changes.Any(p => p.EndsWith(".json", StringComparison.OrdinalIgnoreCase)) &&
+                changes.Any(p => !p.EndsWith(".scene.json", StringComparison.OrdinalIgnoreCase));
+
             if (assetsChanged) ReloadAssets(); // must call _services.SetAssets(_assets) inside
             if (sceneChanged) ReloadScene();
+            else if (prefabChanged)
+                Engine.Core.Scene.PrefabInstanceResolver.Apply(_scene, _assets);
         }
 
         _services.Events.Clear();
@@ -300,10 +303,11 @@ public sealed class GameApp : Game
 
             var json = File.ReadAllText(_scenePath);
             _scene = SceneJson.Deserialize(json);
+            Engine.Core.Scene.PrefabInstanceResolver.Apply(_scene, _assets);
 
             EnsurePlayerPrefabExists();
-            SpawnPrefabIfMissing("Player");
-            SpawnPrefabIfMissing("Capibara", new System.Numerics.Vector3(2f, 0f, 0f));
+            //SpawnPrefabIfMissing("Player");
+            //SpawnPrefabIfMissing("Capibara", new System.Numerics.Vector3(2f, 0f, 0f));
 
             var p = _scene.FindByName("Player");
             if (p != null && p.TryGet<Engine.Core.Components.Animator>(out var a) && a != null)

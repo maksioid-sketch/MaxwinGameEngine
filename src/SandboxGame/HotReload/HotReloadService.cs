@@ -53,11 +53,17 @@ public sealed class HotReloadService : IDisposable
 
     private static bool Matches(string fullPath, string[] filters)
     {
-        // filters example: "atlas.json", ".scene.json"
+        // filters example: "atlas.json", ".scene.json", ".json", "*"
         var fileName = Path.GetFileName(fullPath);
+
+        if (filters.Length == 0)
+            return true;
 
         foreach (var f in filters)
         {
+            if (f == "*")
+                return true;
+
             if (f.StartsWith(".", StringComparison.Ordinal))
             {
                 if (fileName.EndsWith(f, StringComparison.OrdinalIgnoreCase))

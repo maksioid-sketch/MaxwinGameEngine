@@ -60,12 +60,28 @@ public static class SceneJson
             {
                 var entity = scene.CreateEntity(e.Id, e.Name);
 
-                // Transform
-                entity.Transform.Position = new Vector3(e.Transform.Position[0], e.Transform.Position[1], e.Transform.Position[2]);
-                entity.Transform.Scale = new Vector3(e.Transform.Scale[0], e.Transform.Scale[1], e.Transform.Scale[2]);
+                if (!string.IsNullOrWhiteSpace(e.PrefabId))
+                {
+                    entity.Add(new PrefabInstance
+                    {
+                        PrefabId = e.PrefabId,
+                        UsePrefabTransform = e.Transform is null,
+                        OverrideTransform = e.Transform is not null,
+                        OverrideSpriteRenderer = e.SpriteRenderer is not null,
+                        OverrideAnimator = e.Animator is not null,
+                        OverrideBoxCollider2D = e.BoxCollider2D is not null
+                    });
+                }
 
-                // 2D rotation (around Z) stored as radians
-                entity.Transform.Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, e.Transform.RotationZRadians);
+                if (e.Transform is not null)
+                {
+                    // Transform
+                    entity.Transform.Position = new Vector3(e.Transform.Position[0], e.Transform.Position[1], e.Transform.Position[2]);
+                    entity.Transform.Scale = new Vector3(e.Transform.Scale[0], e.Transform.Scale[1], e.Transform.Scale[2]);
+
+                    // 2D rotation (around Z) stored as radians
+                    entity.Transform.Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, e.Transform.RotationZRadians);
+                }
 
                 // Components
                 if (e.SpriteRenderer is not null)
@@ -119,7 +135,8 @@ public static class SceneJson
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = "Entity";
-        public TransformDto Transform { get; set; } = new();
+        public string? PrefabId { get; set; }
+        public TransformDto? Transform { get; set; }
 
         // Optional components (add more later)
         public SpriteRendererDto? SpriteRenderer { get; set; }
@@ -143,6 +160,7 @@ public static class SceneJson
             {
                 Id = e.Id,
                 Name = e.Name,
+                PrefabId = e.TryGet<PrefabInstance>(out var pi) && pi is not null ? pi.PrefabId : null,
                 Transform = new TransformDto
                 {
                     Position = new[] { e.Transform.Position.X, e.Transform.Position.Y, e.Transform.Position.Z },
