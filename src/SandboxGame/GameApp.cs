@@ -38,7 +38,7 @@ public sealed class GameApp : Game
     private EngineServices _services = null!;
 
     private IAssetProvider _assets = null!;
-    private HotReloadService? _hotReload;
+    private HotReloadService _hotReload = null!;
     private MonoGameInput _input = null!;
 
     private string _scenePath = "";
@@ -72,7 +72,6 @@ public sealed class GameApp : Game
     private TextureStore _textures = null!;
     private MonoGameRenderer2D _renderer2D = null!;
 
-    private Entity _player = null!;
 
     public GameApp()
     {
@@ -297,6 +296,9 @@ public sealed class GameApp : Game
             var json = File.ReadAllText(_scenePath);
             _scene = SceneJson.Deserialize(json);
 
+            EnsurePlayerPrefabExists();
+            SpawnPrefabIfMissing("Player");
+
             var p = _scene.FindByName("Player");
             if (p != null && p.TryGet<Engine.Core.Components.Animator>(out var a) && a != null)
             {
@@ -316,6 +318,38 @@ public sealed class GameApp : Game
             // Keep the previous _scene so the game continues running.
         }
 
+    }
+
+    private void EnsurePlayerPrefabExists()
+    {
+        var player = _scene.FindByName("Player");
+        if (player is null)
+            return;
+
+        if (_assets.TryGetPrefab("Player", out _))
+            return;
+
+        var prefabsPath = _prefabsPath;
+        Directory.CreateDirectory(prefabsPath);
+
+        var prefab = Prefab.FromScene(_scene, player.Id);
+        var json = PrefabJson.Serialize(prefab);
+        var filePath = Path.Combine(prefabsPath, "Player.prefab.json");
+        File.WriteAllText(filePath, json);
+
+        // Make sure the asset provider sees the newly created prefab.
+        ReloadAssets();
+    }
+
+    private void SpawnPrefabIfMissing(string prefabId)
+    {
+        if (_scene.FindByName(prefabId) is not null)
+            return;
+
+        if (!_assets.TryGetPrefab(prefabId, out var prefab))
+            return;
+
+        _scene.InstantiatePrefab(prefab);
     }
 
     private static Dictionary<string, Prefab> LoadPrefabs(string prefabsPath)
@@ -457,7 +491,7 @@ public sealed class GameApp : Game
         }
     }
 
-    private static void SetMultilinePersistent(string keyPrefix, string? text)
+    private static void SetMultilinePersistent(string keyPrefix, string text)
     {
         // Clear previous lines (up to some reasonable cap)
         for (int i = 0; i < 16; i++)

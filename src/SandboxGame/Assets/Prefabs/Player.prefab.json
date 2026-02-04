@@ -1,0 +1,55 @@
+{
+  "Version": 1,
+  "RootId": "11111111-1111-1111-1111-111111111111",
+  "Entities": [
+    {
+      "Id": "11111111-1111-1111-1111-111111111111",
+      "Name": "Player",
+      "Transform": {
+        "Position": [
+          0,
+          0,
+          0
+        ],
+        "RotationZRadians": 0,
+        "Scale": [
+          5,
+          5,
+          1
+        ]
+      },
+      "SpriteRenderer": {
+        "SpriteId": "player_idle_0",
+        "Tint": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "Layer": 100,
+        "OverrideSourceRect": false,
+        "SourceRect": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "OverridePixelsPerUnit": false,
+        "PixelsPerUnitOverride": 100,
+        "Flip": "None"
+      },
+      "Animator": {
+        "ControllerId": "player",
+        "ClipId": "",
+        "Playing": true,
+        "Speed": 1,
+        "LoopOverride": false,
+        "Loop": true,
+        "FrameIndex": 0,
+        "TimeIntoFrame": 0,
+        "DefaultCrossFadeSeconds": 0,
+        "DefaultFreezeDuringCrossFade": false
+      }
+    }
+  ]
+}

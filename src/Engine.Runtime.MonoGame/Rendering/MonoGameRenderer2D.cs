@@ -20,7 +20,6 @@ public sealed class MonoGameRenderer2D : IRenderer2D
     private Engine.Core.Rendering.Camera2D? _camera;
 
 
-    private XnaMatrix _viewProj;
     private bool _begun;
 
     public MonoGameRenderer2D(GraphicsDevice graphicsDevice, TextureStore textures)

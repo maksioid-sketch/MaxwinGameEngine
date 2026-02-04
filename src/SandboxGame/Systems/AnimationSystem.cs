@@ -280,7 +280,7 @@ public sealed class AnimationSystem : ISystem
         }
     }
 
-    private static void StartCrossFadeIfNeeded(Animator anim, SpriteRenderer sr, string? previousSpriteId)
+    private static void StartCrossFadeIfNeeded(Animator anim, SpriteRenderer sr, string previousSpriteId)
     {
         // If previousSpriteId is null, we still must consume pending overrides to prevent leaks.
         float fade = anim.PendingCrossFadeSeconds ?? anim.DefaultCrossFadeSeconds;

@@ -23,7 +23,7 @@ public sealed class DictionaryAssetProvider : IAssetProvider
     }
 
     public bool TryGetController(string controllerId, out AnimatorController controller)
-        => _controllers.TryGetValue(controllerId, out controller);
+        => _controllers.TryGetValue(controllerId, out controller!);
 
 
     public bool TryGetSprite(string spriteId, out SpriteDefinition sprite)

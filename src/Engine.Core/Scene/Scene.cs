@@ -1,5 +1,4 @@
 ﻿using Engine.Core.Assets;
-using Engine.Core.Assets;
 using Engine.Core.Components;
 using Engine.Core.Rendering;
 using Engine.Core.Rendering.Queue;

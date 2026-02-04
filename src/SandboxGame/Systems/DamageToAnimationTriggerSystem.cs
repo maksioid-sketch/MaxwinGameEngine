@@ -21,7 +21,7 @@ public sealed class DamageToAnimatorTriggerSystem : ISystem
         {
             var ev = events[i];
 
-            Entity? target = null;
+            Entity target = null;
             foreach (var e in scene.Entities)
             {
                 if (e.Id == ev.EntityId) { target = e; break; }
