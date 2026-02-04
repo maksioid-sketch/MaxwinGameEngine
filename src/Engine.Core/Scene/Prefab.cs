@@ -55,6 +55,9 @@ public sealed class Prefab
 
             if (prefabEntity.Animator is not null)
                 entity.Add(prefabEntity.Animator.ToComponent());
+
+            if (prefabEntity.BoxCollider2D is not null)
+                entity.Add(prefabEntity.BoxCollider2D.ToComponent());
         }
 
         return idMap.TryGetValue(RootId, out var root) ? root : idMap.Values.First();
@@ -70,11 +73,13 @@ public sealed class Prefab
 
         public SpriteRendererData? SpriteRenderer { get; set; }
         public AnimatorData? Animator { get; set; }
+        public BoxCollider2DData? BoxCollider2D { get; set; }
 
         public static PrefabEntity FromEntity(Entity entity)
         {
             entity.TryGet<SpriteRenderer>(out var spr);
             entity.TryGet<Components.Animator>(out var anim);
+            entity.TryGet<BoxCollider2D>(out var box);
 
             return new PrefabEntity
             {
@@ -84,7 +89,8 @@ public sealed class Prefab
                 Scale = entity.Transform.Scale,
                 RotationZRadians = GetZRotationRadians(entity.Transform.Rotation),
                 SpriteRenderer = spr is null ? null : SpriteRendererData.FromComponent(spr),
-                Animator = anim is null ? null : AnimatorData.FromComponent(anim)
+                Animator = anim is null ? null : AnimatorData.FromComponent(anim),
+                BoxCollider2D = box is null ? null : BoxCollider2DData.FromComponent(box)
             };
         }
 
@@ -182,6 +188,33 @@ public sealed class Prefab
                 TimeIntoFrame = TimeIntoFrame,
                 DefaultCrossFadeSeconds = DefaultCrossFadeSeconds,
                 DefaultFreezeDuringCrossFade = DefaultFreezeDuringCrossFade
+            };
+        }
+    }
+
+    public sealed class BoxCollider2DData
+    {
+        public Vector2 Size { get; set; } = new(1f, 1f);
+        public Vector2 Offset { get; set; } = Vector2.Zero;
+        public bool IsTrigger { get; set; } = false;
+
+        public static BoxCollider2DData FromComponent(BoxCollider2D collider)
+        {
+            return new BoxCollider2DData
+            {
+                Size = collider.Size,
+                Offset = collider.Offset,
+                IsTrigger = collider.IsTrigger
+            };
+        }
+
+        public BoxCollider2D ToComponent()
+        {
+            return new BoxCollider2D
+            {
+                Size = Size,
+                Offset = Offset,
+                IsTrigger = IsTrigger
             };
         }
     }

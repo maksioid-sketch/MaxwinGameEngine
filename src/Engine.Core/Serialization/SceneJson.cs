@@ -99,6 +99,15 @@ public static class SceneJson
 
                     });
                 }
+                if (e.BoxCollider2D is not null)
+                {
+                    entity.Add(new BoxCollider2D
+                    {
+                        Size = new Vector2(e.BoxCollider2D.Size[0], e.BoxCollider2D.Size[1]),
+                        Offset = new Vector2(e.BoxCollider2D.Offset[0], e.BoxCollider2D.Offset[1]),
+                        IsTrigger = e.BoxCollider2D.IsTrigger
+                    });
+                }
 
             }
 
@@ -115,6 +124,7 @@ public static class SceneJson
         // Optional components (add more later)
         public SpriteRendererDto? SpriteRenderer { get; set; }
         public AnimatorDto? Animator { get; set; }
+        public BoxCollider2DDto? BoxCollider2D { get; set; }
 
 
         public static EntityDto FromEntity(EntityType e)
@@ -122,6 +132,7 @@ public static class SceneJson
             e.TryGet<SpriteRenderer>(out var spr);
 
             e.TryGet<Engine.Core.Components.Animator>(out var anim);
+            e.TryGet<BoxCollider2D>(out var box);
             
             
 
@@ -153,6 +164,12 @@ public static class SceneJson
                     Loop = anim.Loop,
                     FrameIndex = anim.FrameIndex,
                     TimeIntoFrame = anim.TimeIntoFrame
+                },
+                BoxCollider2D = box is null ? null : new BoxCollider2DDto
+                {
+                    Size = new[] { box.Size.X, box.Size.Y },
+                    Offset = new[] { box.Offset.X, box.Offset.Y },
+                    IsTrigger = box.IsTrigger
                 }
             };
         }
@@ -197,6 +214,13 @@ public static class SceneJson
         public float DefaultCrossFadeSeconds { get; set; } = 0.04f;
         public bool DefaultFreezeDuringCrossFade { get; set; } = false;
 
+    }
+
+    private sealed class BoxCollider2DDto
+    {
+        public float[] Size { get; set; } = new float[] { 1, 1 };
+        public float[] Offset { get; set; } = new float[] { 0, 0 };
+        public bool IsTrigger { get; set; } = false;
     }
 
 }

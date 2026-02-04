@@ -49,6 +49,7 @@ public sealed class GameApp : Game
 
     private SpriteBatch _uiSb = null!;
     private SpriteFont _debugFont = null!;
+    private Texture2D _debugPixel = null!;
 
     private readonly List<RenderItem2D> _renderQueue2D = new();
     private List<ValidationIssue> _validationIssues = new();
@@ -100,6 +101,8 @@ public sealed class GameApp : Game
 
         _uiSb = new SpriteBatch(GraphicsDevice);
         _debugFont = Content.Load<SpriteFont>("DebugFont");
+        _debugPixel = new Texture2D(GraphicsDevice, 1, 1);
+        _debugPixel.SetData(new[] { Microsoft.Xna.Framework.Color.White });
 
         string watchRoot = AppContext.BaseDirectory;
 
@@ -223,6 +226,8 @@ public sealed class GameApp : Game
 
         _renderer2D.End();
 
+        DrawDebugColliders();
+
         DrawDebugOverlay();
 
         base.Draw(gameTime);
@@ -298,6 +303,7 @@ public sealed class GameApp : Game
 
             EnsurePlayerPrefabExists();
             SpawnPrefabIfMissing("Player");
+            SpawnPrefabIfMissing("Capibara", new System.Numerics.Vector3(2f, 0f, 0f));
 
             var p = _scene.FindByName("Player");
             if (p != null && p.TryGet<Engine.Core.Components.Animator>(out var a) && a != null)
@@ -343,13 +349,18 @@ public sealed class GameApp : Game
 
     private void SpawnPrefabIfMissing(string prefabId)
     {
+        SpawnPrefabIfMissing(prefabId, null);
+    }
+
+    private void SpawnPrefabIfMissing(string prefabId, System.Numerics.Vector3? positionOverride)
+    {
         if (_scene.FindByName(prefabId) is not null)
             return;
 
         if (!_assets.TryGetPrefab(prefabId, out var prefab))
             return;
 
-        _scene.InstantiatePrefab(prefab);
+        _scene.InstantiatePrefab(prefab, positionOverride);
     }
 
     private static Dictionary<string, Prefab> LoadPrefabs(string prefabsPath)
@@ -409,6 +420,69 @@ public sealed class GameApp : Game
         }
 
         _uiSb.End();
+    }
+
+    private void DrawDebugColliders()
+    {
+        if (_camera is null)
+            return;
+
+        var collidingIds = new HashSet<Guid>();
+        var collisions = _services.Events.Read<CollisionEvent>();
+        for (int i = 0; i < collisions.Count; i++)
+        {
+            collidingIds.Add(collisions[i].A.Id);
+            collidingIds.Add(collisions[i].B.Id);
+        }
+
+        _uiSb.Begin(samplerState: SamplerState.PointClamp, blendState: BlendState.AlphaBlend);
+
+        for (int i = 0; i < _scene.Entities.Count; i++)
+        {
+            var e = _scene.Entities[i];
+            if (!e.TryGet<BoxCollider2D>(out var box) || box is null)
+                continue;
+
+            var scale = e.Transform.Scale;
+            var size = new System.Numerics.Vector2(Math.Abs(scale.X) * box.Size.X, Math.Abs(scale.Y) * box.Size.Y);
+            var offset = new System.Numerics.Vector2(box.Offset.X * scale.X, box.Offset.Y * scale.Y);
+            var centerWorld = new System.Numerics.Vector2(e.Transform.Position.X, e.Transform.Position.Y) + offset;
+
+            var half = size * 0.5f;
+            var minWorld = centerWorld - half;
+            var maxWorld = centerWorld + half;
+
+            var minScreen = _camera.WorldToScreen(minWorld);
+            var maxScreen = _camera.WorldToScreen(maxWorld);
+
+            float x = MathF.Min(minScreen.X, maxScreen.X);
+            float y = MathF.Min(minScreen.Y, maxScreen.Y);
+            float w = MathF.Abs(maxScreen.X - minScreen.X);
+            float h = MathF.Abs(maxScreen.Y - minScreen.Y);
+
+            var color = collidingIds.Contains(e.Id)
+                ? Microsoft.Xna.Framework.Color.Red
+                : (box.IsTrigger
+                    ? Microsoft.Xna.Framework.Color.Yellow
+                    : Microsoft.Xna.Framework.Color.LimeGreen);
+
+            DrawRectOutline(x, y, w, h, color, 2);
+        }
+
+        _uiSb.End();
+    }
+
+    private void DrawRectOutline(float x, float y, float w, float h, Microsoft.Xna.Framework.Color color, int thickness)
+    {
+        if (w <= 0 || h <= 0)
+            return;
+
+        var t = Math.Max(1, thickness);
+
+        _uiSb.Draw(_debugPixel, new Rectangle((int)x, (int)y, (int)w, t), color);
+        _uiSb.Draw(_debugPixel, new Rectangle((int)x, (int)(y + h - t), (int)w, t), color);
+        _uiSb.Draw(_debugPixel, new Rectangle((int)x, (int)y, t, (int)h), color);
+        _uiSb.Draw(_debugPixel, new Rectangle((int)(x + w - t), (int)y, t, (int)h), color);
     }
 
     private void PushPersistentDebugOverlay()
@@ -524,6 +598,7 @@ public sealed class GameApp : Game
         _systems = new List<ISystem>
         {
             new Engine.Core.Systems.BuiltIn.PlayerMovementSystem(),
+            new Engine.Core.Systems.BuiltIn.CollisionSystem(),
 
             // Demo: E -> DamageEvent -> Animator trigger
             new SandboxGame.Systems.DebugDamageInputSystem(),

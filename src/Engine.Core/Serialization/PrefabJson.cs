@@ -73,6 +73,7 @@ public static class PrefabJson
 
         public SpriteRendererDto? SpriteRenderer { get; set; }
         public AnimatorDto? Animator { get; set; }
+        public BoxCollider2DDto? BoxCollider2D { get; set; }
 
         public static EntityDto FromPrefabEntity(Prefab.PrefabEntity entity)
         {
@@ -87,7 +88,8 @@ public static class PrefabJson
                     RotationZRadians = entity.RotationZRadians
                 },
                 SpriteRenderer = entity.SpriteRenderer is null ? null : SpriteRendererDto.FromData(entity.SpriteRenderer),
-                Animator = entity.Animator is null ? null : AnimatorDto.FromData(entity.Animator)
+                Animator = entity.Animator is null ? null : AnimatorDto.FromData(entity.Animator),
+                BoxCollider2D = entity.BoxCollider2D is null ? null : BoxCollider2DDto.FromData(entity.BoxCollider2D)
             };
         }
 
@@ -101,7 +103,8 @@ public static class PrefabJson
                 Scale = new Vector3(Transform.Scale[0], Transform.Scale[1], Transform.Scale[2]),
                 RotationZRadians = Transform.RotationZRadians,
                 SpriteRenderer = SpriteRenderer is null ? null : SpriteRenderer.ToData(),
-                Animator = Animator is null ? null : Animator.ToData()
+                Animator = Animator is null ? null : Animator.ToData(),
+                BoxCollider2D = BoxCollider2D is null ? null : BoxCollider2D.ToData()
             };
         }
     }
@@ -199,6 +202,33 @@ public static class PrefabJson
                 TimeIntoFrame = TimeIntoFrame,
                 DefaultCrossFadeSeconds = DefaultCrossFadeSeconds,
                 DefaultFreezeDuringCrossFade = DefaultFreezeDuringCrossFade
+            };
+        }
+    }
+
+    private sealed class BoxCollider2DDto
+    {
+        public float[] Size { get; set; } = new float[] { 1, 1 };
+        public float[] Offset { get; set; } = new float[] { 0, 0 };
+        public bool IsTrigger { get; set; } = false;
+
+        public static BoxCollider2DDto FromData(Prefab.BoxCollider2DData data)
+        {
+            return new BoxCollider2DDto
+            {
+                Size = new[] { data.Size.X, data.Size.Y },
+                Offset = new[] { data.Offset.X, data.Offset.Y },
+                IsTrigger = data.IsTrigger
+            };
+        }
+
+        public Prefab.BoxCollider2DData ToData()
+        {
+            return new Prefab.BoxCollider2DData
+            {
+                Size = new Vector2(Size[0], Size[1]),
+                Offset = new Vector2(Offset[0], Offset[1]),
+                IsTrigger = IsTrigger
             };
         }
     }
