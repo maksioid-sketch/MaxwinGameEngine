@@ -11,6 +11,8 @@ public sealed class PlayerMovementSystem : ISystem
 {
     public string PlayerEntityName { get; set; } = "Player";
     public float SpeedUnitsPerSecond { get; set; } = 3f;
+    public float JumpSpeedUnitsPerSecond { get; set; } = 9f;
+    public float GroundCheckDistance { get; set; } = 0.03f;
 
     // Name of the float parameter written to Animator (used by controllers.json)
     public string SpeedParamName { get; set; } = "speed";
@@ -36,8 +38,7 @@ public sealed class PlayerMovementSystem : ISystem
 
         if (ctx.Input.IsDown(InputKey.A) || ctx.Input.IsDown(InputKey.Left)) move.X -= 1f;
         if (ctx.Input.IsDown(InputKey.D) || ctx.Input.IsDown(InputKey.Right)) move.X += 1f;
-        if (ctx.Input.IsDown(InputKey.W) || ctx.Input.IsDown(InputKey.Up)) move.Y -= 1f;
-        if (ctx.Input.IsDown(InputKey.S) || ctx.Input.IsDown(InputKey.Down)) move.Y += 1f;
+        // Vertical movement is now jump-only (Space).
 
         float speed = 0f;
 
@@ -47,14 +48,16 @@ public sealed class PlayerMovementSystem : ISystem
             speed = SpeedUnitsPerSecond;
         }
 
+        bool grounded = IsGrounded(scene, player);
+
         // Apply movement (velocity if Rigidbody2D exists, otherwise direct position)
         if (player.TryGet<Rigidbody2D>(out var rb) && rb is not null)
         {
             var v = rb.Velocity;
             v.X = move.X * SpeedUnitsPerSecond;
 
-            if (!rb.UseGravity || move.Y != 0f)
-                v.Y = move.Y * SpeedUnitsPerSecond;
+            if (grounded && ctx.Input.WasPressed(InputKey.W))
+                v.Y = -JumpSpeedUnitsPerSecond;
 
             rb.Velocity = v;
         }
@@ -120,10 +123,59 @@ public sealed class PlayerMovementSystem : ISystem
         if (player.TryGet<Animator>(out var anim) && anim != null)
         {
             anim.Floats[SpeedParamName] = speed;
-            anim.Bools["grounded"] = true;
+            anim.Bools["grounded"] = grounded;
             anim.Bools["crouch"] = crouch;
             anim.Bools["guard"] = guard;
 
         }
+    }
+
+    private bool IsGrounded(Scene.Scene scene, Entity player)
+    {
+        if (!player.TryGet<BoxCollider2D>(out var playerBox) || playerBox is null)
+            return false;
+
+        var pScale = player.Transform.Scale;
+        var pSize = new Vector2(MathF.Abs(pScale.X) * playerBox.Size.X, MathF.Abs(pScale.Y) * playerBox.Size.Y);
+        var pOffset = new Vector2(playerBox.Offset.X * pScale.X, playerBox.Offset.Y * pScale.Y);
+        var pCenter = new Vector2(player.Transform.Position.X, player.Transform.Position.Y) + pOffset;
+        var pHalf = pSize * 0.5f;
+        var pMin = pCenter - pHalf;
+        var pMax = pCenter + pHalf;
+
+        var entities = scene.Entities;
+        for (int i = 0; i < entities.Count; i++)
+        {
+            var e = entities[i];
+            if (ReferenceEquals(e, player))
+                continue;
+
+            if (!e.TryGet<BoxCollider2D>(out var box) || box is null)
+                continue;
+
+            if (box.IsTrigger)
+                continue;
+
+            if (e.TryGet<PhysicsBody2D>(out var phys) && phys is not null && !phys.IsStatic)
+                continue;
+
+            var scale = e.Transform.Scale;
+            var size = new Vector2(MathF.Abs(scale.X) * box.Size.X, MathF.Abs(scale.Y) * box.Size.Y);
+            var offset = new Vector2(box.Offset.X * scale.X, box.Offset.Y * scale.Y);
+            var center = new Vector2(e.Transform.Position.X, e.Transform.Position.Y) + offset;
+            var half = size * 0.5f;
+            var min = center - half;
+            var max = center + half;
+
+            bool overlapX = pMax.X > min.X && pMin.X < max.X;
+            if (!overlapX)
+                continue;
+
+            float gap = min.Y - pMax.Y;
+            if (gap >= -GroundCheckDistance && gap <= GroundCheckDistance)
+                return true;
+        }
+
+        return false;
     }
 }

@@ -14,6 +14,8 @@
         "stand":           { "clipId": "human_stand", "speed": 1.0 },
 
         "jump":            { "clipId": "human_jump", "speed": 1.0 },
+        "jump_idle":            { "clipId": "human_jump_idle", "speed": 1.0 },
+
 
         "punch_stand":     { "clipId": "human_punch_stand", "speed": 1.0 },
         "punch_crouch":    { "clipId": "human_punch_crouch", "speed": 1.0 },
@@ -117,18 +119,30 @@
         // JUMP / AIR (simple)
         // -------------------------
         {
-          "from": "*",
-          "to": "jump",
+          "from": "idle",
+          "to": "jump_idle",
           "priority": 400,
           "canInterrupt": true,
+          "transitionClipId": "human_jump",
           "conditions": [
-            { "bool": "grounded", "boolValue": false }
+            { "bool": "grounded", "boolValue": false}
+          ]
+        },
+
+        {
+          "from": "walk",
+          "to": "jump_idle",
+          "priority": 400,
+          "canInterrupt": true,
+          "transitionClipId": "human_jump",
+          "conditions": [
+            { "bool": "grounded", "boolValue": false}
           ]
         },
 
         // When grounded again, go to crouch or locomotion
         {
-          "from": "jump",
+          "from": "jump_idle",
           "to": "crouch",
           "priority": 60,
           "conditions": [
@@ -137,7 +151,7 @@
           ]
         },
         {
-          "from": "jump",
+          "from": "jump_idle",
           "to": "idle",
           "priority": 59,
           "conditions": [
