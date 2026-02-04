@@ -75,6 +75,7 @@ public static class PrefabJson
         public AnimatorDto? Animator { get; set; }
         public BoxCollider2DDto? BoxCollider2D { get; set; }
         public PhysicsBody2DDto? PhysicsBody2D { get; set; }
+        public Rigidbody2DDto? Rigidbody2D { get; set; }
 
         public static EntityDto FromPrefabEntity(Prefab.PrefabEntity entity)
         {
@@ -86,14 +87,15 @@ public static class PrefabJson
                 {
                     Position = new[] { entity.Position.X, entity.Position.Y, entity.Position.Z },
                     Scale = new[] { entity.Scale.X, entity.Scale.Y, entity.Scale.Z },
-                    RotationZDegrees = RadToDeg(entity.RotationZRadians)
-                },
-                SpriteRenderer = entity.SpriteRenderer is null ? null : SpriteRendererDto.FromData(entity.SpriteRenderer),
-                Animator = entity.Animator is null ? null : AnimatorDto.FromData(entity.Animator),
-                BoxCollider2D = entity.BoxCollider2D is null ? null : BoxCollider2DDto.FromData(entity.BoxCollider2D),
-                PhysicsBody2D = entity.PhysicsBody2D is null ? null : PhysicsBody2DDto.FromData(entity.PhysicsBody2D)
-            };
-        }
+                RotationZDegrees = RadToDeg(entity.RotationZRadians)
+            },
+            SpriteRenderer = entity.SpriteRenderer is null ? null : SpriteRendererDto.FromData(entity.SpriteRenderer),
+            Animator = entity.Animator is null ? null : AnimatorDto.FromData(entity.Animator),
+            BoxCollider2D = entity.BoxCollider2D is null ? null : BoxCollider2DDto.FromData(entity.BoxCollider2D),
+            PhysicsBody2D = entity.PhysicsBody2D is null ? null : PhysicsBody2DDto.FromData(entity.PhysicsBody2D),
+            Rigidbody2D = entity.Rigidbody2D is null ? null : Rigidbody2DDto.FromData(entity.Rigidbody2D)
+        };
+    }
 
         public Prefab.PrefabEntity ToPrefabEntity()
         {
@@ -107,7 +109,8 @@ public static class PrefabJson
                 SpriteRenderer = SpriteRenderer is null ? null : SpriteRenderer.ToData(),
                 Animator = Animator is null ? null : Animator.ToData(),
                 BoxCollider2D = BoxCollider2D is null ? null : BoxCollider2D.ToData(),
-                PhysicsBody2D = PhysicsBody2D is null ? null : PhysicsBody2D.ToData()
+                PhysicsBody2D = PhysicsBody2D is null ? null : PhysicsBody2D.ToData(),
+                Rigidbody2D = Rigidbody2D is null ? null : Rigidbody2D.ToData()
             };
         }
     }
@@ -260,6 +263,42 @@ public static class PrefabJson
             return new Prefab.PhysicsBody2DData
             {
                 IsStatic = IsStatic
+            };
+        }
+    }
+
+    private sealed class Rigidbody2DDto
+    {
+        public float Mass { get; set; } = 1f;
+        public float[] Velocity { get; set; } = new float[] { 0, 0 };
+        public bool UseGravity { get; set; } = true;
+        public float GravityScale { get; set; } = 1f;
+        public float LinearDrag { get; set; } = 0f;
+        public float Friction { get; set; } = 0.2f;
+
+        public static Rigidbody2DDto FromData(Prefab.Rigidbody2DData data)
+        {
+            return new Rigidbody2DDto
+            {
+                Mass = data.Mass,
+                Velocity = new[] { data.Velocity.X, data.Velocity.Y },
+                UseGravity = data.UseGravity,
+                GravityScale = data.GravityScale,
+                LinearDrag = data.LinearDrag,
+                Friction = data.Friction
+            };
+        }
+
+        public Prefab.Rigidbody2DData ToData()
+        {
+            return new Prefab.Rigidbody2DData
+            {
+                Mass = Mass,
+                Velocity = new Vector2(Velocity[0], Velocity[1]),
+                UseGravity = UseGravity,
+                GravityScale = GravityScale,
+                LinearDrag = LinearDrag,
+                Friction = Friction
             };
         }
     }

@@ -54,7 +54,7 @@ Entity movedInstance = scene.InstantiatePrefab(prefab, new Vector3(5f, 2f, 0f));
 
 ## Notes
 
-- Prefabs currently snapshot entity **transform**, **SpriteRenderer**, and **Animator** data.
+- Prefabs currently snapshot entity **transform**, **SpriteRenderer**, **Animator**, **BoxCollider2D**, **PhysicsBody2D**, and **Rigidbody2D** data.
 - The `InstantiatePrefab` call returns the root entity (as defined by the `rootId` you pass into `Prefab.FromScene`).
 - If you want to customize instance properties after spawn, simply edit the returned `Entity` or other entities in the scene.
 
@@ -75,6 +75,7 @@ Entity:
 - `Animator` (optional, object): Animator component data.
 - `BoxCollider2D` (optional, object): BoxCollider2D component data.
 - `PhysicsBody2D` (optional, object): PhysicsBody2D component data.
+- `Rigidbody2D` (optional, object): Rigidbody2D component data.
 
 Transform:
 - `Position` (required, array of 3 floats): `[x, y, z]`.
@@ -111,6 +112,14 @@ BoxCollider2D:
 
 PhysicsBody2D:
 - `IsStatic` (optional, bool): If true, this body will not be moved by collision resolution.
+
+Rigidbody2D:
+- `Mass` (optional, float)
+- `Velocity` (optional, array of 2 floats): `[x, y]`.
+- `UseGravity` (optional, bool)
+- `GravityScale` (optional, float)
+- `LinearDrag` (optional, float)
+- `Friction` (optional, float): Used by collision resolution for sliding.
 
 Example:
 ```json
@@ -155,6 +164,14 @@ Example:
       },
       "PhysicsBody2D": {
         "IsStatic": false
+      },
+      "Rigidbody2D": {
+        "Mass": 1,
+        "Velocity": [0, 0],
+        "UseGravity": true,
+        "GravityScale": 1,
+        "LinearDrag": 0,
+        "Friction": 0.2
       }
     }
   ]
@@ -170,6 +187,7 @@ Rules:
 - If a component is **present in the scene**, it replaces the prefab component.
 - If `transform` is **omitted**, the prefab root transform is used.
 - If `transform` is **present**, it overrides the prefab transform.
+- `PhysicsBody2D` and `Rigidbody2D` follow the same override rules.
 
 Minimal instance (uses prefab data):
 ```json

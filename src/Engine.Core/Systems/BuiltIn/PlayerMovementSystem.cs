@@ -45,24 +45,37 @@ public sealed class PlayerMovementSystem : ISystem
         {
             move = Vector2.Normalize(move);
             speed = SpeedUnitsPerSecond;
+        }
 
-            // Apply movement
+        // Apply movement (velocity if Rigidbody2D exists, otherwise direct position)
+        if (player.TryGet<Rigidbody2D>(out var rb) && rb is not null)
+        {
+            var v = rb.Velocity;
+            v.X = move.X * SpeedUnitsPerSecond;
+
+            if (!rb.UseGravity || move.Y != 0f)
+                v.Y = move.Y * SpeedUnitsPerSecond;
+
+            rb.Velocity = v;
+        }
+        else if (move != Vector2.Zero)
+        {
             var p = player.Transform.Position;
             p.X += move.X * SpeedUnitsPerSecond * ctx.DeltaSeconds;
             p.Y += move.Y * SpeedUnitsPerSecond * ctx.DeltaSeconds;
             player.Transform.Position = p;
+        }
 
-            // Optional: face direction
-            if (player.TryGet<SpriteRenderer>(out var sr) && sr != null)
-            {
-                bool left = (ctx.Input.IsDown(InputKey.A) || ctx.Input.IsDown(InputKey.Left));
-                bool right = (ctx.Input.IsDown(InputKey.D) || ctx.Input.IsDown(InputKey.Right));
+        // Optional: face direction
+        if (move != Vector2.Zero && player.TryGet<SpriteRenderer>(out var sr) && sr != null)
+        {
+            bool left = (ctx.Input.IsDown(InputKey.A) || ctx.Input.IsDown(InputKey.Left));
+            bool right = (ctx.Input.IsDown(InputKey.D) || ctx.Input.IsDown(InputKey.Right));
 
-                if (left && !right)
-                    sr.Flip = Engine.Core.Rendering.SpriteFlip.X;
-                else if (right && !left)
-                    sr.Flip = Engine.Core.Rendering.SpriteFlip.None;
-            }
+            if (left && !right)
+                sr.Flip = Engine.Core.Rendering.SpriteFlip.X;
+            else if (right && !left)
+                sr.Flip = Engine.Core.Rendering.SpriteFlip.None;
         }
         bool crouch = false;
         bool guard = false;

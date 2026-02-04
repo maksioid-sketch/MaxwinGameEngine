@@ -70,7 +70,8 @@ public static class SceneJson
                         OverrideSpriteRenderer = e.SpriteRenderer is not null,
                         OverrideAnimator = e.Animator is not null,
                         OverrideBoxCollider2D = e.BoxCollider2D is not null,
-                        OverridePhysicsBody2D = e.PhysicsBody2D is not null
+                        OverridePhysicsBody2D = e.PhysicsBody2D is not null,
+                        OverrideRigidbody2D = e.Rigidbody2D is not null
                     });
                 }
 
@@ -135,6 +136,19 @@ public static class SceneJson
                     });
                 }
 
+                if (e.Rigidbody2D is not null)
+                {
+                    entity.Add(new Rigidbody2D
+                    {
+                        Mass = e.Rigidbody2D.Mass,
+                        Velocity = new Vector2(e.Rigidbody2D.Velocity[0], e.Rigidbody2D.Velocity[1]),
+                        UseGravity = e.Rigidbody2D.UseGravity,
+                        GravityScale = e.Rigidbody2D.GravityScale,
+                        LinearDrag = e.Rigidbody2D.LinearDrag,
+                        Friction = e.Rigidbody2D.Friction
+                    });
+                }
+
             }
 
             return scene;
@@ -153,6 +167,7 @@ public static class SceneJson
         public AnimatorDto? Animator { get; set; }
         public BoxCollider2DDto? BoxCollider2D { get; set; }
         public PhysicsBody2DDto? PhysicsBody2D { get; set; }
+        public Rigidbody2DDto? Rigidbody2D { get; set; }
 
 
         public static EntityDto FromEntity(EntityType e)
@@ -162,6 +177,7 @@ public static class SceneJson
             e.TryGet<Engine.Core.Components.Animator>(out var anim);
             e.TryGet<BoxCollider2D>(out var box);
             e.TryGet<PhysicsBody2D>(out var body);
+            e.TryGet<Rigidbody2D>(out var rb);
             
             
 
@@ -204,6 +220,15 @@ public static class SceneJson
                 PhysicsBody2D = body is null ? null : new PhysicsBody2DDto
                 {
                     IsStatic = body.IsStatic
+                },
+                Rigidbody2D = rb is null ? null : new Rigidbody2DDto
+                {
+                    Mass = rb.Mass,
+                    Velocity = new[] { rb.Velocity.X, rb.Velocity.Y },
+                    UseGravity = rb.UseGravity,
+                    GravityScale = rb.GravityScale,
+                    LinearDrag = rb.LinearDrag,
+                    Friction = rb.Friction
                 }
             };
         }
@@ -267,6 +292,16 @@ public static class SceneJson
     private sealed class PhysicsBody2DDto
     {
         public bool IsStatic { get; set; } = false;
+    }
+
+    private sealed class Rigidbody2DDto
+    {
+        public float Mass { get; set; } = 1f;
+        public float[] Velocity { get; set; } = new float[] { 0, 0 };
+        public bool UseGravity { get; set; } = true;
+        public float GravityScale { get; set; } = 1f;
+        public float LinearDrag { get; set; } = 0f;
+        public float Friction { get; set; } = 0.2f;
     }
 
     private static float GetRotationRadians(TransformDto t)

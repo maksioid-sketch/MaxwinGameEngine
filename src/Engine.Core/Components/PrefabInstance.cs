@@ -13,4 +13,5 @@ public sealed class PrefabInstance : IComponent
     public bool OverrideAnimator { get; set; } = false;
     public bool OverrideBoxCollider2D { get; set; } = false;
     public bool OverridePhysicsBody2D { get; set; } = false;
+    public bool OverrideRigidbody2D { get; set; } = false;
 }

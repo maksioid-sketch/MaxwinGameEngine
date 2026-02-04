@@ -74,41 +74,85 @@ public sealed class CollisionSystem : ISystem
         if (a.IsStatic && b.IsStatic)
             return;
 
+        var normal = axis * axisSign;
+
         if (a.IsStatic && !b.IsStatic)
         {
-            var move = axis * (minOverlap * axisSign);
+            var move = normal * minOverlap;
             var bPosition = b.Entity.Transform.Position;
             bPosition.X += move.X;
             bPosition.Y += move.Y;
             b.Entity.Transform.Position = bPosition;
             b.Center += move;
+            ResolveVelocity(b.Entity, -normal);
             return;
         }
 
         if (!a.IsStatic && b.IsStatic)
         {
-            var move = axis * (minOverlap * axisSign);
+            var move = normal * minOverlap;
             var aPosition = a.Entity.Transform.Position;
             aPosition.X -= move.X;
             aPosition.Y -= move.Y;
             a.Entity.Transform.Position = aPosition;
             a.Center -= move;
+            ResolveVelocity(a.Entity, normal);
             return;
         }
 
-        var splitMove = axis * (minOverlap * 0.5f * axisSign);
+        var invMassA = GetInverseMass(a.Entity);
+        var invMassB = GetInverseMass(b.Entity);
+        var invMassSum = invMassA + invMassB;
+        if (invMassSum <= 0f)
+            return;
+
+        var moveA = normal * (minOverlap * (invMassA / invMassSum));
+        var moveB = normal * (minOverlap * (invMassB / invMassSum));
 
         var aPositionSplit = a.Entity.Transform.Position;
-        aPositionSplit.X -= splitMove.X;
-        aPositionSplit.Y -= splitMove.Y;
+        aPositionSplit.X -= moveA.X;
+        aPositionSplit.Y -= moveA.Y;
         a.Entity.Transform.Position = aPositionSplit;
-        a.Center -= splitMove;
+        a.Center -= moveA;
+        ResolveVelocity(a.Entity, normal);
 
         var bPositionSplit = b.Entity.Transform.Position;
-        bPositionSplit.X += splitMove.X;
-        bPositionSplit.Y += splitMove.Y;
+        bPositionSplit.X += moveB.X;
+        bPositionSplit.Y += moveB.Y;
         b.Entity.Transform.Position = bPositionSplit;
-        b.Center += splitMove;
+        b.Center += moveB;
+        ResolveVelocity(b.Entity, -normal);
+    }
+
+    private static void ResolveVelocity(Entity e, Vector2 normal)
+    {
+        if (!e.TryGet<Rigidbody2D>(out var body) || body is null)
+            return;
+
+        if (e.TryGet<PhysicsBody2D>(out var phys) && phys is not null && phys.IsStatic)
+            return;
+
+        var v = body.Velocity;
+        var vn = Vector2.Dot(v, normal);
+        if (vn > 0f)
+            v -= normal * vn;
+
+        var tangent = new Vector2(-normal.Y, normal.X);
+        var vt = Vector2.Dot(v, tangent);
+        v -= tangent * vt * body.Friction;
+
+        body.Velocity = v;
+    }
+
+    private static float GetInverseMass(Entity e)
+    {
+        if (e.TryGet<PhysicsBody2D>(out var phys) && phys is not null && phys.IsStatic)
+            return 0f;
+
+        if (e.TryGet<Rigidbody2D>(out var body) && body is not null && body.Mass > 0f)
+            return 1f / body.Mass;
+
+        return 1f;
     }
 
     private static float GetMinSeparationAxis(in ColliderEntry a, in ColliderEntry b, out Vector2 axisOut, out float axisSign)

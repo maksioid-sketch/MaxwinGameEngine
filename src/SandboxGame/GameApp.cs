@@ -637,6 +637,7 @@ public sealed class GameApp : Game
         _systems = new List<ISystem>
         {
             new Engine.Core.Systems.BuiltIn.PlayerMovementSystem(),
+            new Engine.Core.Systems.BuiltIn.PhysicsSystem(),
             new Engine.Core.Systems.BuiltIn.CollisionSystem(),
 
             // Demo: E -> DamageEvent -> Animator trigger

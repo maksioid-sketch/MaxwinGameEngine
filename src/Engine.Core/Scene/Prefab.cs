@@ -69,6 +69,9 @@ public sealed class Prefab
 
             if (prefabEntity.PhysicsBody2D is not null)
                 entity.Add(prefabEntity.PhysicsBody2D.ToComponent());
+
+            if (prefabEntity.Rigidbody2D is not null)
+                entity.Add(prefabEntity.Rigidbody2D.ToComponent());
         }
 
         return idMap.TryGetValue(RootId, out var root) ? root : idMap.Values.First();
@@ -86,6 +89,7 @@ public sealed class Prefab
         public AnimatorData? Animator { get; set; }
         public BoxCollider2DData? BoxCollider2D { get; set; }
         public PhysicsBody2DData? PhysicsBody2D { get; set; }
+        public Rigidbody2DData? Rigidbody2D { get; set; }
 
         public static PrefabEntity FromEntity(Entity entity)
         {
@@ -93,6 +97,7 @@ public sealed class Prefab
             entity.TryGet<Components.Animator>(out var anim);
             entity.TryGet<BoxCollider2D>(out var box);
             entity.TryGet<PhysicsBody2D>(out var body);
+            entity.TryGet<Rigidbody2D>(out var rb);
 
             return new PrefabEntity
             {
@@ -104,7 +109,8 @@ public sealed class Prefab
                 SpriteRenderer = spr is null ? null : SpriteRendererData.FromComponent(spr),
                 Animator = anim is null ? null : AnimatorData.FromComponent(anim),
                 BoxCollider2D = box is null ? null : BoxCollider2DData.FromComponent(box),
-                PhysicsBody2D = body is null ? null : PhysicsBody2DData.FromComponent(body)
+                PhysicsBody2D = body is null ? null : PhysicsBody2DData.FromComponent(body),
+                Rigidbody2D = rb is null ? null : Rigidbody2DData.FromComponent(rb)
             };
         }
 
@@ -250,6 +256,42 @@ public sealed class Prefab
             return new PhysicsBody2D
             {
                 IsStatic = IsStatic
+            };
+        }
+    }
+
+    public sealed class Rigidbody2DData
+    {
+        public float Mass { get; set; } = 1f;
+        public Vector2 Velocity { get; set; } = Vector2.Zero;
+        public bool UseGravity { get; set; } = true;
+        public float GravityScale { get; set; } = 1f;
+        public float LinearDrag { get; set; } = 0f;
+        public float Friction { get; set; } = 0.2f;
+
+        public static Rigidbody2DData FromComponent(Rigidbody2D body)
+        {
+            return new Rigidbody2DData
+            {
+                Mass = body.Mass,
+                Velocity = body.Velocity,
+                UseGravity = body.UseGravity,
+                GravityScale = body.GravityScale,
+                LinearDrag = body.LinearDrag,
+                Friction = body.Friction
+            };
+        }
+
+        public Rigidbody2D ToComponent()
+        {
+            return new Rigidbody2D
+            {
+                Mass = Mass,
+                Velocity = Velocity,
+                UseGravity = UseGravity,
+                GravityScale = GravityScale,
+                LinearDrag = LinearDrag,
+                Friction = Friction
             };
         }
     }
