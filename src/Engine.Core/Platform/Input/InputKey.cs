@@ -10,5 +10,9 @@ public enum InputKey
     Space,
     Escape,
     Enter,
-    E
+    E,
+    Shift,
+    Z,
+    X,
+    C
 }

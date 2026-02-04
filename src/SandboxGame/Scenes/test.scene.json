@@ -18,7 +18,9 @@
           "controllerId": "player",
           "clipId": "",
           "playing": true,
-          "speed": 1.0
+          "speed": 1.0,
+          "defaultCrossFadeSeconds": 0.0,
+          "defaultfreezeDuringCrossFade": false
         }
 
 

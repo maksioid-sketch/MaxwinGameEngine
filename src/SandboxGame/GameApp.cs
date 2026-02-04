@@ -4,12 +4,15 @@ using Engine.Core.Rendering;
 using Engine.Core.Scene;
 using Engine.Core.Serialization;
 using Engine.Core.Systems;
-using Engine.Core.Assets;
 using Engine.Core.Assets.Animation;
 using Engine.Core.Runtime;
 using Engine.Core.Platform.Input;
 using Engine.Core.Systems.BuiltIn;
 using SandboxGame.Platform;
+using Engine.Core.Runtime.Events;
+using Engine.Core.Runtime.Debug;
+
+
 
 using Engine.Runtime.MonoGame.Assets;
 using Engine.Runtime.MonoGame.Rendering;
@@ -49,6 +52,11 @@ public sealed class GameApp : Game
     private readonly List<RenderItem2D> _renderQueue2D = new();
     private List<ValidationIssue> _validationIssues = new();
 
+    private readonly OnScreenDebug _onScreenDebug = new(maxTransientLines: 18);
+    private readonly System.Collections.Generic.List<string> _debugLineBuffer = new();
+
+
+
 
     // Optional: expose status for future debug overlay
     private string _hotReloadStatus = "Hot reload: off";
@@ -82,7 +90,8 @@ public sealed class GameApp : Game
         _time = new MonoGameTime();
 
         // _assets must exist by now (even if empty)
-        _services = new EngineServices(_input, _time, _assets);
+        _services = new EngineServices(_input, _time, _assets, new EventBus());
+
 
 
         _textures = new TextureStore(Content);
@@ -123,18 +132,23 @@ public sealed class GameApp : Game
 
         _scene = new Engine.Core.Scene.Scene();
 
-        
+
 
         // Load real data
-        ReloadAssets();   // loads atlas + animations, also calls RebuildSystems() inside (recommended)
-        if (!_assets.TryGetAnimation("player_idle", out var idle) || idle.Frames.Count == 0)
-            throw new Exception("Animation 'player_idle' not loaded or has 0 frames. Check animations.generated.json load path + ReloadAssets().");
+        ReloadAssets(throwOnFailure: true);   // fail loudly on startup so you see the real error
+
 
 
         ReloadScene();    // loads scene
         //RebuildSystems(); // if you DON'T call it inside ReloadAssets(), keep this here
 
         _hotReloadStatus = $"{_hotReloadStatus}\nScene path: {_scenePath}";
+
+
+        DebugPrint.Initialize(_onScreenDebug);
+        DebugPrint.Print("DebugPrint ready (Unreal-style).", 2f);
+
+
     }
 
     protected override void Update(GameTime gameTime)
@@ -142,8 +156,12 @@ public sealed class GameApp : Game
         _time.Update(gameTime);
         _input.Update();
 
+        _onScreenDebug.Update(_time.DeltaSeconds);
+
+
         if (_input.WasPressed(InputKey.Escape))
             Exit();
+
 
         // Hot reload first
         var changes = _hotReload?.ConsumeChanges();
@@ -161,6 +179,7 @@ public sealed class GameApp : Game
             if (sceneChanged) ReloadScene();
         }
 
+        _services.Events.Clear();
         var ctx = new EngineContext(_services);
 
         for (int i = 0; i < _systems.Count; i++)
@@ -206,7 +225,7 @@ public sealed class GameApp : Game
         base.Draw(gameTime);
     }
 
-    private void ReloadAssets()
+    private void ReloadAssets(bool throwOnFailure = false)
     {
         try
         {
@@ -216,18 +235,27 @@ public sealed class GameApp : Game
             if (!File.Exists(_animationsPath))
                 throw new FileNotFoundException("animations.generated.json not found", _animationsPath);
 
+            if (!File.Exists(_controllersPath))
+                throw new FileNotFoundException("controllers.json not found", _controllersPath);
+
             // Load + parse
-            var atlasJson = File.ReadAllText(_atlasPath);
+            static string ReadJsonNoBom(string path)
+            {
+                var s = File.ReadAllText(path);
+                return s.TrimStart('\uFEFF'); // remove UTF-8 BOM if present
+            }
+
+            var atlasJson = ReadJsonNoBom(_atlasPath);
             var sprites = AtlasJson.DeserializeSprites(atlasJson);
 
-            var animJson = File.ReadAllText(_animationsPath);
+            var animJson = ReadJsonNoBom(_animationsPath);
             var clips = AnimationJson.DeserializeClips(animJson);
 
-            var controllersJson = File.ReadAllText(_controllersPath);
+            var controllersJson = ReadJsonNoBom(_controllersPath);
             var controllers = Engine.Core.Serialization.AnimatorControllerJson.DeserializeControllers(controllersJson);
 
-            _assets = new DictionaryAssetProvider(sprites, clips, controllers);
 
+            _assets = new DictionaryAssetProvider(sprites, clips, controllers);
 
             // Recreate systems that depend on _assets (AnimationSystem holds _assets reference)
             RebuildSystems();
@@ -236,15 +264,20 @@ public sealed class GameApp : Game
             _validationIssues = SceneValidator.Validate(_scene, _assets);
 
             _hotReloadStatus = $"Assets reloaded: {DateTime.Now:T}";
-
             _services.Assets = _assets;
-
-            _validationIssues = SceneValidator.Validate(_scene, _assets);
-
         }
         catch (Exception ex)
         {
-            _hotReloadStatus = $"Assets reload FAILED: {ex.Message}";
+            _hotReloadStatus =
+                "Assets reload FAILED:\n" +
+                $"{ex.GetType().Name}: {ex.Message}\n" +
+                $"atlas: {_atlasPath}\n" +
+                $"anim:  {_animationsPath}\n" +
+                $"ctrl:  {_controllersPath}";
+
+            if (throwOnFailure)
+                throw new Exception(_hotReloadStatus, ex);
+
             // Keep previous _assets and systems running
         }
     }
@@ -288,35 +321,67 @@ public sealed class GameApp : Game
         base.Dispose(disposing);
     }
 
+    
+
     private void DrawDebugOverlay()
     {
+        // 1) Build ALL overlay text via DebugPrint.Set(...)
+       // PushPersistentDebugOverlay();
+
+        // 2) Draw ONLY the new overlay system
         _uiSb.Begin();
 
         float x = 10f;
         float y = 10f;
-        float lineH = _debugFont.LineSpacing;
 
-        // Existing status
-        DrawLines(_hotReloadStatus, ref y, x, lineH);
+        // NOTE: if your OnScreenDebug has GetLines() WITHOUT buffer, use that.
+        // If you replaced OnScreenDebug with the newer version I gave, use GetLines(_debugLineBuffer).
+        var lines = _onScreenDebug.GetLines(_debugLineBuffer);
 
-        // ---- NEW: Time + Assets sanity ----
-        DrawLine($"dt={_services.Time.DeltaSeconds:0.0000} total={_services.Time.TotalSeconds:0.00}", ref y, x, lineH);
+        for (int i = 0; i < lines.Count; i++)
+        {
+            var line = FilterUnsupportedDebugChars(lines[i]);
+            _uiSb.DrawString(_debugFont, line, new Microsoft.Xna.Framework.Vector2(x, y), Microsoft.Xna.Framework.Color.Yellow);
+            y += _debugFont.LineSpacing;
+        }
+
+        _uiSb.End();
+    }
+
+    private void PushPersistentDebugOverlay()
+    {
+        // Existing status (multiline)
+        SetMultilinePersistent("hot", _hotReloadStatus);
+
+        DebugPrint.Set("time", $"dt={_services.Time.DeltaSeconds:0.0000} total={_services.Time.TotalSeconds:0.00}");
 
         bool hasIdle = _services.Assets.TryGetAnimation("player_idle", out var idleClip);
-        DrawLine($"assets: idleClip={hasIdle} frames={(hasIdle ? idleClip.Frames.Count : 0)}", ref y, x, lineH);
+        DebugPrint.Set("assets_idle", $"assets: idleClip={hasIdle} frames={(hasIdle ? idleClip.Frames.Count : 0)}");
 
-        // ---- NEW: Player animator state ----
         var player = _scene.FindByName("Player");
         if (player is null)
         {
-            DrawLine("Player entity: NOT FOUND", ref y, x, lineH);
+            DebugPrint.Set("player", "Player entity: NOT FOUND");
+            DebugPrint.Clear("ctrl");
+            DebugPrint.Clear("ctrl2");
+            DebugPrint.Clear("anim1");
+            DebugPrint.Clear("anim2");
+            DebugPrint.Clear("anim3");
+            DebugPrint.Clear("assets_cur");
         }
         else if (!player.TryGet<Engine.Core.Components.Animator>(out var anim) || anim is null)
         {
-            DrawLine("Player Animator: MISSING", ref y, x, lineH);
+            DebugPrint.Set("player", "Player Animator: MISSING");
+            DebugPrint.Clear("ctrl");
+            DebugPrint.Clear("ctrl2");
+            DebugPrint.Clear("anim1");
+            DebugPrint.Clear("anim2");
+            DebugPrint.Clear("anim3");
+            DebugPrint.Clear("assets_cur");
         }
         else
         {
+            DebugPrint.Set("player", "Player: OK");
 
             bool hasCtrl = false;
             string initial = "-";
@@ -330,58 +395,56 @@ public sealed class GameApp : Game
                 stateCount = tmpCtrl.States?.Count ?? 0;
             }
 
-            DrawLine($"ControllerId={anim.ControllerId} hasCtrl={hasCtrl}", ref y, x, lineH);
+            DebugPrint.Set("ctrl", $"ControllerId={anim.ControllerId} hasCtrl={hasCtrl}");
             if (hasCtrl)
-                DrawLine($"Ctrl initial={initial} states={stateCount}", ref y, x, lineH);
+                DebugPrint.Set("ctrl2", $"Ctrl initial={initial} states={stateCount}");
+            else
+                DebugPrint.Clear("ctrl2");
 
+            DebugPrint.Set("anim1", $"Animator: clip={anim.ClipId} playing={anim.Playing} speed={anim.Speed:0.00}");
+            DebugPrint.Set("anim2", $"Animator: frame={anim.FrameIndex} t={anim.TimeIntoFrame:0.000} reset={anim.ResetRequested}");
+            DebugPrint.Set("anim3", $"Animator: state={anim.StateId} pending={anim.PendingStateId ?? "-"} next={anim.NextClipId ?? "-"}");
 
-            DrawLine($"Animator: clip={anim.ClipId} playing={anim.Playing} speed={anim.Speed:0.00}", ref y, x, lineH);
-            DrawLine($"Animator: frame={anim.FrameIndex} t={anim.TimeIntoFrame:0.000} reset={anim.ResetRequested}", ref y, x, lineH);
-            DrawLine($"Animator: state={anim.StateId} pending={anim.PendingStateId ?? "-"} next={anim.NextClipId ?? "-"}", ref y, x, lineH);
-
-            var hasCur = false;
-            var curFrames = 0;
-
+            bool hasCur = false;
+            int curFrames = 0;
             if (!string.IsNullOrWhiteSpace(anim.ClipId) && _services.Assets.TryGetAnimation(anim.ClipId, out var tmp))
             {
                 hasCur = true;
                 curFrames = tmp.Frames.Count;
             }
 
-            DrawLine($"assets: currentClip={hasCur} curFrames={curFrames}", ref y, x, lineH);
-
+            DebugPrint.Set("assets_cur", $"assets: currentClip={hasCur} curFrames={curFrames}");
         }
 
         // Existing: render item origin
         if (_renderQueue2D.Count > 0)
         {
             var it = _renderQueue2D[0];
-            DrawLine($"RenderItem: origin={it.OriginPixels}", ref y, x, lineH);
+            DebugPrint.Set("render0", $"RenderItem: origin={it.OriginPixels}");
         }
-
-        _uiSb.End();
+        else
+        {
+            DebugPrint.Clear("render0");
+        }
     }
 
-    private void DrawLines(string text, ref float y, float x, float lineH)
+    private static void SetMultilinePersistent(string keyPrefix, string? text)
     {
-        if (string.IsNullOrEmpty(text)) return;
+        // Clear previous lines (up to some reasonable cap)
+        for (int i = 0; i < 16; i++)
+            Engine.Core.Runtime.Debug.DebugPrint.Clear($"{keyPrefix}_{i}");
 
-        // Normalize newlines and split
+        if (string.IsNullOrWhiteSpace(text))
+            return;
+
         var lines = text.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
 
-        foreach (var raw in lines)
+        for (int i = 0; i < lines.Length && i < 16; i++)
         {
-            var line = FilterUnsupportedDebugChars(raw);
-            _uiSb.DrawString(_debugFont, line, new Microsoft.Xna.Framework.Vector2(x, y), Microsoft.Xna.Framework.Color.White);
-            y += lineH;
+            Engine.Core.Runtime.Debug.DebugPrint.Set($"{keyPrefix}_{i}", lines[i]);
         }
     }
-    private void DrawLine(string line, ref float y, float x, float lineH)
-    {
-        line = FilterUnsupportedDebugChars(line ?? "");
-        _uiSb.DrawString(_debugFont, line, new Microsoft.Xna.Framework.Vector2(x, y), Microsoft.Xna.Framework.Color.White);
-        y += lineH;
-    }
+
 
 
     private static string FilterUnsupportedDebugChars(string s)
@@ -396,11 +459,20 @@ public sealed class GameApp : Game
     private void RebuildSystems()
     {
         _systems = new List<ISystem>
-{
-    new Engine.Core.Systems.BuiltIn.PlayerMovementSystem(),
-    new SandboxGame.Systems.AnimatorControllerSystem(() => _assets),
-    new SandboxGame.Systems.AnimationSystem()
-};
+        {
+            new Engine.Core.Systems.BuiltIn.PlayerMovementSystem(),
+
+            // Demo: E -> DamageEvent -> Animator trigger
+            new SandboxGame.Systems.DebugDamageInputSystem(),
+            new SandboxGame.Systems.DamageToAnimatorTriggerSystem(),
+
+            new SandboxGame.Systems.AnimatorControllerSystem(() => _assets),
+            new SandboxGame.Systems.AnimationSystem(),
+             
+            new Engine.Core.Systems.BuiltIn.AnimationNotifierSystem(),
+            new SandboxGame.Systems.AnimationNotifyDebugSystem()
+        };
+
 
 
     }

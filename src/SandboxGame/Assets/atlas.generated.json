@@ -690,6 +690,831 @@
         0
       ],
       "DefaultOriginToCenter": true
+    },
+    "human_idle_0": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        0,
+        0,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_walk_0": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        32,
+        0,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_walk_1": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        64,
+        0,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_walk_2": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        96,
+        0,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_walk_3": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        128,
+        0,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_walk_4": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        160,
+        0,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_walk_5": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        192,
+        0,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_crouch_0": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        224,
+        0,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_crouch_1": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        256,
+        0,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_crouch_2": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        288,
+        0,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_stand_0": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        0,
+        64,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_damage_high_0": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        32,
+        64,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_damage_high_1": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        64,
+        64,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_damage_low_0": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        96,
+        64,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_damage_low_1": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        128,
+        64,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_damage_crouch_0": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        160,
+        64,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_damage_crouch_1": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        192,
+        64,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_jump_0": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        224,
+        64,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_jump_1": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        256,
+        64,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_jump_2": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        288,
+        64,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_vert_strike_stand_0": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        0,
+        128,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_vert_strike_stand_1": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        32,
+        128,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_vert_strike_stand_2": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        64,
+        128,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_vert_strike_stand_3": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        96,
+        128,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_vert_strike_crouch_0": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        0,
+        192,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        17,
+        32
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_vert_strike_crouch_1": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        32,
+        192,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        17,
+        32
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_vert_strike_crouch_2": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        64,
+        192,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        17,
+        32
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_vert_strike_crouch_3": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        96,
+        192,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        17,
+        32
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_vert_strike_air_0": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        0,
+        256,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_vert_strike_air_1": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        32,
+        256,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_vert_strike_air_2": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        64,
+        256,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_vert_strike_air_3": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        96,
+        256,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_hor_strike_stand_0": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        128,
+        128,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_hor_strike_stand_1": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        160,
+        128,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_hor_strike_stand_2": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        192,
+        128,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_hor_strike_crouch_0": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        128,
+        192,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        14,
+        32
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_hor_strike_crouch_1": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        160,
+        192,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        14,
+        32
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_hor_strike_crouch_2": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        192,
+        192,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        14,
+        32
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_hor_strike_air_0": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        128,
+        256,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_hor_strike_air_1": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        160,
+        256,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_hor_strike_air_2": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        192,
+        256,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_punch_stand_0": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        224,
+        128,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_punch_stand_1": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        256,
+        128,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_punch_crouch_0": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        224,
+        192,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        14,
+        32
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_punch_crouch_1": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        256,
+        192,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        14,
+        32
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_punch_air_0": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        224,
+        256,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_punch_air_1": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        256,
+        256,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_guard_stand_0": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        288,
+        128,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_guard_crouch_0": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        288,
+        192,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_guard_air_0": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        288,
+        256,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_damage_air_0": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        32,
+        320,
+        38,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_damage_air_1": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        70,
+        320,
+        38,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_dead_0": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        128,
+        320,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_crouch_idle_0": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        288,
+        0,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
+    },
+    "human_jump_idle_0": {
+      "TextureKey": "Sprites/advnt_full",
+      "SourceRect": [
+        288,
+        64,
+        32,
+        64
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
     }
   }
 }

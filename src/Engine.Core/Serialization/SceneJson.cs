@@ -93,7 +93,10 @@ public static class SceneJson
                         LoopOverride = e.Animator.LoopOverride,
                         Loop = e.Animator.Loop,
                         FrameIndex = e.Animator.FrameIndex,
-                        TimeIntoFrame = e.Animator.TimeIntoFrame
+                        TimeIntoFrame = e.Animator.TimeIntoFrame,
+                        DefaultCrossFadeSeconds = e.Animator.DefaultCrossFadeSeconds,
+                        DefaultFreezeDuringCrossFade = e.Animator.DefaultFreezeDuringCrossFade,
+
                     });
                 }
 
@@ -190,6 +193,10 @@ public static class SceneJson
 
         public int FrameIndex { get; set; } = 0;
         public float TimeIntoFrame { get; set; } = 0f;
+
+        public float DefaultCrossFadeSeconds { get; set; } = 0.04f;
+        public bool DefaultFreezeDuringCrossFade { get; set; } = false;
+
     }
 
 }

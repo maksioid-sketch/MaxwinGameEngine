@@ -198,6 +198,618 @@
         "loop": false,
         "fps": 10
       }
+    },
+
+    {
+      "name": "Human Idle",
+      "textureKey": "Sprites/advnt_full",
+
+      "prefix": "human_idle",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 0,
+      "startY": 0,
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "columns": 1,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_idle",
+        "loop": false,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Human walk",
+      "textureKey": "Sprites/advnt_full",
+
+      "prefix": "human_walk",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 32,
+      "startY": 0,
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "columns": 6,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_walk",
+        "loop": true,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Human Crouch",
+      "textureKey": "Sprites/advnt_full",
+
+      "prefix": "human_crouch",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 224,
+      "startY": 0,
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "columns": 3,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_crouch",
+        "loop": false,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Human Stand",
+      "textureKey": "Sprites/advnt_full",
+
+      "prefix": "human_stand",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 0,
+      "startY": 64,
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "columns": 1,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_stand",
+        "loop": false,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Human Damage High",
+      "textureKey": "Sprites/advnt_full",
+
+      "prefix": "human_damage_high",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 32,
+      "startY": 64,
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "columns": 2,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_damage_high",
+        "loop": false,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Human Damage Low",
+      "textureKey": "Sprites/advnt_full",
+
+      "prefix": "human_damage_low",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 96,
+      "startY": 64,
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "columns": 2,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_damage_low",
+        "loop": false,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Human Damage Crouch",
+      "textureKey": "Sprites/advnt_full",
+
+      "prefix": "human_damage_crouch",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 160,
+      "startY": 64,
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "columns": 2,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_damage_crouch",
+        "loop": false,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Human Jump",
+      "textureKey": "Sprites/advnt_full",
+
+      "prefix": "human_jump",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 224,
+      "startY": 64,
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "columns": 3,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_jump",
+        "loop": false,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Human Vertical Strike Stand",
+      "textureKey": "Sprites/advnt_full",
+
+      "prefix": "human_vert_strike_stand",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 0,
+      "startY": 128,
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "columns": 4,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_vert_strike_stand",
+        "loop": false,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Human Vertical Strike Crouch",
+      "textureKey": "Sprites/advnt_full",
+
+      "prefix": "human_vert_strike_crouch",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 0,
+      "startY": 192,
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "columns": 4,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [17, 32],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_vert_strike_crouch",
+        "loop": false,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Human Vertical Strike Air",
+      "textureKey": "Sprites/advnt_full",
+
+      "prefix": "human_vert_strike_air",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 0,
+      "startY": 256,
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "columns": 4,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_vert_strike_air",
+        "loop": false,
+        "fps": 10
+      }
+    },
+
+
+
+
+    {
+      "name": "Human Horizontal Strike Stand",
+      "textureKey": "Sprites/advnt_full",
+
+      "prefix": "human_hor_strike_stand",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 128,
+      "startY": 128,
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "columns": 3,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_hor_strike_stand",
+        "loop": false,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Human Horizontal Strike Crouch",
+      "textureKey": "Sprites/advnt_full",
+
+      "prefix": "human_hor_strike_crouch",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 128,
+      "startY": 192,
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "columns": 3,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [14, 32],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_hor_strike_crouch",
+        "loop": false,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Human Horizontal Strike Air",
+      "textureKey": "Sprites/advnt_full",
+
+      "prefix": "human_hor_strike_air",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 128,
+      "startY": 256,
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "columns": 3,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_hor_strike_air",
+        "loop": false,
+        "fps": 10
+      }
+    },
+
+
+    {
+      "name": "Human Punch Stand",
+      "textureKey": "Sprites/advnt_full",
+
+      "prefix": "human_punch_stand",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 224,
+      "startY": 128,
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "columns": 2,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_punch_stand",
+        "loop": false,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Human Punch Crouch",
+      "textureKey": "Sprites/advnt_full",
+
+      "prefix": "human_punch_crouch",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 224,
+      "startY": 192,
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "columns": 2,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [14, 32],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_punch_crouch",
+        "loop": false,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Human Punch Air",
+      "textureKey": "Sprites/advnt_full",
+
+      "prefix": "human_punch_air",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 224,
+      "startY": 256,
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "columns": 2,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_punch_air",
+        "loop": false,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Human Guard Stand",
+      "textureKey": "Sprites/advnt_full",
+
+      "prefix": "human_guard_stand",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 288,
+      "startY": 128,
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "columns": 1,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_guard_stand",
+        "loop": false,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Human Guard Crouch",
+      "textureKey": "Sprites/advnt_full",
+
+      "prefix": "human_guard_crouch",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 288,
+      "startY": 192,
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "columns": 1,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_guard_crouch",
+        "loop": false,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Human Guard Air",
+      "textureKey": "Sprites/advnt_full",
+
+      "prefix": "human_guard_air",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 288,
+      "startY": 256,
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "columns": 1,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_guard_air",
+        "loop": false,
+        "fps": 10
+      }
+    },
+
+
+
+    {
+      "name": "Human Damage Air",
+      "textureKey": "Sprites/advnt_full",
+
+      "prefix": "human_damage_air",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 32,
+      "startY": 320,
+      "frameWidth": 38,
+      "frameHeight": 64,
+      "columns": 2,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_damage_air",
+        "loop": false,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Human Dead",
+      "textureKey": "Sprites/advnt_full",
+
+      "prefix": "human_dead",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 128,
+      "startY": 320,
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "columns": 1,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_dead",
+        "loop": true,
+        "fps": 10
+      }
+    },
+
+    {
+      "name": "Human Crouch Idle",
+      "textureKey": "Sprites/advnt_full",
+
+      "prefix": "human_crouch_idle",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 288,
+      "startY": 0,
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "columns": 1,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_crouch_idle",
+        "loop": true,
+        "fps": 10
+      }
+    }, 
+
+    {
+      "name": "Human Jump Idle",
+      "textureKey": "Sprites/advnt_full",
+
+      "prefix": "human_jump_idle",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 288,
+      "startY": 64,
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "columns": 1,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true,
+
+      "clip": {
+        "clipId": "human_jump_idle",
+        "loop": true,
+        "fps": 10
+      }
     }
+
+
+
+
+
+
   ]
 }
