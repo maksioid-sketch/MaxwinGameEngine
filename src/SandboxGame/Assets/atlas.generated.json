@@ -1515,6 +1515,21 @@
         0
       ],
       "DefaultOriginToCenter": true
+    },
+    "background_road_0": {
+      "TextureKey": "Sprites/country-platform-tiles-example",
+      "SourceRect": [
+        0,
+        0,
+        384,
+        224
+      ],
+      "PixelsPerUnit": 100,
+      "OriginPixels": [
+        0,
+        0
+      ],
+      "DefaultOriginToCenter": true
     }
   }
 }

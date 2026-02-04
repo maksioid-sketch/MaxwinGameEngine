@@ -74,6 +74,7 @@ public static class PrefabJson
         public SpriteRendererDto? SpriteRenderer { get; set; }
         public AnimatorDto? Animator { get; set; }
         public BoxCollider2DDto? BoxCollider2D { get; set; }
+        public PhysicsBody2DDto? PhysicsBody2D { get; set; }
 
         public static EntityDto FromPrefabEntity(Prefab.PrefabEntity entity)
         {
@@ -89,7 +90,8 @@ public static class PrefabJson
                 },
                 SpriteRenderer = entity.SpriteRenderer is null ? null : SpriteRendererDto.FromData(entity.SpriteRenderer),
                 Animator = entity.Animator is null ? null : AnimatorDto.FromData(entity.Animator),
-                BoxCollider2D = entity.BoxCollider2D is null ? null : BoxCollider2DDto.FromData(entity.BoxCollider2D)
+                BoxCollider2D = entity.BoxCollider2D is null ? null : BoxCollider2DDto.FromData(entity.BoxCollider2D),
+                PhysicsBody2D = entity.PhysicsBody2D is null ? null : PhysicsBody2DDto.FromData(entity.PhysicsBody2D)
             };
         }
 
@@ -104,7 +106,8 @@ public static class PrefabJson
                 RotationZRadians = GetRotationRadians(Transform),
                 SpriteRenderer = SpriteRenderer is null ? null : SpriteRenderer.ToData(),
                 Animator = Animator is null ? null : Animator.ToData(),
-                BoxCollider2D = BoxCollider2D is null ? null : BoxCollider2D.ToData()
+                BoxCollider2D = BoxCollider2D is null ? null : BoxCollider2D.ToData(),
+                PhysicsBody2D = PhysicsBody2D is null ? null : PhysicsBody2D.ToData()
             };
         }
     }
@@ -236,6 +239,27 @@ public static class PrefabJson
                 Size = new Vector2(Size[0], Size[1]),
                 Offset = new Vector2(Offset[0], Offset[1]),
                 IsTrigger = IsTrigger
+            };
+        }
+    }
+
+    private sealed class PhysicsBody2DDto
+    {
+        public bool IsStatic { get; set; } = false;
+
+        public static PhysicsBody2DDto FromData(Prefab.PhysicsBody2DData data)
+        {
+            return new PhysicsBody2DDto
+            {
+                IsStatic = data.IsStatic
+            };
+        }
+
+        public Prefab.PhysicsBody2DData ToData()
+        {
+            return new Prefab.PhysicsBody2DData
+            {
+                IsStatic = IsStatic
             };
         }
     }

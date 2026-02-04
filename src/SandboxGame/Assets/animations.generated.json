@@ -247,8 +247,7 @@
         },
         {
           "spriteId": "human_walk_2",
-          "durationSeconds": 0.1,
-          "events": ["footstep"] 
+          "durationSeconds": 0.1
         },
         {
           "spriteId": "human_walk_3",
@@ -260,8 +259,7 @@
         },
         {
           "spriteId": "human_walk_5",
-          "durationSeconds": 0.1,
-          "events": ["footstep"]
+          "durationSeconds": 0.1
         }
       ]
     },

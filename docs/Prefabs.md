@@ -74,6 +74,7 @@ Entity:
 - `SpriteRenderer` (optional, object): SpriteRenderer component data.
 - `Animator` (optional, object): Animator component data.
 - `BoxCollider2D` (optional, object): BoxCollider2D component data.
+- `PhysicsBody2D` (optional, object): PhysicsBody2D component data.
 
 Transform:
 - `Position` (required, array of 3 floats): `[x, y, z]`.
@@ -107,6 +108,9 @@ BoxCollider2D:
 - `Size` (required, array of 2 floats): `[width, height]`.
 - `Offset` (optional, array of 2 floats): `[x, y]`.
 - `IsTrigger` (optional, bool)
+
+PhysicsBody2D:
+- `IsStatic` (optional, bool): If true, this body will not be moved by collision resolution.
 
 Example:
 ```json
@@ -148,6 +152,9 @@ Example:
         "Size": [0.16, 0.46],
         "Offset": [0, 0.089],
         "IsTrigger": false
+      },
+      "PhysicsBody2D": {
+        "IsStatic": false
       }
     }
   ]

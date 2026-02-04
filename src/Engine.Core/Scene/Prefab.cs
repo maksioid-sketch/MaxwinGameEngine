@@ -66,6 +66,9 @@ public sealed class Prefab
 
             if (prefabEntity.BoxCollider2D is not null)
                 entity.Add(prefabEntity.BoxCollider2D.ToComponent());
+
+            if (prefabEntity.PhysicsBody2D is not null)
+                entity.Add(prefabEntity.PhysicsBody2D.ToComponent());
         }
 
         return idMap.TryGetValue(RootId, out var root) ? root : idMap.Values.First();
@@ -82,12 +85,14 @@ public sealed class Prefab
         public SpriteRendererData? SpriteRenderer { get; set; }
         public AnimatorData? Animator { get; set; }
         public BoxCollider2DData? BoxCollider2D { get; set; }
+        public PhysicsBody2DData? PhysicsBody2D { get; set; }
 
         public static PrefabEntity FromEntity(Entity entity)
         {
             entity.TryGet<SpriteRenderer>(out var spr);
             entity.TryGet<Components.Animator>(out var anim);
             entity.TryGet<BoxCollider2D>(out var box);
+            entity.TryGet<PhysicsBody2D>(out var body);
 
             return new PrefabEntity
             {
@@ -98,7 +103,8 @@ public sealed class Prefab
                 RotationZRadians = GetZRotationRadians(entity.Transform.Rotation),
                 SpriteRenderer = spr is null ? null : SpriteRendererData.FromComponent(spr),
                 Animator = anim is null ? null : AnimatorData.FromComponent(anim),
-                BoxCollider2D = box is null ? null : BoxCollider2DData.FromComponent(box)
+                BoxCollider2D = box is null ? null : BoxCollider2DData.FromComponent(box),
+                PhysicsBody2D = body is null ? null : PhysicsBody2DData.FromComponent(body)
             };
         }
 
@@ -223,6 +229,27 @@ public sealed class Prefab
                 Size = Size,
                 Offset = Offset,
                 IsTrigger = IsTrigger
+            };
+        }
+    }
+
+    public sealed class PhysicsBody2DData
+    {
+        public bool IsStatic { get; set; } = false;
+
+        public static PhysicsBody2DData FromComponent(PhysicsBody2D body)
+        {
+            return new PhysicsBody2DData
+            {
+                IsStatic = body.IsStatic
+            };
+        }
+
+        public PhysicsBody2D ToComponent()
+        {
+            return new PhysicsBody2D
+            {
+                IsStatic = IsStatic
             };
         }
     }

@@ -69,7 +69,8 @@ public static class SceneJson
                         OverrideTransform = e.Transform is not null,
                         OverrideSpriteRenderer = e.SpriteRenderer is not null,
                         OverrideAnimator = e.Animator is not null,
-                        OverrideBoxCollider2D = e.BoxCollider2D is not null
+                        OverrideBoxCollider2D = e.BoxCollider2D is not null,
+                        OverridePhysicsBody2D = e.PhysicsBody2D is not null
                     });
                 }
 
@@ -126,6 +127,14 @@ public static class SceneJson
                     });
                 }
 
+                if (e.PhysicsBody2D is not null)
+                {
+                    entity.Add(new PhysicsBody2D
+                    {
+                        IsStatic = e.PhysicsBody2D.IsStatic
+                    });
+                }
+
             }
 
             return scene;
@@ -143,6 +152,7 @@ public static class SceneJson
         public SpriteRendererDto? SpriteRenderer { get; set; }
         public AnimatorDto? Animator { get; set; }
         public BoxCollider2DDto? BoxCollider2D { get; set; }
+        public PhysicsBody2DDto? PhysicsBody2D { get; set; }
 
 
         public static EntityDto FromEntity(EntityType e)
@@ -151,6 +161,7 @@ public static class SceneJson
 
             e.TryGet<Engine.Core.Components.Animator>(out var anim);
             e.TryGet<BoxCollider2D>(out var box);
+            e.TryGet<PhysicsBody2D>(out var body);
             
             
 
@@ -189,6 +200,10 @@ public static class SceneJson
                     Size = new[] { box.Size.X, box.Size.Y },
                     Offset = new[] { box.Offset.X, box.Offset.Y },
                     IsTrigger = box.IsTrigger
+                },
+                PhysicsBody2D = body is null ? null : new PhysicsBody2DDto
+                {
+                    IsStatic = body.IsStatic
                 }
             };
         }
@@ -247,6 +262,11 @@ public static class SceneJson
         public float[] Size { get; set; } = new float[] { 1, 1 };
         public float[] Offset { get; set; } = new float[] { 0, 0 };
         public bool IsTrigger { get; set; } = false;
+    }
+
+    private sealed class PhysicsBody2DDto
+    {
+        public bool IsStatic { get; set; } = false;
     }
 
     private static float GetRotationRadians(TransformDto t)

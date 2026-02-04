@@ -1,32 +1,32 @@
 {
   "Version": 1,
-  "RootId": "11111111-1111-1111-1111-111111111111",
+  "RootId": "33333333-3333-3333-3333-333333333333",
   "Entities": [
     {
-      "Id": "11111111-1111-1111-1111-111111111111",
-      "Name": "Player",
+      "Id": "33333333-3333-3333-3333-333333333333",
+      "Name": "BackgroundRoad",
       "Transform": {
         "Position": [
-          -2,
-          -3,
+          0,
+          0.08,
           0
         ],
         "RotationZDegrees": 0,
         "Scale": [
-          5,
-          5,
+          3.5,
+          3.5,
           1
         ]
       },
       "SpriteRenderer": {
-        "SpriteId": "player_idle_0",
+        "SpriteId": "background_road_0",
         "Tint": [
           1,
           1,
           1,
           1
         ],
-        "Layer": 100,
+        "Layer": 90,
         "OverrideSourceRect": false,
         "SourceRect": [
           0,
@@ -38,28 +38,19 @@
         "PixelsPerUnitOverride": 100,
         "Flip": "None"
       },
-      "Animator": {
-        "ControllerId": "player",
-        "ClipId": "",
-        "Playing": true,
-        "Speed": 1,
-        "LoopOverride": false,
-        "Loop": true,
-        "FrameIndex": 0,
-        "TimeIntoFrame": 0,
-        "DefaultCrossFadeSeconds": 0,
-        "DefaultFreezeDuringCrossFade": false
-      },
       "BoxCollider2D": {
         "Size": [
-          0.16,
-          0.46
+          5,
+          0.2
         ],
         "Offset": [
           0,
-          0.089
+          0.9
         ],
         "IsTrigger": false
+      },
+      "PhysicsBody2D": {
+        "IsStatic": true
       }
     }
   ]

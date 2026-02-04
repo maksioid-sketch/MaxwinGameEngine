@@ -34,7 +34,8 @@ public sealed class CollisionSystem : ISystem
             var offsetWorld = axisX * offsetLocal.X + axisY * offsetLocal.Y;
             center += offsetWorld;
 
-            _entries.Add(new ColliderEntry(e, col, center, size * 0.5f, rot, axisX, axisY));
+            bool isStatic = e.TryGet<PhysicsBody2D>(out var body) && body is not null && body.IsStatic;
+            _entries.Add(new ColliderEntry(e, col, center, size * 0.5f, rot, axisX, axisY, isStatic));
         }
 
         for (int i = 0; i < _entries.Count; i++)
@@ -70,19 +71,44 @@ public sealed class CollisionSystem : ISystem
         if (minOverlap <= 0f)
             return;
 
-        var move = axis * (minOverlap * 0.5f * axisSign);
+        if (a.IsStatic && b.IsStatic)
+            return;
 
-        var aPos = a.Entity.Transform.Position;
-        aPos.X -= move.X;
-        aPos.Y -= move.Y;
-        a.Entity.Transform.Position = aPos;
-        a.Center -= move;
+        if (a.IsStatic && !b.IsStatic)
+        {
+            var move = axis * (minOverlap * axisSign);
+            var bPosition = b.Entity.Transform.Position;
+            bPosition.X += move.X;
+            bPosition.Y += move.Y;
+            b.Entity.Transform.Position = bPosition;
+            b.Center += move;
+            return;
+        }
 
-        var bPos = b.Entity.Transform.Position;
-        bPos.X += move.X;
-        bPos.Y += move.Y;
-        b.Entity.Transform.Position = bPos;
-        b.Center += move;
+        if (!a.IsStatic && b.IsStatic)
+        {
+            var move = axis * (minOverlap * axisSign);
+            var aPosition = a.Entity.Transform.Position;
+            aPosition.X -= move.X;
+            aPosition.Y -= move.Y;
+            a.Entity.Transform.Position = aPosition;
+            a.Center -= move;
+            return;
+        }
+
+        var splitMove = axis * (minOverlap * 0.5f * axisSign);
+
+        var aPositionSplit = a.Entity.Transform.Position;
+        aPositionSplit.X -= splitMove.X;
+        aPositionSplit.Y -= splitMove.Y;
+        a.Entity.Transform.Position = aPositionSplit;
+        a.Center -= splitMove;
+
+        var bPositionSplit = b.Entity.Transform.Position;
+        bPositionSplit.X += splitMove.X;
+        bPositionSplit.Y += splitMove.Y;
+        b.Entity.Transform.Position = bPositionSplit;
+        b.Center += splitMove;
     }
 
     private static float GetMinSeparationAxis(in ColliderEntry a, in ColliderEntry b, out Vector2 axisOut, out float axisSign)
@@ -158,8 +184,9 @@ public sealed class CollisionSystem : ISystem
         public float Rotation;
         public Vector2 AxisX;
         public Vector2 AxisY;
+        public bool IsStatic;
 
-        public ColliderEntry(Entity entity, BoxCollider2D collider, Vector2 center, Vector2 halfSize, float rotation, Vector2 axisX, Vector2 axisY)
+        public ColliderEntry(Entity entity, BoxCollider2D collider, Vector2 center, Vector2 halfSize, float rotation, Vector2 axisX, Vector2 axisY, bool isStatic)
         {
             Entity = entity;
             Collider = collider;
@@ -168,6 +195,7 @@ public sealed class CollisionSystem : ISystem
             Rotation = rotation;
             AxisX = axisX;
             AxisY = axisY;
+            IsStatic = isStatic;
         }
     }
 }

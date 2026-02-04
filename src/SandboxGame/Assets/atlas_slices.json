@@ -804,6 +804,27 @@
         "loop": true,
         "fps": 10
       }
+    },
+
+    {
+      "name": "Background Road",
+      "textureKey": "Sprites/country-platform-tiles-example",
+
+      "prefix": "background_road",
+      "idPattern": "{prefix}_{index}",
+
+      "startX": 0,
+      "startY": 0,
+      "frameWidth": 384,
+      "frameHeight": 224,
+      "columns": 1,
+      "rows": 1,
+
+      "pixelsPerUnit": 100.0,
+      "originPixels": [0, 0],
+      "defaultOriginToCenter": true
+
+      
     }
 
 
