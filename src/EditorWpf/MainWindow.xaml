@@ -5,9 +5,52 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EditorWpf"
         mc:Ignorable="d"
-        Title="Maxwin Editor" Height="720" Width="1100"
-        MinHeight="480" MinWidth="800">
+        Title="Maxwin Editor" Height="720" Width="1200"
+        MinHeight="480" MinWidth="900"
+        Background="#141416" Foreground="#E7E7E7">
     <Grid>
+        <Grid.Resources>
+            <SolidColorBrush x:Key="PanelBg" Color="#1D1E22"/>
+            <SolidColorBrush x:Key="PanelBorder" Color="#2A2B31"/>
+            <SolidColorBrush x:Key="Accent" Color="#3B82F6"/>
+            <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <Style TargetType="Button">
+                <Setter Property="Background" Value="#262830"/>
+                <Setter Property="Foreground" Value="#E7E7E7"/>
+                <Setter Property="BorderBrush" Value="#3A3C44"/>
+                <Setter Property="Padding" Value="10,6"/>
+                <Setter Property="Margin" Value="0,0,8,0"/>
+            </Style>
+            <Style TargetType="TextBox">
+                <Setter Property="Background" Value="#1B1C20"/>
+                <Setter Property="Foreground" Value="#E7E7E7"/>
+                <Setter Property="BorderBrush" Value="#343640"/>
+                <Setter Property="Padding" Value="6,4"/>
+            </Style>
+            <Style TargetType="ListBox">
+                <Setter Property="Background" Value="#17181C"/>
+                <Setter Property="Foreground" Value="#E7E7E7"/>
+                <Setter Property="BorderThickness" Value="0"/>
+            </Style>
+            <Style TargetType="TextBlock">
+                <Setter Property="Foreground" Value="#E7E7E7"/>
+            </Style>
+            <Style TargetType="DataGrid">
+                <Setter Property="Background" Value="#17181C"/>
+                <Setter Property="Foreground" Value="#E7E7E7"/>
+                <Setter Property="RowBackground" Value="#17181C"/>
+                <Setter Property="AlternatingRowBackground" Value="#1B1C21"/>
+                <Setter Property="BorderBrush" Value="#2A2B31"/>
+            </Style>
+            <Style TargetType="DataGridRow">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsOverridden}" Value="True">
+                        <Setter Property="Background" Value="#2A2330"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Resources>
+
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -16,39 +59,100 @@
 
         <DockPanel Grid.Row="0" Margin="8" LastChildFill="True">
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                <Button x:Name="OpenButton" Width="110" Margin="0,0,8,0" Click="OpenButton_OnClick">Open Scene</Button>
-                <Button x:Name="ReloadButton" Width="80" Margin="0,0,8,0" Click="ReloadButton_OnClick">Reload</Button>
+                <Button x:Name="OpenButton" Width="110" Click="OpenButton_OnClick">Open Scene</Button>
+                <Button x:Name="ReloadButton" Width="80" Click="ReloadButton_OnClick">Reload</Button>
+                <Button x:Name="SaveButton" Width="80" Click="SaveButton_OnClick">Save</Button>
             </StackPanel>
             <TextBox x:Name="ScenePathBox" IsReadOnly="True" VerticalContentAlignment="Center"/>
         </DockPanel>
 
         <Grid Grid.Row="1" Margin="8,0,8,8">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="240"/>
+                <ColumnDefinition Width="280"/>
                 <ColumnDefinition Width="6"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="6"/>
+                <ColumnDefinition Width="320"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" BorderBrush="#333" BorderThickness="1" Padding="6">
-                <DockPanel LastChildFill="True">
-                    <TextBlock DockPanel.Dock="Top" FontWeight="Bold" Margin="0,0,0,6">Entities</TextBlock>
-                    <ListBox x:Name="EntitiesList" SelectionChanged="EntitiesList_OnSelectionChanged"
-                             DisplayMemberPath="DisplayName"/>
-                </DockPanel>
-            </Border>
-
-            <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#222"/>
-
-            <Border Grid.Column="2" BorderBrush="#333" BorderThickness="1" Padding="6">
+            <Border Grid.Column="0" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" Padding="8">
                 <DockPanel LastChildFill="True">
                     <TextBlock DockPanel.Dock="Top" FontWeight="Bold" Margin="0,0,0,6">Inspector</TextBlock>
                     <ListBox x:Name="InspectorList" FontFamily="Consolas"/>
                 </DockPanel>
             </Border>
+
+            <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                          Background="#2A2B31" ResizeBehavior="PreviousAndNext" ResizeDirection="Columns"/>
+
+            <Border Grid.Column="2" Background="#0F1013" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" Padding="8">
+                <DockPanel LastChildFill="True">
+                    <TextBlock DockPanel.Dock="Top" FontWeight="Bold" Margin="0,0,0,6">Game View</TextBlock>
+                    <Border Background="#0B0C0F" BorderBrush="#1E2027" BorderThickness="1" CornerRadius="6">
+                        <Grid>
+                            <TextBlock Text="Game Window (placeholder)" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Foreground="#8B8E98"/>
+                        </Grid>
+                    </Border>
+                </DockPanel>
+            </Border>
+
+            <GridSplitter Grid.Column="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                          Background="#2A2B31" ResizeBehavior="PreviousAndNext" ResizeDirection="Columns"/>
+
+            <Border Grid.Column="4" Background="{StaticResource PanelBg}" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" Padding="8">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="6"/>
+                        <RowDefinition Height="240"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" FontWeight="Bold" Margin="0,0,0,6">Entities</TextBlock>
+                    <ListBox Grid.Row="1" x:Name="EntitiesList" SelectionChanged="EntitiesList_OnSelectionChanged"
+                             DisplayMemberPath="DisplayName"/>
+                    <GridSplitter Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#2A2B31"/>
+
+                    <Border Grid.Row="3" Background="#17181C" BorderBrush="#2A2B31" BorderThickness="1" Padding="6">
+                        <DockPanel LastChildFill="True">
+                            <TextBlock DockPanel.Dock="Top" FontWeight="Bold" Margin="0,0,0,6">Details</TextBlock>
+                            <TreeView x:Name="DetailsTree" BorderThickness="0" FontSize="11" Background="#141519">
+                                <TreeView.Resources>
+                                    <HierarchicalDataTemplate DataType="{x:Type local:ComponentNode}" ItemsSource="{Binding Fields}">
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" Foreground="#F0F0F2" Margin="0,4,0,2"/>
+                                    </HierarchicalDataTemplate>
+                                    <DataTemplate DataType="{x:Type local:FieldNode}">
+                                        <Grid Margin="2,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Grid.Column="0" Text="{Binding Name}" Foreground="#D0D2D8"/>
+
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="8,0,0,0">
+                                                <TextBox Width="140" FontSize="11"
+                                                         Text="{Binding ValueText, UpdateSourceTrigger=LostFocus}"
+                                                         LostFocus="DetailsValue_OnLostFocus"
+                                                         KeyDown="DetailsValue_OnKeyDown"/>
+                                                <Button Content="↺" Width="22" Height="22" Margin="6,0,0,0"
+                                                        ToolTip="Reset to prefab value"
+                                                        Visibility="{Binding CanReset, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                        Click="DetailsReset_OnClick"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </TreeView.Resources>
+                            </TreeView>
+                        </DockPanel>
+                    </Border>
+                </Grid>
+            </Border>
         </Grid>
 
-        <Border Grid.Row="2" Background="#222" Padding="8,6">
-            <TextBlock x:Name="StatusText" Foreground="#EEE">Ready.</TextBlock>
+        <Border Grid.Row="2" Background="#1A1B1F" Padding="8,6">
+            <TextBlock x:Name="StatusText" Foreground="#C9CBD2">Ready.</TextBlock>
         </Border>
     </Grid>
 </Window>
