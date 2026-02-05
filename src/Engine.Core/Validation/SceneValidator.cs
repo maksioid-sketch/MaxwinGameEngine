@@ -12,6 +12,47 @@ public static class SceneValidator
 
         foreach (var e in scene.Entities)
         {
+            if (e.TryGet<PrefabInstance>(out var pi) && pi is not null)
+            {
+                if (string.IsNullOrWhiteSpace(pi.PrefabId))
+                {
+                    issues.Add(new ValidationIssue
+                    {
+                        Severity = ValidationSeverity.Error,
+                        Code = "PREFAB_ID_EMPTY",
+                        EntityName = e.Name,
+                        Message = "PrefabInstance.PrefabId is empty."
+                    });
+                }
+                else if (!assets.TryGetPrefab(pi.PrefabId, out var prefab))
+                {
+                    issues.Add(new ValidationIssue
+                    {
+                        Severity = ValidationSeverity.Error,
+                        Code = "PREFAB_NOT_FOUND",
+                        EntityName = e.Name,
+                        Message = $"Prefab '{pi.PrefabId}' not found."
+                    });
+                }
+                else
+                {
+                    try
+                    {
+                        _ = prefab.GetRootEntity();
+                    }
+                    catch (Exception ex)
+                    {
+                        issues.Add(new ValidationIssue
+                        {
+                            Severity = ValidationSeverity.Error,
+                            Code = "PREFAB_ROOT_INVALID",
+                            EntityName = e.Name,
+                            Message = $"Prefab '{pi.PrefabId}' root invalid: {ex.Message}"
+                        });
+                    }
+                }
+            }
+
             if (!e.TryGet<SpriteRenderer>(out var sr) || sr is null)
                 continue;
 

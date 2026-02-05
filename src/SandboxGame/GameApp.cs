@@ -26,6 +26,8 @@ using System.IO;
 using System.Linq;
 using Engine.Core.Rendering.Queue;
 using Engine.Core.Validation;
+using Engine.Core.Inspection;
+using Engine.Core.Math;
 
 
 namespace SandboxGame;
@@ -558,7 +560,7 @@ public sealed class GameApp : Game
         // Existing status (multiline)
         SetMultilinePersistent("hot", _hotReloadStatus);
 
-        DebugPrint.Set("time", $"dt={_services.Time.DeltaSeconds:0.0000} total={_services.Time.TotalSeconds:0.00}");
+        DebugPrint.Set("time", $"dt={Fmt(_services.Time.DeltaSeconds, "0.0000")} total={Fmt(_services.Time.TotalSeconds, "0.00")}");
 
         bool hasIdle = _services.Assets.TryGetAnimation("player_idle", out var idleClip);
         DebugPrint.Set("assets_idle", $"assets: idleClip={hasIdle} frames={(hasIdle ? idleClip.Frames.Count : 0)}");
@@ -606,8 +608,8 @@ public sealed class GameApp : Game
             else
                 DebugPrint.Clear("ctrl2");
 
-            DebugPrint.Set("anim1", $"Animator: clip={anim.ClipId} playing={anim.Playing} speed={anim.Speed:0.00}");
-            DebugPrint.Set("anim2", $"Animator: frame={anim.FrameIndex} t={anim.TimeIntoFrame:0.000} reset={anim.ResetRequested}");
+            DebugPrint.Set("anim1", $"Animator: clip={anim.ClipId} playing={anim.Playing} speed={Fmt(anim.Speed, "0.00")}");
+            DebugPrint.Set("anim2", $"Animator: frame={anim.FrameIndex} t={Fmt(anim.TimeIntoFrame, "0.000")} reset={anim.ResetRequested}");
             DebugPrint.Set("anim3", $"Animator: state={anim.StateId} pending={anim.PendingStateId ?? "-"} next={anim.NextClipId ?? "-"}");
 
             bool hasCur = false;
@@ -635,9 +637,7 @@ public sealed class GameApp : Game
 
     private static void SetMultilinePersistent(string keyPrefix, string text)
     {
-        // Clear previous lines (up to some reasonable cap)
-        for (int i = 0; i < 16; i++)
-            Engine.Core.Runtime.Debug.DebugPrint.Clear($"{keyPrefix}_{i}");
+        ClearMultilinePersistent(keyPrefix);
 
         if (string.IsNullOrWhiteSpace(text))
             return;
@@ -648,6 +648,24 @@ public sealed class GameApp : Game
         {
             Engine.Core.Runtime.Debug.DebugPrint.Set($"{keyPrefix}_{i}", lines[i]);
         }
+    }
+
+    private static void SetMultilinePersistent(string keyPrefix, IReadOnlyList<string> lines)
+    {
+        ClearMultilinePersistent(keyPrefix);
+        if (lines is null || lines.Count == 0)
+            return;
+
+        int count = System.Math.Min(16, lines.Count);
+        for (int i = 0; i < count; i++)
+            Engine.Core.Runtime.Debug.DebugPrint.Set($"{keyPrefix}_{i}", lines[i]);
+    }
+
+    private static void ClearMultilinePersistent(string keyPrefix)
+    {
+        // Clear previous lines (up to some reasonable cap)
+        for (int i = 0; i < 16; i++)
+            Engine.Core.Runtime.Debug.DebugPrint.Clear($"{keyPrefix}_{i}");
     }
 
 
@@ -775,6 +793,7 @@ public sealed class GameApp : Game
         {
             DebugPrint.Set("editor_sel", "Selected: none (click collider)");
             DebugPrint.Set("editor_help", "Edit: arrows move | Z/X scale | C toggle override | F5 save");
+            ClearMultilinePersistent("inspector");
             return;
         }
 
@@ -785,9 +804,84 @@ public sealed class GameApp : Game
         var pos = selected.Transform.Position;
         var scale = selected.Transform.Scale;
         DebugPrint.Set("editor_transform",
-            $"Transform: pos=({pos.X:0.###},{pos.Y:0.###}) scale=({scale.X:0.###},{scale.Y:0.###})");
+            $"Transform: pos=({Fmt(pos.X)},{Fmt(pos.Y)}) scale=({Fmt(scale.X)},{Fmt(scale.Y)})");
         DebugPrint.Set("editor_override", $"Transform Override: {isOverride} (usePrefab={usePrefab})");
+
+        if (_editorMode)
+            UpdateInspectorOverlay(selected);
+        else
+            ClearMultilinePersistent("inspector");
     }
+
+    private void UpdateInspectorOverlay(Entity selected)
+    {
+        var lines = new List<string>(16)
+        {
+            $"Inspector: {selected.Name}"
+        };
+
+        foreach (var desc in ComponentRegistry.All())
+        {
+            object? instance = null;
+            if (desc.Type == typeof(Transform))
+            {
+                instance = selected.Transform;
+            }
+            else if (typeof(IComponent).IsAssignableFrom(desc.Type))
+            {
+                var method = typeof(Entity).GetMethod("TryGet")!;
+                var generic = method.MakeGenericMethod(desc.Type);
+                var args = new object?[] { null };
+                var ok = (bool)generic.Invoke(selected, args)!;
+                if (ok) instance = args[0];
+            }
+
+            if (instance is null)
+                continue;
+
+            lines.Add(desc.DisplayName + ":");
+
+            for (int i = 0; i < desc.Fields.Count; i++)
+            {
+                var f = desc.Fields[i];
+                var value = f.Getter?.Invoke(instance);
+                lines.Add($"  {f.Name} = {FormatValue(value)}");
+                if (lines.Count >= 16) break;
+            }
+
+            if (lines.Count >= 16) break;
+        }
+
+        SetMultilinePersistent("inspector", lines);
+    }
+
+    private static string FormatValue(object? value)
+    {
+        if (value is null) return "null";
+
+        return value switch
+        {
+            System.Numerics.Vector2 v2 => $"({Fmt(v2.X)}, {Fmt(v2.Y)})",
+            System.Numerics.Vector3 v3 => $"({Fmt(v3.X)}, {Fmt(v3.Y)}, {Fmt(v3.Z)})",
+            Color4 c => $"({Fmt(c.R)}, {Fmt(c.G)}, {Fmt(c.B)}, {Fmt(c.A)})",
+            bool b => b ? "true" : "false",
+            float f => Fmt(f),
+            double d => Fmt(d),
+            _ => value.ToString() ?? "null"
+        };
+    }
+
+    private static string Fmt(float value)
+        => value.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+
+    private static string Fmt(double value)
+        => value.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+
+    private static string Fmt(float value, string format)
+        => value.ToString(format, System.Globalization.CultureInfo.InvariantCulture);
+
+    private static string Fmt(double value, string format)
+        => value.ToString(format, System.Globalization.CultureInfo.InvariantCulture);
 
     private bool WasLeftClick()
         => _curMouse.LeftButton == ButtonState.Pressed && _prevMouse.LeftButton == ButtonState.Released;

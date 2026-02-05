@@ -240,13 +240,16 @@ public static class SceneJson
                 },
                 Animator = !includeAnimator || anim is null ? null : new AnimatorDto
                 {
+                    ControllerId = anim.ControllerId,
                     ClipId = anim.ClipId,
                     Playing = anim.Playing,
                     Speed = anim.Speed,
                     LoopOverride = anim.LoopOverride,
                     Loop = anim.Loop,
                     FrameIndex = anim.FrameIndex,
-                    TimeIntoFrame = anim.TimeIntoFrame
+                    TimeIntoFrame = anim.TimeIntoFrame,
+                    DefaultCrossFadeSeconds = anim.DefaultCrossFadeSeconds,
+                    DefaultFreezeDuringCrossFade = anim.DefaultFreezeDuringCrossFade
                 },
                 BoxCollider2D = !includeBoxCollider2D || box is null ? null : new BoxCollider2DDto
                 {

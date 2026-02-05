@@ -1,4 +1,4 @@
-﻿{
+{
   "Version": 1,
   "Entities": [
     {
@@ -7,8 +7,8 @@
       "PrefabId": "Player",
       "Transform": {
         "Position": [
-          -3.0199206,
-          1.6465287,
+          -3.4865868,
+          0.21319394,
           0
         ],
         "rotationZDegrees": 0,
@@ -32,7 +32,7 @@
       "Transform": {
         "Position": [
           -1.7655811,
-          -0.12933485,
+          2.364002,
           0
         ],
         "rotationZDegrees": 0,
