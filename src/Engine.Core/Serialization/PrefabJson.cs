@@ -10,6 +10,8 @@ namespace Engine.Core.Serialization;
 
 public static class PrefabJson
 {
+    public const int CurrentVersion = 1;
+
     private static readonly JsonSerializerOptions Options = new()
     {
         WriteIndented = true,
@@ -19,8 +21,11 @@ public static class PrefabJson
         Converters = { new JsonStringEnumConverter() }
     };
 
-    public static string Serialize(Prefab prefab, int version = 1)
+    public static string Serialize(Prefab prefab, int version = CurrentVersion)
     {
+        if (version > CurrentVersion)
+            throw new NotSupportedException($"Unsupported prefab version: {version}");
+
         var dto = PrefabDto.FromPrefab(prefab, version);
         return JsonSerializer.Serialize(dto, Options);
     }
@@ -30,8 +35,11 @@ public static class PrefabJson
         var dto = JsonSerializer.Deserialize<PrefabDto>(json, Options)
                   ?? throw new InvalidOperationException("Prefab JSON deserialized to null.");
 
-        if (dto.Version != 1)
+        if (dto.Version > CurrentVersion)
             throw new NotSupportedException($"Unsupported prefab version: {dto.Version}");
+
+        if (dto.Version < CurrentVersion)
+            dto = PrefabDto.UpgradeToCurrent(dto);
 
         return dto.ToPrefab();
     }
@@ -48,8 +56,17 @@ public static class PrefabJson
             {
                 Version = version,
                 RootId = prefab.RootId,
-                Entities = prefab.Entities.Select(EntityDto.FromPrefabEntity).ToList()
+                Entities = prefab.Entities
+                    .OrderBy(e => e.Id)
+                    .Select(EntityDto.FromPrefabEntity)
+                    .ToList()
             };
+        }
+
+        public static PrefabDto UpgradeToCurrent(PrefabDto dto)
+        {
+            // Placeholder for future prefab migrations.
+            return dto;
         }
 
         public Prefab ToPrefab()

@@ -11,7 +11,7 @@
           0.08,
           0
         ],
-        "RotationZDegrees": 0,
+        "rotationZDegrees": 0,
         "Scale": [
           3.5,
           3.5,
@@ -38,6 +38,7 @@
         "PixelsPerUnitOverride": 100,
         "Flip": "None"
       },
+      "Animator": null,
       "BoxCollider2D": {
         "Size": [
           5,
@@ -52,6 +53,7 @@
       "PhysicsBody2D": {
         "IsStatic": true
       },
+      "Rigidbody2D": null,
       "DebugRender2D": {
         "ShowCollider": false
       }

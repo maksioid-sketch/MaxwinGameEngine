@@ -11,7 +11,7 @@
           -4,
           0
         ],
-        "RotationZDegrees": 0,
+        "rotationZDegrees": 0,
         "Scale": [
           5,
           5,
@@ -38,6 +38,7 @@
         "PixelsPerUnitOverride": 100,
         "Flip": "None"
       },
+      "Animator": null,
       "BoxCollider2D": {
         "Size": [
           0.6,
@@ -49,9 +50,13 @@
         ],
         "IsTrigger": false
       },
+      "PhysicsBody2D": null,
       "Rigidbody2D": {
         "Mass": 3,
-        "Velocity": [0, 0],
+        "Velocity": [
+          0,
+          0
+        ],
         "UseGravity": true,
         "GravityScale": 1,
         "LinearDrag": 0,
@@ -60,7 +65,6 @@
       "DebugRender2D": {
         "ShowCollider": false
       }
-
     }
   ]
 }

@@ -11,6 +11,8 @@ namespace Engine.Core.Serialization;
 
 public static class SceneJson
 {
+    public const int CurrentVersion = 1;
+
     private static readonly JsonSerializerOptions Options = new()
     {
         WriteIndented = true,
@@ -20,8 +22,11 @@ public static class SceneJson
         Converters = { new JsonStringEnumConverter() }
     };
 
-    public static string Serialize(SceneType scene, int version = 1)
+    public static string Serialize(SceneType scene, int version = CurrentVersion)
     {
+        if (version > CurrentVersion)
+            throw new NotSupportedException($"Unsupported scene version: {version}");
+
         var dto = SceneDto.FromScene(scene, version);
         return JsonSerializer.Serialize(dto, Options);
     }
@@ -31,8 +36,11 @@ public static class SceneJson
         var dto = JsonSerializer.Deserialize<SceneDto>(json, Options)
                   ?? throw new InvalidOperationException("Scene JSON deserialized to null.");
 
-        if (dto.Version != 1)
+        if (dto.Version > CurrentVersion)
             throw new NotSupportedException($"Unsupported scene version: {dto.Version}");
+
+        if (dto.Version < CurrentVersion)
+            dto = SceneDto.UpgradeToCurrent(dto);
 
         return dto.ToScene();
     }
@@ -49,8 +57,17 @@ public static class SceneJson
             return new SceneDto
             {
                 Version = version,
-                Entities = scene.Entities.Select(EntityDto.FromEntity).ToList()
+                Entities = scene.Entities
+                    .OrderBy(e => e.Id)
+                    .Select(EntityDto.FromEntity)
+                    .ToList()
             };
+        }
+
+        public static SceneDto UpgradeToCurrent(SceneDto dto)
+        {
+            // Placeholder for future scene migrations.
+            return dto;
         }
 
         public SceneType ToScene()
@@ -189,23 +206,26 @@ public static class SceneJson
             e.TryGet<PhysicsBody2D>(out var body);
             e.TryGet<Rigidbody2D>(out var rb);
             e.TryGet<DebugRender2D>(out var debug);
+            e.TryGet<PrefabInstance>(out var pi);
             
             
 
 
             var rotZ = GetZRotationRadians(e.Transform.Rotation);
 
+            bool includeTransform = pi is null || !pi.UsePrefabTransform || pi.OverrideTransform;
+
             return new EntityDto
             {
                 Id = e.Id,
                 Name = e.Name,
-                PrefabId = e.TryGet<PrefabInstance>(out var pi) && pi is not null ? pi.PrefabId : null,
-                Transform = new TransformDto
+                PrefabId = pi is not null ? pi.PrefabId : null,
+                Transform = includeTransform ? new TransformDto
                 {
                     Position = new[] { e.Transform.Position.X, e.Transform.Position.Y, e.Transform.Position.Z },
                     Scale = new[] { e.Transform.Scale.X, e.Transform.Scale.Y, e.Transform.Scale.Z },
                     RotationZDegrees = RadToDeg(rotZ)
-                },
+                } : null,
                 SpriteRenderer = spr is null ? null : new SpriteRendererDto
                 {
                     SpriteId = spr.SpriteId,

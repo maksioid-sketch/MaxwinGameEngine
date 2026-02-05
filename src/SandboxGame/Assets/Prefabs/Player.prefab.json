@@ -11,7 +11,7 @@
           -3,
           0
         ],
-        "RotationZDegrees": 0,
+        "rotationZDegrees": 0,
         "Scale": [
           5,
           5,
@@ -60,17 +60,20 @@
           0.089
         ],
         "IsTrigger": false
-      
       },
+      "PhysicsBody2D": null,
       "Rigidbody2D": {
         "Mass": 1,
-        "Velocity": [0, 0],
+        "Velocity": [
+          0,
+          0
+        ],
         "UseGravity": true,
         "GravityScale": 2,
         "LinearDrag": 0,
         "Friction": 0.2
-      }
-
+      },
+      "DebugRender2D": null
     }
   ]
 }
