@@ -44,6 +44,9 @@ public static class PrefabInstanceResolver
 
             if (!instance.OverrideRigidbody2D && root.Rigidbody2D is not null)
                 entity.Add(root.Rigidbody2D.ToComponent());
+
+            if (!instance.OverrideDebugRender2D && root.DebugRender2D is not null)
+                entity.Add(root.DebugRender2D.ToComponent());
         }
     }
 }

@@ -51,6 +51,9 @@
       },
       "PhysicsBody2D": {
         "IsStatic": true
+      },
+      "DebugRender2D": {
+        "ShowCollider": false
       }
     }
   ]

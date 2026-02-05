@@ -76,6 +76,7 @@ Entity:
 - `BoxCollider2D` (optional, object): BoxCollider2D component data.
 - `PhysicsBody2D` (optional, object): PhysicsBody2D component data.
 - `Rigidbody2D` (optional, object): Rigidbody2D component data.
+- `DebugRender2D` (optional, object): Debug render flags.
 
 Transform:
 - `Position` (required, array of 3 floats): `[x, y, z]`.
@@ -120,6 +121,9 @@ Rigidbody2D:
 - `GravityScale` (optional, float)
 - `LinearDrag` (optional, float)
 - `Friction` (optional, float): Used by collision resolution for sliding.
+
+DebugRender2D:
+- `ShowCollider` (optional, bool): Toggle collider visualization per-entity.
 
 Example:
 ```json
@@ -172,6 +176,9 @@ Example:
         "GravityScale": 1,
         "LinearDrag": 0,
         "Friction": 0.2
+      },
+      "DebugRender2D": {
+        "ShowCollider": true
       }
     }
   ]

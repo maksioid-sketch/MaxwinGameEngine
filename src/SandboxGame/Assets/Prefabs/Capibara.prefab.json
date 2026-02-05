@@ -26,7 +26,7 @@
           1,
           1
         ],
-        "Layer": 90,
+        "Layer": 100,
         "OverrideSourceRect": false,
         "SourceRect": [
           0,
@@ -56,6 +56,9 @@
         "GravityScale": 1,
         "LinearDrag": 0,
         "Friction": 0.2
+      },
+      "DebugRender2D": {
+        "ShowCollider": false
       }
 
     }

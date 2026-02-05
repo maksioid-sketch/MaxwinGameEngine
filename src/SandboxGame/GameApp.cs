@@ -447,6 +447,9 @@ public sealed class GameApp : Game
             if (!e.TryGet<BoxCollider2D>(out var box) || box is null)
                 continue;
 
+            if (!e.TryGet<DebugRender2D>(out var debug) || debug is null || !debug.ShowCollider)
+                continue;
+
             var scale = e.Transform.Scale;
             var size = new System.Numerics.Vector2(Math.Abs(scale.X) * box.Size.X, Math.Abs(scale.Y) * box.Size.Y);
             var offsetLocal = new System.Numerics.Vector2(box.Offset.X * scale.X, box.Offset.Y * scale.Y);

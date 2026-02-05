@@ -71,7 +71,8 @@ public static class SceneJson
                         OverrideAnimator = e.Animator is not null,
                         OverrideBoxCollider2D = e.BoxCollider2D is not null,
                         OverridePhysicsBody2D = e.PhysicsBody2D is not null,
-                        OverrideRigidbody2D = e.Rigidbody2D is not null
+                        OverrideRigidbody2D = e.Rigidbody2D is not null,
+                        OverrideDebugRender2D = e.DebugRender2D is not null
                     });
                 }
 
@@ -149,6 +150,14 @@ public static class SceneJson
                     });
                 }
 
+                if (e.DebugRender2D is not null)
+                {
+                    entity.Add(new DebugRender2D
+                    {
+                        ShowCollider = e.DebugRender2D.ShowCollider
+                    });
+                }
+
             }
 
             return scene;
@@ -168,6 +177,7 @@ public static class SceneJson
         public BoxCollider2DDto? BoxCollider2D { get; set; }
         public PhysicsBody2DDto? PhysicsBody2D { get; set; }
         public Rigidbody2DDto? Rigidbody2D { get; set; }
+        public DebugRender2DDto? DebugRender2D { get; set; }
 
 
         public static EntityDto FromEntity(EntityType e)
@@ -178,6 +188,7 @@ public static class SceneJson
             e.TryGet<BoxCollider2D>(out var box);
             e.TryGet<PhysicsBody2D>(out var body);
             e.TryGet<Rigidbody2D>(out var rb);
+            e.TryGet<DebugRender2D>(out var debug);
             
             
 
@@ -229,6 +240,10 @@ public static class SceneJson
                     GravityScale = rb.GravityScale,
                     LinearDrag = rb.LinearDrag,
                     Friction = rb.Friction
+                },
+                DebugRender2D = debug is null ? null : new DebugRender2DDto
+                {
+                    ShowCollider = debug.ShowCollider
                 }
             };
         }
@@ -302,6 +317,11 @@ public static class SceneJson
         public float GravityScale { get; set; } = 1f;
         public float LinearDrag { get; set; } = 0f;
         public float Friction { get; set; } = 0.2f;
+    }
+
+    private sealed class DebugRender2DDto
+    {
+        public bool ShowCollider { get; set; } = false;
     }
 
     private static float GetRotationRadians(TransformDto t)

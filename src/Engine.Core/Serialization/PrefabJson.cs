@@ -76,6 +76,7 @@ public static class PrefabJson
         public BoxCollider2DDto? BoxCollider2D { get; set; }
         public PhysicsBody2DDto? PhysicsBody2D { get; set; }
         public Rigidbody2DDto? Rigidbody2D { get; set; }
+        public DebugRender2DDto? DebugRender2D { get; set; }
 
         public static EntityDto FromPrefabEntity(Prefab.PrefabEntity entity)
         {
@@ -93,7 +94,8 @@ public static class PrefabJson
             Animator = entity.Animator is null ? null : AnimatorDto.FromData(entity.Animator),
             BoxCollider2D = entity.BoxCollider2D is null ? null : BoxCollider2DDto.FromData(entity.BoxCollider2D),
             PhysicsBody2D = entity.PhysicsBody2D is null ? null : PhysicsBody2DDto.FromData(entity.PhysicsBody2D),
-            Rigidbody2D = entity.Rigidbody2D is null ? null : Rigidbody2DDto.FromData(entity.Rigidbody2D)
+            Rigidbody2D = entity.Rigidbody2D is null ? null : Rigidbody2DDto.FromData(entity.Rigidbody2D),
+            DebugRender2D = entity.DebugRender2D is null ? null : DebugRender2DDto.FromData(entity.DebugRender2D)
         };
     }
 
@@ -110,7 +112,8 @@ public static class PrefabJson
                 Animator = Animator is null ? null : Animator.ToData(),
                 BoxCollider2D = BoxCollider2D is null ? null : BoxCollider2D.ToData(),
                 PhysicsBody2D = PhysicsBody2D is null ? null : PhysicsBody2D.ToData(),
-                Rigidbody2D = Rigidbody2D is null ? null : Rigidbody2D.ToData()
+                Rigidbody2D = Rigidbody2D is null ? null : Rigidbody2D.ToData(),
+                DebugRender2D = DebugRender2D is null ? null : DebugRender2D.ToData()
             };
         }
     }
@@ -299,6 +302,27 @@ public static class PrefabJson
                 GravityScale = GravityScale,
                 LinearDrag = LinearDrag,
                 Friction = Friction
+            };
+        }
+    }
+
+    private sealed class DebugRender2DDto
+    {
+        public bool ShowCollider { get; set; } = false;
+
+        public static DebugRender2DDto FromData(Prefab.DebugRender2DData data)
+        {
+            return new DebugRender2DDto
+            {
+                ShowCollider = data.ShowCollider
+            };
+        }
+
+        public Prefab.DebugRender2DData ToData()
+        {
+            return new Prefab.DebugRender2DData
+            {
+                ShowCollider = ShowCollider
             };
         }
     }

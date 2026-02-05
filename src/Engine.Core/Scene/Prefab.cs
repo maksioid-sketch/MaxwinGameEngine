@@ -72,6 +72,9 @@ public sealed class Prefab
 
             if (prefabEntity.Rigidbody2D is not null)
                 entity.Add(prefabEntity.Rigidbody2D.ToComponent());
+
+            if (prefabEntity.DebugRender2D is not null)
+                entity.Add(prefabEntity.DebugRender2D.ToComponent());
         }
 
         return idMap.TryGetValue(RootId, out var root) ? root : idMap.Values.First();
@@ -90,6 +93,7 @@ public sealed class Prefab
         public BoxCollider2DData? BoxCollider2D { get; set; }
         public PhysicsBody2DData? PhysicsBody2D { get; set; }
         public Rigidbody2DData? Rigidbody2D { get; set; }
+        public DebugRender2DData? DebugRender2D { get; set; }
 
         public static PrefabEntity FromEntity(Entity entity)
         {
@@ -98,6 +102,7 @@ public sealed class Prefab
             entity.TryGet<BoxCollider2D>(out var box);
             entity.TryGet<PhysicsBody2D>(out var body);
             entity.TryGet<Rigidbody2D>(out var rb);
+            entity.TryGet<DebugRender2D>(out var debug);
 
             return new PrefabEntity
             {
@@ -110,7 +115,8 @@ public sealed class Prefab
                 Animator = anim is null ? null : AnimatorData.FromComponent(anim),
                 BoxCollider2D = box is null ? null : BoxCollider2DData.FromComponent(box),
                 PhysicsBody2D = body is null ? null : PhysicsBody2DData.FromComponent(body),
-                Rigidbody2D = rb is null ? null : Rigidbody2DData.FromComponent(rb)
+                Rigidbody2D = rb is null ? null : Rigidbody2DData.FromComponent(rb),
+                DebugRender2D = debug is null ? null : DebugRender2DData.FromComponent(debug)
             };
         }
 
@@ -292,6 +298,27 @@ public sealed class Prefab
                 GravityScale = GravityScale,
                 LinearDrag = LinearDrag,
                 Friction = Friction
+            };
+        }
+    }
+
+    public sealed class DebugRender2DData
+    {
+        public bool ShowCollider { get; set; } = false;
+
+        public static DebugRender2DData FromComponent(DebugRender2D debug)
+        {
+            return new DebugRender2DData
+            {
+                ShowCollider = debug.ShowCollider
+            };
+        }
+
+        public DebugRender2D ToComponent()
+        {
+            return new DebugRender2D
+            {
+                ShowCollider = ShowCollider
             };
         }
     }
