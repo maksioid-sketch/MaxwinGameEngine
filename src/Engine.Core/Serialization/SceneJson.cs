@@ -11,7 +11,7 @@ namespace Engine.Core.Serialization;
 
 public static class SceneJson
 {
-    public const int CurrentVersion = 1;
+    public const int CurrentVersion = 2;
 
     private static readonly JsonSerializerOptions Options = new()
     {
@@ -59,14 +59,28 @@ public static class SceneJson
                 Version = version,
                 Entities = scene.Entities
                     .OrderBy(e => e.Id)
-                    .Select(EntityDto.FromEntity)
+                    .Select(e => EntityDto.FromEntity(e, version))
                     .ToList()
             };
         }
 
         public static SceneDto UpgradeToCurrent(SceneDto dto)
         {
-            // Placeholder for future scene migrations.
+            if (dto.Version == 1)
+            {
+                // v1 -> v2: degrees remain primary; ensure degrees populated if only radians exist
+                foreach (var e in dto.Entities)
+                {
+                    if (e.Transform is null)
+                        continue;
+
+                    if (e.Transform.RotationZDegrees == 0f && e.Transform.RotationZRadians != 0f)
+                        e.Transform.RotationZDegrees = RadToDeg(e.Transform.RotationZRadians);
+                }
+
+                dto.Version = 2;
+            }
+
             return dto;
         }
 
@@ -197,7 +211,7 @@ public static class SceneJson
         public DebugRender2DDto? DebugRender2D { get; set; }
 
 
-        public static EntityDto FromEntity(EntityType e)
+        public static EntityDto FromEntity(EntityType e, int version)
         {
             e.TryGet<SpriteRenderer>(out var spr);
 
@@ -221,7 +235,7 @@ public static class SceneJson
             bool includeRigidbody2D = pi is null || pi.OverrideRigidbody2D;
             bool includeDebugRender2D = pi is null || pi.OverrideDebugRender2D;
 
-            return new EntityDto
+            var dto = new EntityDto
             {
                 Id = e.Id,
                 Name = e.Name,
@@ -229,8 +243,7 @@ public static class SceneJson
                 Transform = includeTransform ? new TransformDto
                 {
                     Position = new[] { e.Transform.Position.X, e.Transform.Position.Y, e.Transform.Position.Z },
-                    Scale = new[] { e.Transform.Scale.X, e.Transform.Scale.Y, e.Transform.Scale.Z },
-                    RotationZDegrees = RadToDeg(rotZ)
+                    Scale = new[] { e.Transform.Scale.X, e.Transform.Scale.Y, e.Transform.Scale.Z }
                 } : null,
                 SpriteRenderer = !includeSpriteRenderer || spr is null ? null : new SpriteRendererDto
                 {
@@ -275,6 +288,15 @@ public static class SceneJson
                     ShowCollider = debug.ShowCollider
                 }
             };
+
+            if (dto.Transform is not null)
+            {
+                // Degrees stay primary in v2 JSON.
+                dto.Transform.RotationZDegrees = RadToDeg(rotZ);
+                dto.Transform.RotationZRadians = 0f;
+            }
+
+            return dto;
         }
 
         private static float GetZRotationRadians(Quaternion q)
