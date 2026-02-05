@@ -21,6 +21,7 @@ public partial class MainWindow : Window
     private readonly ObservableCollection<EntityView> _entities = new();
     private readonly ObservableCollection<string> _inspectorLines = new();
     private readonly ObservableCollection<ComponentNode> _details = new();
+    private readonly HashSet<string> _expandedComponents = new(StringComparer.OrdinalIgnoreCase);
     private Scene? _scene;
     private string? _currentScenePath;
     private string? _prefabsPath;
@@ -165,10 +166,9 @@ public partial class MainWindow : Window
 
     private void UpdateDetails(Entity? entity)
     {
-        _details.Clear();
-
         if (entity is null)
         {
+            _details.Clear();
             _details.Add(new ComponentNode("No selection"));
             return;
         }
@@ -198,8 +198,15 @@ public partial class MainWindow : Window
             typeof(Rigidbody2D)
         };
 
-        foreach (var type in orderedTypes)
+        if (_details.Count == 0)
         {
+            BuildDetailsTree(orderedTypes);
+            RestoreExpandedState();
+        }
+
+        for (int i = 0; i < orderedTypes.Length; i++)
+        {
+            var type = orderedTypes[i];
             var desc = ComponentRegistry.TryGet(type);
             if (desc is null)
                 continue;
@@ -207,10 +214,25 @@ public partial class MainWindow : Window
             var prefabInstanceObj = prefabRoot is null ? null : GetPrefabComponent(prefabRoot, type);
             var sceneInstance = TryGetComponent(entity, type);
 
-            var compNode = new ComponentNode(desc.DisplayName);
-
-            foreach (var field in desc.Fields)
+            ComponentNode compNode;
+            if (i < _details.Count)
+                compNode = _details[i];
+            else
             {
+                compNode = new ComponentNode(desc.DisplayName);
+                _details.Add(compNode);
+            }
+
+            if (!string.Equals(compNode.Name, desc.DisplayName, StringComparison.OrdinalIgnoreCase))
+                compNode = ReplaceComponentNode(i, desc.DisplayName);
+
+            EnsureFieldNodes(compNode, desc, type);
+
+            for (int f = 0; f < desc.Fields.Count; f++)
+            {
+                var field = desc.Fields[f];
+                var node = compNode.Fields[f];
+
                 var prefabValue = prefabInstanceObj is null ? "" : FormatValue(field.Getter?.Invoke(prefabInstanceObj));
                 var sceneValue = sceneInstance is null ? "" : FormatValue(field.Getter?.Invoke(sceneInstance));
                 var defaultValue = FormatValue(field.DefaultValue);
@@ -220,15 +242,16 @@ public partial class MainWindow : Window
                     ? sceneValue
                     : (hasPrefab ? (string.IsNullOrWhiteSpace(prefabValue) ? defaultValue : prefabValue) : (string.IsNullOrWhiteSpace(sceneValue) ? defaultValue : sceneValue));
 
-                compNode.Fields.Add(new FieldNode(
-                    field.Name,
-                    displayValue,
-                    type,
-                    field,
-                    canReset: isOverridden));
-            }
+                bool isBool = field.Kind == FieldKind.Bool;
+                bool boolValue = false;
+                if (isBool)
+                    bool.TryParse(displayValue, out boolValue);
 
-            _details.Add(compNode);
+                node.ValueText = displayValue;
+                node.CanReset = isOverridden;
+                node.IsBool = isBool;
+                node.BoolValue = boolValue;
+            }
         }
     }
 
@@ -352,6 +375,15 @@ public partial class MainWindow : Window
             return;
 
         ApplyDetailEdit(node, box.Text ?? string.Empty);
+    }
+
+    private void DetailsBool_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is not CheckBox box || box.DataContext is not FieldNode node)
+            return;
+
+        var val = box.IsChecked == true ? "true" : "false";
+        ApplyDetailEdit(node, val);
     }
 
     private void ApplyDetailEdit(FieldNode node, string valueText)
@@ -554,6 +586,106 @@ public partial class MainWindow : Window
         {
             return false;
         }
+    }
+
+    private void DetailsTree_OnExpanded(object sender, RoutedEventArgs e)
+    {
+        if (e.OriginalSource is not TreeViewItem item)
+            return;
+
+        if (item.DataContext is ComponentNode node)
+            _expandedComponents.Add(node.Name);
+    }
+
+    private void DetailsTree_OnCollapsed(object sender, RoutedEventArgs e)
+    {
+        if (e.OriginalSource is not TreeViewItem item)
+            return;
+
+        if (item.DataContext is ComponentNode node)
+            _expandedComponents.Remove(node.Name);
+    }
+
+    private void DetailsTree_OnPreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+    {
+        var viewer = FindScrollViewer(DetailsTree);
+        if (viewer is null)
+            return;
+
+        var delta = -e.Delta * 0.3;
+        var target = Math.Max(0, Math.Min(viewer.ScrollableHeight, viewer.VerticalOffset + delta));
+        viewer.ScrollToVerticalOffset(target);
+        e.Handled = true;
+    }
+
+    private static ScrollViewer? FindScrollViewer(DependencyObject root)
+    {
+        if (root is ScrollViewer sv)
+            return sv;
+
+        for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(root); i++)
+        {
+            var child = System.Windows.Media.VisualTreeHelper.GetChild(root, i);
+            var found = FindScrollViewer(child);
+            if (found is not null)
+                return found;
+        }
+
+        return null;
+    }
+
+    private void RestoreExpandedState()
+    {
+        Dispatcher.BeginInvoke(new Action(() =>
+        {
+            foreach (var item in _details)
+            {
+                var container = (TreeViewItem)DetailsTree.ItemContainerGenerator.ContainerFromItem(item);
+                if (container is null)
+                    continue;
+
+                container.IsExpanded = _expandedComponents.Contains(item.Name);
+            }
+        }), System.Windows.Threading.DispatcherPriority.Background);
+    }
+
+    private void BuildDetailsTree(Type[] orderedTypes)
+    {
+        _details.Clear();
+
+        foreach (var type in orderedTypes)
+        {
+            var desc = ComponentRegistry.TryGet(type);
+            if (desc is null)
+                continue;
+
+            var compNode = new ComponentNode(desc.DisplayName);
+            EnsureFieldNodes(compNode, desc, type);
+            _details.Add(compNode);
+        }
+    }
+
+    private void EnsureFieldNodes(ComponentNode compNode, ComponentDescriptor desc, Type componentType)
+    {
+        if (compNode.Fields.Count == desc.Fields.Count)
+            return;
+
+        compNode.Fields.Clear();
+        for (int i = 0; i < desc.Fields.Count; i++)
+        {
+            var field = desc.Fields[i];
+            compNode.Fields.Add(new FieldNode(field.Name, "", componentType, field, false, field.Kind == FieldKind.Bool, false));
+        }
+    }
+
+    private ComponentNode ReplaceComponentNode(int index, string name)
+    {
+        var node = new ComponentNode(name);
+        if (index >= 0 && index < _details.Count)
+            _details[index] = node;
+        else
+            _details.Add(node);
+        return node;
     }
 
     private sealed class EntityView

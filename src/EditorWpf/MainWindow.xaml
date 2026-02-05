@@ -14,6 +14,7 @@
             <SolidColorBrush x:Key="PanelBorder" Color="#2A2B31"/>
             <SolidColorBrush x:Key="Accent" Color="#3B82F6"/>
             <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <local:InverseBooleanConverter x:Key="InverseBoolToVisibilityConverter"/>
             <Style TargetType="Button">
                 <Setter Property="Background" Value="#262830"/>
                 <Setter Property="Foreground" Value="#E7E7E7"/>
@@ -34,6 +35,96 @@
             </Style>
             <Style TargetType="TextBlock">
                 <Setter Property="Foreground" Value="#E7E7E7"/>
+            </Style>
+            <Style x:Key="DetailsTextBoxStyle" TargetType="TextBox">
+                <Setter Property="Height" Value="22"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="Background" Value="#15161A"/>
+                <Setter Property="BorderBrush" Value="#2C2E36"/>
+                <Setter Property="Foreground" Value="#E7E7E7"/>
+            </Style>
+            <Style x:Key="DetailsCheckBoxStyle" TargetType="CheckBox">
+                <Setter Property="Height" Value="22"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Foreground" Value="#E7E7E7"/>
+                <Setter Property="Background" Value="#1F2127"/>
+                <Setter Property="BorderBrush" Value="#4A4D59"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Padding" Value="4,0,0,0"/>
+                <Setter Property="OverridesDefaultStyle" Value="True"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="CheckBox">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="18"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border x:Name="Box" Width="14" Height="14" Margin="2"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="2"/>
+                                <TextBlock Grid.Column="1" Text="{TemplateBinding Content}"
+                                           VerticalAlignment="Center"
+                                           Foreground="{TemplateBinding Foreground}"/>
+                                <Path x:Name="Check" Grid.Column="0" Margin="4,4,0,0"
+                                      Stroke="#E7E7E7" StrokeThickness="2"
+                                      Data="M 0 4 L 4 8 L 10 0" Visibility="Collapsed"/>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="Check" Property="Visibility" Value="Visible"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Box" Property="BorderBrush" Value="#6A6D78"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="Box" Property="Opacity" Value="0.5"/>
+                                    <Setter Property="Foreground" Value="#8A8D96"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style x:Key="ResetIconButtonStyle" TargetType="Button">
+                <Setter Property="Width" Value="22"/>
+                <Setter Property="Height" Value="22"/>
+                <Setter Property="FontFamily" Value="Segoe UI Symbol"/>
+                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="Foreground" Value="#F2F2F4"/>
+                <Setter Property="Background" Value="#262830"/>
+                <Setter Property="BorderBrush" Value="#3A3C44"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="OverridesDefaultStyle" Value="True"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bd"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="2">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="#2A2C34"/>
+                                    <Setter TargetName="Bd" Property="BorderBrush" Value="#4A4D59"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="#22242B"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="Bd" Property="Opacity" Value="0.6"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
             </Style>
             <Style TargetType="DataGrid">
                 <Setter Property="Background" Value="#17181C"/>
@@ -117,33 +208,74 @@
                     <Border Grid.Row="3" Background="#17181C" BorderBrush="#2A2B31" BorderThickness="1" Padding="6">
                         <DockPanel LastChildFill="True">
                             <TextBlock DockPanel.Dock="Top" FontWeight="Bold" Margin="0,0,0,6">Details</TextBlock>
-                            <TreeView x:Name="DetailsTree" BorderThickness="0" FontSize="11" Background="#141519">
+                            <TreeView x:Name="DetailsTree" BorderThickness="0" FontSize="11" Background="#141519"
+                                      Grid.IsSharedSizeScope="True"
+                                      ScrollViewer.CanContentScroll="False"
+                                      ScrollViewer.PanningMode="VerticalOnly"
+                                      ScrollViewer.PanningRatio="0.2"
+                                      ScrollViewer.PanningDeceleration="0.001"
+                                      ScrollViewer.IsDeferredScrollingEnabled="True"
+                                      PreviewMouseWheel="DetailsTree_OnPreviewMouseWheel">
                                 <TreeView.Resources>
                                     <HierarchicalDataTemplate DataType="{x:Type local:ComponentNode}" ItemsSource="{Binding Fields}">
-                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" Foreground="#F0F0F2" Margin="0,4,0,2"/>
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" Foreground="#F0F0F2" Margin="0,6,0,4"/>
                                     </HierarchicalDataTemplate>
                                     <DataTemplate DataType="{x:Type local:FieldNode}">
-                                        <Grid Margin="2,0">
+                                        <Grid Margin="2,2" MinHeight="24">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*" SharedSizeGroup="DetailName"/>
+                                                <ColumnDefinition Width="*" SharedSizeGroup="DetailValue"/>
                                             </Grid.ColumnDefinitions>
 
                                             <TextBlock Grid.Column="0" Text="{Binding Name}" Foreground="#D0D2D8"/>
 
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="8,0,0,0">
-                                                <TextBox Width="140" FontSize="11"
+                                            <Grid Grid.Column="1" Margin="8,0,0,0" HorizontalAlignment="Stretch">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBox Grid.Column="0" FontSize="11" HorizontalAlignment="Stretch"
+                                                         Style="{StaticResource DetailsTextBoxStyle}"
+                                                         Visibility="{Binding IsBool, Converter={StaticResource InverseBoolToVisibilityConverter}}"
                                                          Text="{Binding ValueText, UpdateSourceTrigger=LostFocus}"
                                                          LostFocus="DetailsValue_OnLostFocus"
                                                          KeyDown="DetailsValue_OnKeyDown"/>
-                                                <Button Content="↺" Width="22" Height="22" Margin="6,0,0,0"
+
+                                                <CheckBox Grid.Column="0" VerticalAlignment="Center"
+                                                          Style="{StaticResource DetailsCheckBoxStyle}"
+                                                          Visibility="{Binding IsBool, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                          IsChecked="{Binding BoolValue}"
+                                                          Click="DetailsBool_OnClick"/>
+
+                                                <Button Grid.Column="1" Content="↺" Margin="6,0,0,0"
+                                                        Style="{StaticResource ResetIconButtonStyle}"
                                                         ToolTip="Reset to prefab value"
                                                         Visibility="{Binding CanReset, Converter={StaticResource BoolToVisibilityConverter}}"
                                                         Click="DetailsReset_OnClick"/>
-                                            </StackPanel>
+                                            </Grid>
                                         </Grid>
                                     </DataTemplate>
                                 </TreeView.Resources>
+                                <TreeView.ItemContainerStyle>
+                                    <Style TargetType="TreeViewItem">
+                                        <Style.Setters>
+                                            <Setter Property="Background" Value="Transparent"/>
+                                            <Setter Property="BorderThickness" Value="0"/>
+                                            <Setter Property="Focusable" Value="False"/>
+                                            <Setter Property="IsTabStop" Value="False"/>
+                                            <Setter Property="Padding" Value="0"/>
+                                            <EventSetter Event="Expanded" Handler="DetailsTree_OnExpanded"/>
+                                            <EventSetter Event="Collapsed" Handler="DetailsTree_OnCollapsed"/>
+                                        </Style.Setters>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Foreground" Value="#E7E7E7"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TreeView.ItemContainerStyle>
                             </TreeView>
                         </DockPanel>
                     </Border>
