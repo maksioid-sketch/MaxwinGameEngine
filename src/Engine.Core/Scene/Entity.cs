@@ -41,4 +41,10 @@ public sealed class Entity
         if (TryGet<T>(out var existing) && existing is not null) return existing;
         return Add(factory());
     }
+
+    public bool Remove<T>() where T : class, IComponent
+        => _components.Remove(typeof(T));
+
+    public bool Remove(Type componentType)
+        => _components.Remove(componentType);
 }

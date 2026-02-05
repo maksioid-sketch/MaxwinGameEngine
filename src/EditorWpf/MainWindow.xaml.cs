@@ -432,11 +432,37 @@ public partial class MainWindow : Window
         }
     }
 
-    private static void ApplyOverrideValue(Entity entity, Type componentType, FieldDescriptor field, string valueText)
+    private void ApplyOverrideValue(Entity entity, Type componentType, FieldDescriptor field, string valueText)
     {
         object? target = componentType == typeof(Transform)
             ? entity.Transform
             : TryGetComponent(entity, componentType);
+
+        Prefab.PrefabEntity? prefabRoot = null;
+        if (TryGetPrefabRoot(entity, out var root))
+            prefabRoot = root;
+
+        PrefabInstance? pi = null;
+        if (entity.TryGet<PrefabInstance>(out var piFound))
+            pi = piFound;
+
+        if (prefabRoot is not null)
+        {
+            var prefabComponent = GetPrefabComponent(prefabRoot, componentType);
+            if (prefabComponent is not null)
+            {
+                if (target is null)
+                {
+                    target = prefabComponent;
+                    var addMethod = typeof(Entity).GetMethod("Add")!.MakeGenericMethod(componentType);
+                    addMethod.Invoke(entity, new[] { target });
+                }
+                else if (pi is not null && !IsOverrideActive(pi, componentType))
+                {
+                    CopyComponentValues(prefabComponent, target, componentType);
+                }
+            }
+        }
 
         if (target is null)
         {
@@ -451,6 +477,23 @@ public partial class MainWindow : Window
         field.Setter?.Invoke(target, value);
 
         EnsurePrefabOverrideFlag(entity, componentType);
+    }
+
+    private static void CopyComponentValues(object source, object target, Type componentType)
+    {
+        var desc = ComponentRegistry.TryGet(componentType);
+        if (desc is null)
+            return;
+
+        for (int i = 0; i < desc.Fields.Count; i++)
+        {
+            var f = desc.Fields[i];
+            if (f.Getter is null || f.Setter is null)
+                continue;
+
+            var v = f.Getter(source);
+            f.Setter(target, v);
+        }
     }
 
     private void ResetFieldOverride(Entity entity, Type componentType, FieldDescriptor field)
@@ -475,11 +518,17 @@ public partial class MainWindow : Window
             {
                 var prefabValue = field.Getter(prefabComponent);
                 field.Setter?.Invoke(target, prefabValue);
+                TryClearOverrideIfMatchesPrefab(entity, componentType, prefabComponent, target);
                 return;
             }
+
+            // Prefab has no such component: treat reset as "remove override"
+            ClearOverrideAndRemoveComponent(entity, componentType);
+            return;
         }
 
         field.Setter?.Invoke(target, field.DefaultValue);
+        TryClearOverrideIfMatchesPrefab(entity, componentType, null, target);
     }
 
     private static object ParseFieldValue(FieldKind kind, Type? enumType, string text)
@@ -565,6 +614,127 @@ public partial class MainWindow : Window
             pi.OverrideRigidbody2D = true;
         else if (componentType == typeof(DebugRender2D))
             pi.OverrideDebugRender2D = true;
+    }
+
+    private void TryClearOverrideIfMatchesPrefab(Entity entity, Type componentType, object? prefabComponent, object target)
+    {
+        if (!entity.TryGet<PrefabInstance>(out var pi) || pi is null)
+            return;
+
+        Prefab.PrefabEntity? prefabRoot = null;
+        if (prefabComponent is null)
+        {
+            if (!TryGetPrefabRoot(entity, out var root))
+                return;
+            prefabRoot = root;
+        }
+
+        prefabComponent ??= GetPrefabComponent(prefabRoot!, componentType);
+        if (prefabComponent is null)
+        {
+            ClearOverrideAndRemoveComponent(entity, componentType);
+            return;
+        }
+
+        if (!AreComponentFieldsEqual(prefabComponent, target, componentType))
+            return;
+
+        if (componentType == typeof(Transform))
+        {
+            pi.OverrideTransform = false;
+            pi.UsePrefabTransform = true;
+        }
+        else if (componentType == typeof(SpriteRenderer)) pi.OverrideSpriteRenderer = false;
+        else if (componentType == typeof(Animator)) pi.OverrideAnimator = false;
+        else if (componentType == typeof(BoxCollider2D)) pi.OverrideBoxCollider2D = false;
+        else if (componentType == typeof(PhysicsBody2D)) pi.OverridePhysicsBody2D = false;
+        else if (componentType == typeof(Rigidbody2D)) pi.OverrideRigidbody2D = false;
+        else if (componentType == typeof(DebugRender2D)) pi.OverrideDebugRender2D = false;
+    }
+
+    private void ClearOverrideAndRemoveComponent(Entity entity, Type componentType)
+    {
+        if (entity.TryGet<PrefabInstance>(out var pi) && pi is not null)
+        {
+            if (componentType == typeof(Transform))
+            {
+                pi.OverrideTransform = false;
+                pi.UsePrefabTransform = true;
+            }
+            else if (componentType == typeof(SpriteRenderer)) pi.OverrideSpriteRenderer = false;
+            else if (componentType == typeof(Animator)) pi.OverrideAnimator = false;
+            else if (componentType == typeof(BoxCollider2D)) pi.OverrideBoxCollider2D = false;
+            else if (componentType == typeof(PhysicsBody2D)) pi.OverridePhysicsBody2D = false;
+            else if (componentType == typeof(Rigidbody2D)) pi.OverrideRigidbody2D = false;
+            else if (componentType == typeof(DebugRender2D)) pi.OverrideDebugRender2D = false;
+        }
+
+        if (componentType != typeof(Transform))
+            entity.Remove(componentType);
+    }
+
+    private static bool AreComponentFieldsEqual(object a, object b, Type componentType)
+    {
+        var desc = ComponentRegistry.TryGet(componentType);
+        if (desc is null)
+            return true;
+
+        for (int i = 0; i < desc.Fields.Count; i++)
+        {
+            var f = desc.Fields[i];
+            if (f.Getter is null)
+                continue;
+
+            var va = f.Getter(a);
+            var vb = f.Getter(b);
+            if (!ValuesEqual(va, vb))
+                return false;
+        }
+
+        return true;
+    }
+
+    private static bool ValuesEqual(object? a, object? b)
+    {
+        if (a is null || b is null)
+            return a == b;
+
+        return (a, b) switch
+        {
+            (float fa, float fb) => MathF.Abs(fa - fb) < 0.0001f,
+            (double da, double db) => Math.Abs(da - db) < 0.0001,
+            (Vector2 va, Vector2 vb) => Vector2.DistanceSquared(va, vb) < 0.0000001f,
+            (Vector3 va, Vector3 vb) => Vector3.DistanceSquared(va, vb) < 0.0000001f,
+            (Color4 ca, Color4 cb) =>
+                MathF.Abs(ca.R - cb.R) < 0.0001f &&
+                MathF.Abs(ca.G - cb.G) < 0.0001f &&
+                MathF.Abs(ca.B - cb.B) < 0.0001f &&
+                MathF.Abs(ca.A - cb.A) < 0.0001f,
+            _ => Equals(a, b)
+        };
+    }
+
+    private static bool IsOverrideActive(PrefabInstance? pi, Type componentType)
+    {
+        if (pi is null)
+            return false;
+
+        if (componentType == typeof(Transform))
+            return pi.OverrideTransform;
+        if (componentType == typeof(SpriteRenderer))
+            return pi.OverrideSpriteRenderer;
+        if (componentType == typeof(Animator))
+            return pi.OverrideAnimator;
+        if (componentType == typeof(BoxCollider2D))
+            return pi.OverrideBoxCollider2D;
+        if (componentType == typeof(PhysicsBody2D))
+            return pi.OverridePhysicsBody2D;
+        if (componentType == typeof(Rigidbody2D))
+            return pi.OverrideRigidbody2D;
+        if (componentType == typeof(DebugRender2D))
+            return pi.OverrideDebugRender2D;
+
+        return false;
     }
 
     private bool TryGetPrefabRoot(Entity entity, out Prefab.PrefabEntity root)
