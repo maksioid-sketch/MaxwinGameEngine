@@ -214,6 +214,12 @@ public static class SceneJson
             var rotZ = GetZRotationRadians(e.Transform.Rotation);
 
             bool includeTransform = pi is null || !pi.UsePrefabTransform || pi.OverrideTransform;
+            bool includeSpriteRenderer = pi is null || pi.OverrideSpriteRenderer;
+            bool includeAnimator = pi is null || pi.OverrideAnimator;
+            bool includeBoxCollider2D = pi is null || pi.OverrideBoxCollider2D;
+            bool includePhysicsBody2D = pi is null || pi.OverridePhysicsBody2D;
+            bool includeRigidbody2D = pi is null || pi.OverrideRigidbody2D;
+            bool includeDebugRender2D = pi is null || pi.OverrideDebugRender2D;
 
             return new EntityDto
             {
@@ -226,13 +232,13 @@ public static class SceneJson
                     Scale = new[] { e.Transform.Scale.X, e.Transform.Scale.Y, e.Transform.Scale.Z },
                     RotationZDegrees = RadToDeg(rotZ)
                 } : null,
-                SpriteRenderer = spr is null ? null : new SpriteRendererDto
+                SpriteRenderer = !includeSpriteRenderer || spr is null ? null : new SpriteRendererDto
                 {
                     SpriteId = spr.SpriteId,
                     Layer = spr.Layer,
                     Tint = new[] { spr.Tint.R, spr.Tint.G, spr.Tint.B, spr.Tint.A },
                 },
-                Animator = anim is null ? null : new AnimatorDto
+                Animator = !includeAnimator || anim is null ? null : new AnimatorDto
                 {
                     ClipId = anim.ClipId,
                     Playing = anim.Playing,
@@ -242,17 +248,17 @@ public static class SceneJson
                     FrameIndex = anim.FrameIndex,
                     TimeIntoFrame = anim.TimeIntoFrame
                 },
-                BoxCollider2D = box is null ? null : new BoxCollider2DDto
+                BoxCollider2D = !includeBoxCollider2D || box is null ? null : new BoxCollider2DDto
                 {
                     Size = new[] { box.Size.X, box.Size.Y },
                     Offset = new[] { box.Offset.X, box.Offset.Y },
                     IsTrigger = box.IsTrigger
                 },
-                PhysicsBody2D = body is null ? null : new PhysicsBody2DDto
+                PhysicsBody2D = !includePhysicsBody2D || body is null ? null : new PhysicsBody2DDto
                 {
                     IsStatic = body.IsStatic
                 },
-                Rigidbody2D = rb is null ? null : new Rigidbody2DDto
+                Rigidbody2D = !includeRigidbody2D || rb is null ? null : new Rigidbody2DDto
                 {
                     Mass = rb.Mass,
                     Velocity = new[] { rb.Velocity.X, rb.Velocity.Y },
@@ -261,7 +267,7 @@ public static class SceneJson
                     LinearDrag = rb.LinearDrag,
                     Friction = rb.Friction
                 },
-                DebugRender2D = debug is null ? null : new DebugRender2DDto
+                DebugRender2D = !includeDebugRender2D || debug is null ? null : new DebugRender2DDto
                 {
                     ShowCollider = debug.ShowCollider
                 }

@@ -57,6 +57,10 @@ public sealed class GameApp : Game
     private readonly OnScreenDebug _onScreenDebug = new(maxTransientLines: 18);
     private readonly System.Collections.Generic.List<string> _debugLineBuffer = new();
 
+    private bool _editorMode = false;
+    private Guid? _selectedEntityId = null;
+    private MouseState _prevMouse;
+    private MouseState _curMouse;
 
 
 
@@ -65,6 +69,7 @@ public sealed class GameApp : Game
 
 
     private List<ISystem> _systems = new();
+    private List<ISystem> _editorSystems = new();
     private readonly GraphicsDeviceManager _gdm;
 
     private Scene _scene = null!;
@@ -160,6 +165,8 @@ public sealed class GameApp : Game
     {
         _time.Update(gameTime);
         _input.Update();
+        _prevMouse = _curMouse;
+        _curMouse = Mouse.GetState();
 
         _onScreenDebug.Update(_time.DeltaSeconds);
 
@@ -167,6 +174,12 @@ public sealed class GameApp : Game
         if (_input.WasPressed(InputKey.Escape))
             Exit();
 
+        if (_input.WasPressed(InputKey.F1))
+        {
+            _editorMode = !_editorMode;
+            if (!_editorMode)
+                _selectedEntityId = null;
+        }
 
         // Hot reload first
         var changes = _hotReload?.ConsumeChanges();
@@ -191,10 +204,21 @@ public sealed class GameApp : Game
         _services.Events.Clear();
         var ctx = new EngineContext(_services);
 
-        for (int i = 0; i < _systems.Count; i++)
-            _systems[i].Update(_scene, ctx);
+        UpdateEditorOverlay();
 
-        _scene.Update(_time.DeltaSeconds);
+        if (_editorMode)
+        {
+            UpdateEditor(ctx);
+            for (int i = 0; i < _editorSystems.Count; i++)
+                _editorSystems[i].Update(_scene, ctx);
+        }
+        else
+        {
+            for (int i = 0; i < _systems.Count; i++)
+                _systems[i].Update(_scene, ctx);
+
+            _scene.Update(_time.DeltaSeconds);
+        }
 
         base.Update(gameTime);
     }
@@ -230,6 +254,7 @@ public sealed class GameApp : Game
         _renderer2D.End();
 
         DrawDebugColliders();
+        DrawSelectionOutline();
 
         DrawDebugOverlay();
 
@@ -304,6 +329,7 @@ public sealed class GameApp : Game
             var json = File.ReadAllText(_scenePath);
             _scene = SceneJson.Deserialize(json);
             Engine.Core.Scene.PrefabInstanceResolver.Apply(_scene, _assets);
+            _selectedEntityId = null;
 
             EnsurePlayerPrefabExists();
             //SpawnPrefabIfMissing("Player");
@@ -654,10 +680,261 @@ public sealed class GameApp : Game
             new SandboxGame.Systems.AnimationNotifyDebugSystem()
         };
 
+        _editorSystems = new List<ISystem>
+        {
+            new SandboxGame.Systems.AnimatorControllerSystem(() => _assets),
+            new SandboxGame.Systems.AnimationSystem(),
+            new Engine.Core.Systems.BuiltIn.AnimationNotifierSystem()
+        };
 
 
     }
 
+    private void UpdateEditor(EngineContext ctx)
+    {
+        if (WasLeftClick())
+        {
+            var world = _camera.ScreenToWorld(new System.Numerics.Vector2(_curMouse.X, _curMouse.Y));
+            var picked = PickEntityAt(world);
+            _selectedEntityId = picked?.Id;
+        }
+
+        var selected = GetSelectedEntity();
+        if (selected is null)
+            return;
+
+        if (_input.WasPressed(InputKey.C))
+            ToggleTransformOverride(selected);
+
+        if (_input.WasPressed(InputKey.F5))
+            SaveScene();
+
+        float moveSpeed = _input.IsDown(InputKey.Shift) ? 5f : 1f;
+        float scaleSpeed = _input.IsDown(InputKey.Shift) ? 1.5f : 0.5f;
+
+        var pos = selected.Transform.Position;
+        bool moved = false;
+
+        if (_input.IsDown(InputKey.Left))
+        {
+            pos.X -= moveSpeed * ctx.DeltaSeconds;
+            moved = true;
+        }
+        if (_input.IsDown(InputKey.Right))
+        {
+            pos.X += moveSpeed * ctx.DeltaSeconds;
+            moved = true;
+        }
+        if (_input.IsDown(InputKey.Up))
+        {
+            pos.Y -= moveSpeed * ctx.DeltaSeconds;
+            moved = true;
+        }
+        if (_input.IsDown(InputKey.Down))
+        {
+            pos.Y += moveSpeed * ctx.DeltaSeconds;
+            moved = true;
+        }
+
+        if (moved)
+        {
+            EnsureTransformOverride(selected);
+            selected.Transform.Position = pos;
+        }
+
+        bool scaled = false;
+        var scale = selected.Transform.Scale;
+        if (_input.IsDown(InputKey.Z))
+        {
+            scale.X += scaleSpeed * ctx.DeltaSeconds;
+            scale.Y += scaleSpeed * ctx.DeltaSeconds;
+            scaled = true;
+        }
+        if (_input.IsDown(InputKey.X))
+        {
+            scale.X -= scaleSpeed * ctx.DeltaSeconds;
+            scale.Y -= scaleSpeed * ctx.DeltaSeconds;
+            scaled = true;
+        }
+
+        if (scaled)
+        {
+            scale.X = MathF.Max(0.1f, scale.X);
+            scale.Y = MathF.Max(0.1f, scale.Y);
+            EnsureTransformOverride(selected);
+            selected.Transform.Scale = scale;
+        }
+    }
+
+    private void UpdateEditorOverlay()
+    {
+        DebugPrint.Set("editor_mode", _editorMode ? "Editor: ON (F1 to toggle)" : "Editor: OFF (F1 to toggle)");
+
+        var selected = GetSelectedEntity();
+        if (selected is null)
+        {
+            DebugPrint.Set("editor_sel", "Selected: none (click collider)");
+            DebugPrint.Set("editor_help", "Edit: arrows move | Z/X scale | C toggle override | F5 save");
+            return;
+        }
+
+        DebugPrint.Set("editor_sel", $"Selected: {selected.Name} ({selected.Id})");
+        DebugPrint.Set("editor_help", "Edit: arrows move | Z/X scale | C toggle override | F5 save");
+
+        bool isOverride = IsTransformOverride(selected, out var usePrefab);
+        var pos = selected.Transform.Position;
+        var scale = selected.Transform.Scale;
+        DebugPrint.Set("editor_transform",
+            $"Transform: pos=({pos.X:0.###},{pos.Y:0.###}) scale=({scale.X:0.###},{scale.Y:0.###})");
+        DebugPrint.Set("editor_override", $"Transform Override: {isOverride} (usePrefab={usePrefab})");
+    }
+
+    private bool WasLeftClick()
+        => _curMouse.LeftButton == ButtonState.Pressed && _prevMouse.LeftButton == ButtonState.Released;
+
+    private Entity? PickEntityAt(System.Numerics.Vector2 world)
+    {
+        for (int i = _scene.Entities.Count - 1; i >= 0; i--)
+        {
+            var e = _scene.Entities[i];
+            if (e.TryGet<BoxCollider2D>(out var box) && box is not null)
+            {
+                if (PointInBoxCollider(world, e, box))
+                    return e;
+            }
+            else
+            {
+                var center = new System.Numerics.Vector2(e.Transform.Position.X, e.Transform.Position.Y);
+                if ((world - center).Length() <= 0.25f)
+                    return e;
+            }
+        }
+
+        return null;
+    }
+
+    private static bool PointInBoxCollider(System.Numerics.Vector2 point, Entity e, BoxCollider2D box)
+    {
+        var scale = e.Transform.Scale;
+        var size = new System.Numerics.Vector2(Math.Abs(scale.X) * box.Size.X, Math.Abs(scale.Y) * box.Size.Y);
+        var offsetLocal = new System.Numerics.Vector2(box.Offset.X * scale.X, box.Offset.Y * scale.Y);
+        var centerWorld = new System.Numerics.Vector2(e.Transform.Position.X, e.Transform.Position.Y);
+        var rot = GetZRotationRadians(e.Transform.Rotation);
+
+        var axisX = new System.Numerics.Vector2(MathF.Cos(rot), MathF.Sin(rot));
+        var axisY = new System.Numerics.Vector2(-axisX.Y, axisX.X);
+        var offsetWorld = axisX * offsetLocal.X + axisY * offsetLocal.Y;
+        centerWorld += offsetWorld;
+
+        var half = size * 0.5f;
+        var d = point - centerWorld;
+        var dx = System.Numerics.Vector2.Dot(d, axisX);
+        var dy = System.Numerics.Vector2.Dot(d, axisY);
+
+        return Math.Abs(dx) <= half.X && Math.Abs(dy) <= half.Y;
+    }
+
+    private Entity? GetSelectedEntity()
+    {
+        if (!_selectedEntityId.HasValue)
+            return null;
+
+        return _scene.Entities.FirstOrDefault(e => e.Id == _selectedEntityId.Value);
+    }
+
+    private void EnsureTransformOverride(Entity e)
+    {
+        if (!e.TryGet<PrefabInstance>(out var pi) || pi is null)
+            return;
+
+        pi.OverrideTransform = true;
+        pi.UsePrefabTransform = false;
+    }
+
+    private void ToggleTransformOverride(Entity e)
+    {
+        if (!e.TryGet<PrefabInstance>(out var pi) || pi is null)
+            return;
+
+        if (pi.OverrideTransform)
+        {
+            pi.OverrideTransform = false;
+            pi.UsePrefabTransform = true;
+
+            if (_assets.TryGetPrefab(pi.PrefabId, out var prefab))
+            {
+                var root = prefab.GetRootEntity();
+                e.Transform.Position = root.Position;
+                e.Transform.Scale = root.Scale;
+                e.Transform.Rotation = System.Numerics.Quaternion.CreateFromAxisAngle(
+                    System.Numerics.Vector3.UnitZ,
+                    root.RotationZRadians);
+            }
+        }
+        else
+        {
+            pi.OverrideTransform = true;
+            pi.UsePrefabTransform = false;
+        }
+    }
+
+    private bool IsTransformOverride(Entity e, out bool usePrefab)
+    {
+        usePrefab = false;
+        if (!e.TryGet<PrefabInstance>(out var pi) || pi is null)
+            return false;
+
+        usePrefab = pi.UsePrefabTransform;
+        return pi.OverrideTransform;
+    }
+
+    private void SaveScene()
+    {
+        try
+        {
+            var json = SceneJson.Serialize(_scene);
+            File.WriteAllText(_scenePath, json);
+            _hotReloadStatus = $"Scene saved: {DateTime.Now:T}";
+        }
+        catch (Exception ex)
+        {
+            _hotReloadStatus = $"Scene save FAILED: {ex.Message}";
+        }
+    }
+
+    private void DrawSelectionOutline()
+    {
+        if (!_editorMode)
+            return;
+
+        var selected = GetSelectedEntity();
+        if (selected is null)
+            return;
+
+        if (!selected.TryGet<BoxCollider2D>(out var box) || box is null)
+            return;
+
+        var scale = selected.Transform.Scale;
+        var size = new System.Numerics.Vector2(Math.Abs(scale.X) * box.Size.X, Math.Abs(scale.Y) * box.Size.Y);
+        var offsetLocal = new System.Numerics.Vector2(box.Offset.X * scale.X, box.Offset.Y * scale.Y);
+        var centerWorld = new System.Numerics.Vector2(selected.Transform.Position.X, selected.Transform.Position.Y);
+        var rot = GetZRotationRadians(selected.Transform.Rotation);
+
+        var axisX = new System.Numerics.Vector2(MathF.Cos(rot), MathF.Sin(rot));
+        var axisY = new System.Numerics.Vector2(-axisX.Y, axisX.X);
+        var offsetWorld = axisX * offsetLocal.X + axisY * offsetLocal.Y;
+        centerWorld += offsetWorld;
+
+        var half = size * 0.5f;
+        var p0 = centerWorld + axisX * half.X + axisY * half.Y;
+        var p1 = centerWorld + axisX * half.X - axisY * half.Y;
+        var p2 = centerWorld - axisX * half.X - axisY * half.Y;
+        var p3 = centerWorld - axisX * half.X + axisY * half.Y;
+
+        _uiSb.Begin(samplerState: SamplerState.PointClamp, blendState: BlendState.AlphaBlend);
+        DrawObbOutline(p0, p1, p2, p3, Microsoft.Xna.Framework.Color.Cyan, 2);
+        _uiSb.End();
+    }
 
 }
 

@@ -48,6 +48,8 @@ public sealed class MonoGameInput : IInput
         InputKey.Z => Keys.Z,
         InputKey.X => Keys.X,
         InputKey.C => Keys.C,
+        InputKey.F1 => Keys.F1,
+        InputKey.F5 => Keys.F5,
 
         _ => Keys.None
     };

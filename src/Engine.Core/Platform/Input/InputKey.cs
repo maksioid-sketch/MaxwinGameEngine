@@ -14,5 +14,7 @@ public enum InputKey
     Shift,
     Z,
     X,
-    C
+    C,
+    F1,
+    F5
 }
