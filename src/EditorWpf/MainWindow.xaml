@@ -36,6 +36,46 @@
             <Style TargetType="TextBlock">
                 <Setter Property="Foreground" Value="#E7E7E7"/>
             </Style>
+            <Style x:Key="SlimDarkScrollBar" TargetType="ScrollBar">
+                <Setter Property="Width" Value="8"/>
+                <Setter Property="Background" Value="#111319"/>
+                <Setter Property="BorderBrush" Value="#111319"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="VerticalAlignment" Value="Stretch"/>
+                <Setter Property="Foreground" Value="#B7BDC9"/>
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ScrollBar">
+                            <Grid Background="{TemplateBinding Background}"
+                                  Width="{TemplateBinding Width}">
+                                <Track x:Name="PART_Track" IsDirectionReversed="True"
+                                       Width="{TemplateBinding Width}">
+                                    <Track.DecreaseRepeatButton>
+                                        <RepeatButton Command="ScrollBar.PageUpCommand" Opacity="0"/>
+                                    </Track.DecreaseRepeatButton>
+                                    <Track.IncreaseRepeatButton>
+                                        <RepeatButton Command="ScrollBar.PageDownCommand" Opacity="0"/>
+                                    </Track.IncreaseRepeatButton>
+                                    <Track.Thumb>
+                                        <Thumb Background="#2F3440" BorderBrush="#2F3440" BorderThickness="0"
+                                               Width="{TemplateBinding Width}" MinWidth="{TemplateBinding Width}"
+                                               FocusVisualStyle="{x:Null}">
+                                            <Thumb.Template>
+                                                <ControlTemplate TargetType="Thumb">
+                                                    <Border Background="{TemplateBinding Background}"
+                                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                                            BorderThickness="0"/>
+                                                </ControlTemplate>
+                                            </Thumb.Template>
+                                        </Thumb>
+                                    </Track.Thumb>
+                                </Track>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
             <Style x:Key="DetailsTextBoxStyle" TargetType="TextBox">
                 <Setter Property="Height" Value="22"/>
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -209,33 +249,40 @@
                         <DockPanel LastChildFill="True">
                             <TextBlock DockPanel.Dock="Top" FontWeight="Bold" Margin="0,0,0,6">Details</TextBlock>
                             <TreeView x:Name="DetailsTree" BorderThickness="0" FontSize="11" Background="#141519"
-                                      Grid.IsSharedSizeScope="True"
+                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                      ScrollViewer.VerticalScrollBarVisibility="Auto"
                                       ScrollViewer.CanContentScroll="False"
                                       ScrollViewer.PanningMode="VerticalOnly"
                                       ScrollViewer.PanningRatio="0.2"
                                       ScrollViewer.PanningDeceleration="0.001"
-                                      ScrollViewer.IsDeferredScrollingEnabled="True"
+                                      ScrollViewer.IsDeferredScrollingEnabled="False"
+                                      HorizontalContentAlignment="Stretch"
                                       PreviewMouseWheel="DetailsTree_OnPreviewMouseWheel">
                                 <TreeView.Resources>
+                                    <Style TargetType="ScrollViewer">
+                                        <Setter Property="Padding" Value="0,0,10,0"/>
+                                    </Style>
+                                    <Style TargetType="ScrollBar" BasedOn="{StaticResource SlimDarkScrollBar}"/>
                                     <HierarchicalDataTemplate DataType="{x:Type local:ComponentNode}" ItemsSource="{Binding Fields}">
                                         <TextBlock Text="{Binding Name}" FontWeight="Bold" Foreground="#F0F0F2" Margin="0,6,0,4"/>
                                     </HierarchicalDataTemplate>
                                     <DataTemplate DataType="{x:Type local:FieldNode}">
-                                        <Grid Margin="2,2" MinHeight="24">
+                                        <Grid Margin="2,2" MinHeight="24" HorizontalAlignment="Stretch">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" SharedSizeGroup="DetailName"/>
-                                                <ColumnDefinition Width="*" SharedSizeGroup="DetailValue"/>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="DetailName"/>
+                                                <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
 
                                             <TextBlock Grid.Column="0" Text="{Binding Name}" Foreground="#D0D2D8"/>
 
-                                            <Grid Grid.Column="1" Margin="8,0,0,0" HorizontalAlignment="Stretch">
+                                            <Grid Grid.Column="1" Margin="12,0,14,0" HorizontalAlignment="Stretch">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
 
                                                 <TextBox Grid.Column="0" FontSize="11" HorizontalAlignment="Stretch"
+                                                         Margin="0,0,6,0"
                                                          Style="{StaticResource DetailsTextBoxStyle}"
                                                          Visibility="{Binding IsBool, Converter={StaticResource InverseBoolToVisibilityConverter}}"
                                                          Text="{Binding ValueText, UpdateSourceTrigger=LostFocus}"
@@ -243,12 +290,13 @@
                                                          KeyDown="DetailsValue_OnKeyDown"/>
 
                                                 <CheckBox Grid.Column="0" VerticalAlignment="Center"
+                                                          Margin="0,0,6,0"
                                                           Style="{StaticResource DetailsCheckBoxStyle}"
                                                           Visibility="{Binding IsBool, Converter={StaticResource BoolToVisibilityConverter}}"
                                                           IsChecked="{Binding BoolValue}"
                                                           Click="DetailsBool_OnClick"/>
 
-                                                <Button Grid.Column="1" Content="↺" Margin="6,0,0,0"
+                                                <Button Grid.Column="1" Content="↺" Margin="6,0,8,0"
                                                         Style="{StaticResource ResetIconButtonStyle}"
                                                         ToolTip="Reset to prefab value"
                                                         Visibility="{Binding CanReset, Converter={StaticResource BoolToVisibilityConverter}}"
@@ -258,13 +306,15 @@
                                     </DataTemplate>
                                 </TreeView.Resources>
                                 <TreeView.ItemContainerStyle>
-                                    <Style TargetType="TreeViewItem">
+                                        <Style TargetType="TreeViewItem">
                                         <Style.Setters>
                                             <Setter Property="Background" Value="Transparent"/>
                                             <Setter Property="BorderThickness" Value="0"/>
                                             <Setter Property="Focusable" Value="False"/>
                                             <Setter Property="IsTabStop" Value="False"/>
                                             <Setter Property="Padding" Value="0"/>
+                                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                            <Setter Property="Grid.IsSharedSizeScope" Value="True"/>
                                             <EventSetter Event="Expanded" Handler="DetailsTree_OnExpanded"/>
                                             <EventSetter Event="Collapsed" Handler="DetailsTree_OnCollapsed"/>
                                         </Style.Setters>
