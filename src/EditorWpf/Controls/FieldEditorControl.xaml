@@ -1,0 +1,125 @@
+<UserControl x:Class="EditorWpf.Controls.FieldEditorControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:EditorWpf"
+             MinHeight="24"
+             Background="Transparent">
+    <Grid Margin="2,2" HorizontalAlignment="Stretch">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" SharedSizeGroup="DetailName"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Column="0" Text="{Binding Name}" Foreground="#D0D2D8"
+                   VerticalAlignment="Center"/>
+
+        <Grid Grid.Column="1" Margin="12,0,14,0" HorizontalAlignment="Stretch"
+              VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBox Grid.Column="0" FontSize="11" HorizontalAlignment="Stretch"
+                     Margin="0,0,6,0"
+                     Style="{StaticResource DetailsTextBoxStyle}"
+                     Visibility="{Binding IsText, Converter={StaticResource BoolToVisibilityConverter}}"
+                     Text="{Binding ValueText, UpdateSourceTrigger=LostFocus}"
+                     LostFocus="DetailsValue_OnLostFocus"
+                     KeyDown="DetailsValue_OnKeyDown"/>
+
+            <ComboBox Grid.Column="0" FontSize="11" HorizontalAlignment="Stretch"
+                      Margin="0,0,6,0"
+                      Style="{StaticResource DarkComboBoxStyle}"
+                      Visibility="{Binding IsEnum, Converter={StaticResource BoolToVisibilityConverter}}"
+                      ItemsSource="{Binding EnumOptions}"
+                      SelectedItem="{Binding EnumValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                      SelectionChanged="DetailsEnum_OnSelectionChanged"/>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal"
+                        VerticalAlignment="Center"
+                        Margin="0,0,6,0"
+                        Visibility="{Binding IsVector2, Converter={StaticResource BoolToVisibilityConverter}}">
+                <TextBlock Text="X" Margin="0,0,4,0" VerticalAlignment="Center" Foreground="#A7ABB4"/>
+                <TextBox FontSize="11" Margin="0,0,8,0" MinWidth="24"
+                         Style="{StaticResource DetailsTextBoxStyle}"
+                         Text="{Binding XValue, UpdateSourceTrigger=PropertyChanged}"
+                         LostFocus="DetailsVectorValue_OnLostFocus"
+                         KeyDown="DetailsVectorValue_OnKeyDown"/>
+                <TextBlock Text="Y" Margin="0,0,4,0" VerticalAlignment="Center" Foreground="#A7ABB4"/>
+                <TextBox FontSize="11" MinWidth="24"
+                         Style="{StaticResource DetailsTextBoxStyle}"
+                         Text="{Binding YValue, UpdateSourceTrigger=PropertyChanged}"
+                         LostFocus="DetailsVectorValue_OnLostFocus"
+                         KeyDown="DetailsVectorValue_OnKeyDown"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal"
+                        VerticalAlignment="Center"
+                        Margin="0,0,6,0"
+                        Visibility="{Binding IsVector3, Converter={StaticResource BoolToVisibilityConverter}}">
+                <TextBlock Text="X" Margin="0,0,4,0" VerticalAlignment="Center" Foreground="#A7ABB4"/>
+                <TextBox FontSize="11" Margin="0,0,8,0" MinWidth="24"
+                         Style="{StaticResource DetailsTextBoxStyle}"
+                         Text="{Binding XValue, UpdateSourceTrigger=PropertyChanged}"
+                         LostFocus="DetailsVectorValue_OnLostFocus"
+                         KeyDown="DetailsVectorValue_OnKeyDown"/>
+                <TextBlock Text="Y" Margin="0,0,4,0" VerticalAlignment="Center" Foreground="#A7ABB4"/>
+                <TextBox FontSize="11" Margin="0,0,8,0" MinWidth="24"
+                         Style="{StaticResource DetailsTextBoxStyle}"
+                         Text="{Binding YValue, UpdateSourceTrigger=PropertyChanged}"
+                         LostFocus="DetailsVectorValue_OnLostFocus"
+                         KeyDown="DetailsVectorValue_OnKeyDown"/>
+                <TextBlock Text="Z" Margin="0,0,4,0" VerticalAlignment="Center" Foreground="#A7ABB4"/>
+                <TextBox FontSize="11" MinWidth="24"
+                         Style="{StaticResource DetailsTextBoxStyle}"
+                         Text="{Binding ZValue, UpdateSourceTrigger=PropertyChanged}"
+                         LostFocus="DetailsVectorValue_OnLostFocus"
+                         KeyDown="DetailsVectorValue_OnKeyDown"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal"
+                        VerticalAlignment="Center"
+                        Margin="0,0,6,0"
+                        Visibility="{Binding IsColor4, Converter={StaticResource BoolToVisibilityConverter}}">
+                <TextBlock Text="R" Margin="0,0,4,0" VerticalAlignment="Center" Foreground="#A7ABB4"/>
+                <TextBox FontSize="11" Margin="0,0,6,0" MinWidth="24"
+                         Style="{StaticResource DetailsTextBoxStyle}"
+                         Text="{Binding XValue, UpdateSourceTrigger=PropertyChanged}"
+                         LostFocus="DetailsVectorValue_OnLostFocus"
+                         KeyDown="DetailsVectorValue_OnKeyDown"/>
+                <TextBlock Text="G" Margin="0,0,4,0" VerticalAlignment="Center" Foreground="#A7ABB4"/>
+                <TextBox FontSize="11" Margin="0,0,6,0" MinWidth="24"
+                         Style="{StaticResource DetailsTextBoxStyle}"
+                         Text="{Binding YValue, UpdateSourceTrigger=PropertyChanged}"
+                         LostFocus="DetailsVectorValue_OnLostFocus"
+                         KeyDown="DetailsVectorValue_OnKeyDown"/>
+                <TextBlock Text="B" Margin="0,0,4,0" VerticalAlignment="Center" Foreground="#A7ABB4"/>
+                <TextBox FontSize="11" Margin="0,0,6,0" MinWidth="24"
+                         Style="{StaticResource DetailsTextBoxStyle}"
+                         Text="{Binding ZValue, UpdateSourceTrigger=PropertyChanged}"
+                         LostFocus="DetailsVectorValue_OnLostFocus"
+                         KeyDown="DetailsVectorValue_OnKeyDown"/>
+                <TextBlock Text="A" Margin="0,0,4,0" VerticalAlignment="Center" Foreground="#A7ABB4"/>
+                <TextBox FontSize="11" MinWidth="24"
+                         Style="{StaticResource DetailsTextBoxStyle}"
+                         Text="{Binding WValue, UpdateSourceTrigger=PropertyChanged}"
+                         LostFocus="DetailsVectorValue_OnLostFocus"
+                         KeyDown="DetailsVectorValue_OnKeyDown"/>
+            </StackPanel>
+
+            <CheckBox Grid.Column="0" VerticalAlignment="Center"
+                      Margin="0,0,6,0"
+                      Style="{StaticResource DetailsCheckBoxStyle}"
+                      Visibility="{Binding IsBool, Converter={StaticResource BoolToVisibilityConverter}}"
+                      IsChecked="{Binding BoolValue}"
+                      Click="DetailsBool_OnClick"/>
+
+            <Button Grid.Column="1" Content="↺" Margin="6,0,8,0"
+                    Style="{StaticResource ResetIconButtonStyle}"
+                    ToolTip="Reset to prefab value"
+                    Visibility="{Binding CanReset, Converter={StaticResource BoolToVisibilityConverter}}"
+                    Click="DetailsReset_OnClick"/>
+        </Grid>
+    </Grid>
+</UserControl>

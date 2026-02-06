@@ -32,6 +32,7 @@ public sealed class FieldNode : INotifyPropertyChanged
     private string _yValue;
     private string _zValue;
     private string _wValue;
+    public object? ComponentInstance { get; set; }
     public Type? ComponentType { get; }
     public FieldDescriptor? FieldDescriptor { get; }
     public FieldKind Kind { get; }

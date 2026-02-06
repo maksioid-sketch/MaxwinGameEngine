@@ -4,6 +4,11 @@
              xmlns:local="clr-namespace:EditorWpf"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/EditorTheme.xaml"/>
+                <ResourceDictionary Source="Resources/FieldTemplates.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>
