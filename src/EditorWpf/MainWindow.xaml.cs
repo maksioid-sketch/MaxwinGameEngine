@@ -251,6 +251,10 @@ public partial class MainWindow : Window
                 node.CanReset = isOverridden;
                 node.IsBool = isBool;
                 node.BoolValue = boolValue;
+                if (field.Kind == FieldKind.Enum)
+                    node.EnumValue = displayValue;
+
+                UpdateVectorFields(node, field.Kind, displayValue);
             }
         }
     }
@@ -315,6 +319,35 @@ public partial class MainWindow : Window
         };
     }
 
+    private static void UpdateVectorFields(FieldNode node, FieldKind kind, string valueText)
+    {
+        float[]? parts = null;
+        try
+        {
+            parts = kind switch
+            {
+                FieldKind.Vector2 => SplitNumbers(valueText, 2),
+                FieldKind.Vector3 => SplitNumbers(valueText, 3),
+                FieldKind.Color4 => SplitNumbers(valueText, 4),
+                _ => null
+            };
+        }
+        catch
+        {
+            parts = null;
+        }
+
+        if (parts is null)
+            return;
+
+        node.XValue = Fmt(parts[0]);
+        node.YValue = Fmt(parts[1]);
+        if (parts.Length > 2)
+            node.ZValue = Fmt(parts[2]);
+        if (parts.Length > 3)
+            node.WValue = Fmt(parts[3]);
+    }
+
     private static string Fmt(float value)
         => value.ToString("0.###", CultureInfo.InvariantCulture);
 
@@ -375,6 +408,39 @@ public partial class MainWindow : Window
             return;
 
         ApplyDetailEdit(node, box.Text ?? string.Empty);
+    }
+
+    private void DetailsVectorValue_OnLostFocus(object sender, RoutedEventArgs e)
+    {
+        if (sender is not TextBox box || box.DataContext is not FieldNode node)
+            return;
+
+        ApplyDetailEdit(node, ComposeVectorValue(node));
+    }
+
+    private void DetailsVectorValue_OnKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (e.Key != System.Windows.Input.Key.Enter)
+            return;
+
+        if (sender is not TextBox box || box.DataContext is not FieldNode node)
+            return;
+
+        ApplyDetailEdit(node, ComposeVectorValue(node));
+    }
+
+    private void DetailsEnum_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (sender is not ComboBox box || box.DataContext is not FieldNode node)
+            return;
+
+        if (box.SelectedItem is not string value)
+            return;
+
+        if (string.Equals(value, node.ValueText, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        ApplyDetailEdit(node, value);
     }
 
     private void DetailsBool_OnClick(object sender, RoutedEventArgs e)
@@ -558,6 +624,19 @@ public partial class MainWindow : Window
             default:
                 throw new InvalidOperationException("Unsupported field kind.");
         }
+    }
+
+    private static string ComposeVectorValue(FieldNode node)
+    {
+        static string Sanitize(string value) => value?.Trim() ?? string.Empty;
+
+        return node.Kind switch
+        {
+            FieldKind.Vector2 => $"({Sanitize(node.XValue)}, {Sanitize(node.YValue)})",
+            FieldKind.Vector3 => $"({Sanitize(node.XValue)}, {Sanitize(node.YValue)}, {Sanitize(node.ZValue)})",
+            FieldKind.Color4 => $"({Sanitize(node.XValue)}, {Sanitize(node.YValue)}, {Sanitize(node.ZValue)}, {Sanitize(node.WValue)})",
+            _ => node.ValueText
+        };
     }
 
     private static Vector2 ParseVector2(string text)
@@ -782,6 +861,8 @@ public partial class MainWindow : Window
         if (viewer is null)
             return;
 
+        CloseOpenComboBoxes(DetailsTree);
+
         var delta = -e.Delta * 0.3;
         var target = Math.Max(0, Math.Min(viewer.ScrollableHeight, viewer.VerticalOffset + delta));
         viewer.ScrollToVerticalOffset(target);
@@ -802,6 +883,18 @@ public partial class MainWindow : Window
         }
 
         return null;
+    }
+
+    private static void CloseOpenComboBoxes(DependencyObject root)
+    {
+        if (root is ComboBox combo && combo.IsDropDownOpen)
+            combo.IsDropDownOpen = false;
+
+        for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(root); i++)
+        {
+            var child = System.Windows.Media.VisualTreeHelper.GetChild(root, i);
+            CloseOpenComboBoxes(child);
+        }
     }
 
     private void RestoreExpandedState()
@@ -844,7 +937,13 @@ public partial class MainWindow : Window
         for (int i = 0; i < desc.Fields.Count; i++)
         {
             var field = desc.Fields[i];
-            compNode.Fields.Add(new FieldNode(field.Name, "", componentType, field, false, field.Kind == FieldKind.Bool, false));
+            var node = new FieldNode(field.Name, "", componentType, field, false, field.Kind == FieldKind.Bool, false);
+            if (field.Kind == FieldKind.Enum && field.EnumType is not null)
+            {
+                foreach (var name in Enum.GetNames(field.EnumType))
+                    node.EnumOptions.Add(name);
+            }
+            compNode.Fields.Add(node);
         }
     }
 
