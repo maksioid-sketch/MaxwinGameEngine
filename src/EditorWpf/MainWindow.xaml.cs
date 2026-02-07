@@ -217,7 +217,11 @@ public partial class MainWindow : Window
 
     private void Window_OnPreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
-        CommitFocusedDetailEdit(e.OriginalSource as DependencyObject);
+        var source = e.OriginalSource as DependencyObject;
+        if (source is not null && IsResetButtonClick(source))
+            return;
+
+        CommitFocusedDetailEdit(source);
     }
 
     private static ScrollViewer? FindScrollViewer(DependencyObject root)
@@ -283,6 +287,34 @@ public partial class MainWindow : Window
         };
 
         ViewModel.ApplyDetailEdit(node, value);
+        System.Windows.Input.Keyboard.ClearFocus();
+    }
+
+    private bool IsResetButtonClick(DependencyObject source)
+    {
+        var button = FindAncestor<Button>(source);
+        if (button is null)
+            return false;
+
+        if (button.Style is null)
+            return false;
+
+        var resetStyle = TryFindResource("ResetIconButtonStyle") as Style;
+        return resetStyle is not null && ReferenceEquals(button.Style, resetStyle);
+    }
+
+    private static T? FindAncestor<T>(DependencyObject child) where T : DependencyObject
+    {
+        var current = child;
+        while (current is not null)
+        {
+            if (current is T match)
+                return match;
+
+            current = System.Windows.Media.VisualTreeHelper.GetParent(current);
+        }
+
+        return null;
     }
 
     private static bool IsDescendantOf(DependencyObject ancestor, DependencyObject child)

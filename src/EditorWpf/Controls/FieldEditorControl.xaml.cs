@@ -82,5 +82,6 @@ public partial class FieldEditorControl : UserControl
             return;
 
         GetViewModel()?.ResetFieldOverride(node);
+        System.Windows.Input.Keyboard.ClearFocus();
     }
 }
