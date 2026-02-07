@@ -518,13 +518,15 @@ public sealed class GameApp : Game
     {
         try
         {
+            var previousSelection = _selectedEntityId;
+
             if (!File.Exists(_scenePath))
                 throw new FileNotFoundException("scene not found at runtime path", _scenePath);
 
             var json = File.ReadAllText(_scenePath);
             _scene = SceneJson.Deserialize(json);
             Engine.Core.Scene.PrefabInstanceResolver.Apply(_scene, _assets);
-            _selectedEntityId = null;
+            RestoreSelectionAfterReload(previousSelection);
 
             EnsurePlayerPrefabExists();
             //SpawnPrefabIfMissing("Player");
@@ -549,6 +551,18 @@ public sealed class GameApp : Game
             // Keep the previous _scene so the game continues running.
         }
 
+    }
+
+    private void RestoreSelectionAfterReload(Guid? previousSelection)
+    {
+        if (!previousSelection.HasValue)
+        {
+            SetSelectedEntity(null);
+            return;
+        }
+
+        var match = _scene.Entities.FirstOrDefault(e => e.Id == previousSelection.Value);
+        SetSelectedEntity(match);
     }
 
     private void EnsurePlayerPrefabExists()

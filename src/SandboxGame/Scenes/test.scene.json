@@ -54,9 +54,7 @@
         "LinearDrag": 0,
         "Friction": 0.2
       },
-      "DebugRender2D": {
-        "ShowCollider": true
-      }
+      "DebugRender2D": null
     },
     {
       "Id": "22222222-2222-2222-2222-222222222222",
@@ -123,9 +121,7 @@
         "LinearDrag": 0,
         "Friction": 0.2
       },
-      "DebugRender2D": {
-        "ShowCollider": true
-      }
+      "DebugRender2D": null
     },
     {
       "Id": "33333333-3333-3333-3333-333333333333",
@@ -157,7 +153,17 @@
         "DefaultCrossFadeSeconds": 0,
         "DefaultFreezeDuringCrossFade": false
       },
-      "BoxCollider2D": null,
+      "BoxCollider2D": {
+        "Size": [
+          5,
+          0.2
+        ],
+        "Offset": [
+          0,
+          0.915
+        ],
+        "IsTrigger": false
+      },
       "PhysicsBody2D": null,
       "Rigidbody2D": {
         "Mass": 1,
