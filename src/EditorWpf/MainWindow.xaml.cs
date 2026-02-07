@@ -31,6 +31,7 @@ public partial class MainWindow : Window
     private void TryStartGameHost()
     {
         _isPlayMode = false;
+        ViewModel.AutoSaveEnabled = true;
         UpdatePlayToggleButton();
 
         var exePath = FindSandboxGameExe();
@@ -58,6 +59,7 @@ public partial class MainWindow : Window
         {
             GameHost.StartGame(exePath, Path.GetDirectoryName(exePath), "--editor", restart: true);
             _isPlayMode = false;
+            ViewModel.AutoSaveEnabled = true;
             UpdatePlayToggleButton();
             UpdateGameHostInputState();
             ViewModel.StatusText = "Game stopped (Edit mode).";
@@ -66,6 +68,7 @@ public partial class MainWindow : Window
 
         GameHost.StartGame(exePath, Path.GetDirectoryName(exePath), "--play", restart: true);
         _isPlayMode = true;
+        ViewModel.AutoSaveEnabled = false;
         UpdatePlayToggleButton();
         UpdateGameHostInputState();
         ViewModel.StatusText = "Game started in Play mode.";

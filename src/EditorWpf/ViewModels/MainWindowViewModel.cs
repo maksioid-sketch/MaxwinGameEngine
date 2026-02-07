@@ -26,6 +26,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private string _scenePath = string.Empty;
     private string _statusText = "Ready.";
     private Entity? _selectedEntity;
+    private bool _autoSaveEnabled = true;
 
     public ObservableCollection<EntityView> Entities => _entities;
     public ObservableCollection<string> InspectorLines => _inspectorLines;
@@ -41,6 +42,12 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     {
         get => _statusText;
         set { if (_statusText != value) { _statusText = value; Notify(); } }
+    }
+
+    public bool AutoSaveEnabled
+    {
+        get => _autoSaveEnabled;
+        set { if (_autoSaveEnabled != value) { _autoSaveEnabled = value; Notify(); } }
     }
 
     public void Initialize(string baseDirectory)
@@ -166,6 +173,9 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     private bool AutoSaveScene()
     {
+        if (!AutoSaveEnabled)
+            return false;
+
         if (string.IsNullOrWhiteSpace(_currentScenePath) || _scene is null)
             return false;
 
@@ -292,11 +302,13 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 var node = compNode.Fields[f];
                 node.ComponentInstance = entity;
 
-                var prefabValue = prefabInstanceObj is null ? "" : FormatValue(field.Getter?.Invoke(prefabInstanceObj));
-                var sceneValue = sceneInstance is null ? "" : FormatValue(field.Getter?.Invoke(sceneInstance));
+                var prefabRaw = prefabInstanceObj is null ? null : field.Getter?.Invoke(prefabInstanceObj);
+                var sceneRaw = sceneInstance is null ? null : field.Getter?.Invoke(sceneInstance);
+                var prefabValue = prefabRaw is null ? "" : FormatValue(prefabRaw);
+                var sceneValue = sceneRaw is null ? "" : FormatValue(sceneRaw);
                 var defaultValue = FormatValue(field.DefaultValue);
 
-                bool isOverridden = hasPrefab && sceneInstance is not null && prefabValue != sceneValue;
+                bool isOverridden = hasPrefab && sceneInstance is not null && !ValuesEqual(prefabRaw, sceneRaw);
                 var displayValue = isOverridden
                     ? sceneValue
                     : (hasPrefab ? (string.IsNullOrWhiteSpace(prefabValue) ? defaultValue : prefabValue) : (string.IsNullOrWhiteSpace(sceneValue) ? defaultValue : sceneValue));
@@ -464,9 +476,10 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         if (entity.TryGet<PrefabInstance>(out var piFound))
             pi = piFound;
 
+        object? prefabComponent = null;
         if (prefabRoot is not null)
         {
-            var prefabComponent = GetPrefabComponent(prefabRoot, componentType);
+            prefabComponent = GetPrefabComponent(prefabRoot, componentType);
             if (prefabComponent is not null)
             {
                 if (target is null)
@@ -495,6 +508,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         field.Setter?.Invoke(target, value);
 
         EnsurePrefabOverrideFlag(entity, componentType);
+        if (prefabComponent is not null && target is not null)
+            TryClearOverrideIfMatchesPrefab(entity, componentType, prefabComponent, target);
     }
 
     private static void CopyComponentValues(object source, object target, Type componentType)

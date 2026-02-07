@@ -50,7 +50,9 @@
         ],
         "IsTrigger": false
       },
-      "PhysicsBody2D": null,
+      "PhysicsBody2D": {
+        "IsStatic": false
+      },
       "Rigidbody2D": {
         "Mass": 3,
         "Velocity": [

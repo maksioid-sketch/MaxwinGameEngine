@@ -8,7 +8,7 @@
       "Transform": {
         "Position": [
           0,
-          0,
+          -5,
           0
         ],
         "rotationZDegrees": 0,
@@ -18,7 +18,17 @@
           1
         ]
       },
-      "SpriteRenderer": null,
+      "SpriteRenderer": {
+        "SpriteId": "player_idle_0",
+        "Layer": 100,
+        "Tint": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "Flip": "None"
+      },
       "Animator": {
         "ControllerId": "player",
         "ClipId": "human_idle",
@@ -43,7 +53,17 @@
         "IsTrigger": false
       },
       "PhysicsBody2D": null,
-      "Rigidbody2D": null,
+      "Rigidbody2D": {
+        "Mass": 1,
+        "Velocity": [
+          0,
+          0
+        ],
+        "UseGravity": true,
+        "GravityScale": 2,
+        "LinearDrag": 0,
+        "Friction": 0.2
+      },
       "DebugRender2D": {
         "ShowCollider": true
       }
@@ -54,14 +74,14 @@
       "PrefabId": "Capibara",
       "Transform": {
         "Position": [
-          -1.7655811,
-          2.364002,
+          0,
+          0,
           0
         ],
         "rotationZDegrees": 0,
         "Scale": [
-          2.1499906,
-          2.1499906,
+          5,
+          5,
           1
         ]
       },
@@ -70,7 +90,9 @@
       "BoxCollider2D": null,
       "PhysicsBody2D": null,
       "Rigidbody2D": null,
-      "DebugRender2D": null
+      "DebugRender2D": {
+        "ShowCollider": true
+      }
     },
     {
       "Id": "33333333-3333-3333-3333-333333333333",

@@ -119,7 +119,9 @@
                     Style="{StaticResource ResetIconButtonStyle}"
                     ToolTip="Reset to prefab value"
                     Visibility="{Binding CanReset, Converter={StaticResource BoolToVisibilityConverter}}"
+                    PreviewMouseDown="DetailsReset_OnPreviewMouseDown"
                     Click="DetailsReset_OnClick"/>
         </Grid>
     </Grid>
 </UserControl>
+

@@ -7,6 +7,8 @@ namespace EditorWpf.Controls;
 
 public partial class FieldEditorControl : UserControl
 {
+    private bool _suppressCommitOnLostFocus;
+
     public FieldEditorControl()
     {
         InitializeComponent();
@@ -17,6 +19,12 @@ public partial class FieldEditorControl : UserControl
 
     private void DetailsValue_OnLostFocus(object sender, RoutedEventArgs e)
     {
+        if (_suppressCommitOnLostFocus)
+        {
+            _suppressCommitOnLostFocus = false;
+            return;
+        }
+
         if (sender is not TextBox box || box.DataContext is not FieldNode node)
             return;
 
@@ -36,6 +44,12 @@ public partial class FieldEditorControl : UserControl
 
     private void DetailsVectorValue_OnLostFocus(object sender, RoutedEventArgs e)
     {
+        if (_suppressCommitOnLostFocus)
+        {
+            _suppressCommitOnLostFocus = false;
+            return;
+        }
+
         if (sender is not TextBox box || box.DataContext is not FieldNode node)
             return;
 
@@ -83,5 +97,10 @@ public partial class FieldEditorControl : UserControl
 
         GetViewModel()?.ResetFieldOverride(node);
         System.Windows.Input.Keyboard.ClearFocus();
+    }
+
+    private void DetailsReset_OnPreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        _suppressCommitOnLostFocus = true;
     }
 }

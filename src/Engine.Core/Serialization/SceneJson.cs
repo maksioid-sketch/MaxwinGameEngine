@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Engine.Core.Components;
 using Engine.Core.Math;
+using Engine.Core.Rendering;
 using SceneType = Engine.Core.Scene.Scene;
 using EntityType = Engine.Core.Scene.Entity;
 
@@ -130,6 +131,7 @@ public static class SceneJson
                             e.SpriteRenderer.Tint[1],
                             e.SpriteRenderer.Tint[2],
                             e.SpriteRenderer.Tint[3]),
+                        Flip = e.SpriteRenderer.Flip
                         
                     });
                 }
@@ -250,6 +252,7 @@ public static class SceneJson
                     SpriteId = spr.SpriteId,
                     Layer = spr.Layer,
                     Tint = new[] { spr.Tint.R, spr.Tint.G, spr.Tint.B, spr.Tint.A },
+                    Flip = spr.Flip
                 },
                 Animator = !includeAnimator || anim is null ? null : new AnimatorDto
                 {
@@ -328,6 +331,7 @@ public static class SceneJson
         
         // RGBA floats
         public float[] Tint { get; set; } = new float[] { 1, 1, 1, 1 };
+        public SpriteFlip Flip { get; set; } = SpriteFlip.None;
     }
 
     private sealed class AnimatorDto

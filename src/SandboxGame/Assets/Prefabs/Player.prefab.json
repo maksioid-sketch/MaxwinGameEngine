@@ -61,7 +61,9 @@
         ],
         "IsTrigger": false
       },
-      "PhysicsBody2D": null,
+      "PhysicsBody2D": {
+        "IsStatic": false
+      },
       "Rigidbody2D": {
         "Mass": 1,
         "Velocity": [
@@ -73,7 +75,9 @@
         "LinearDrag": 0,
         "Friction": 0.2
       },
-      "DebugRender2D": null
+      "DebugRender2D": {
+        "ShowCollider": false
+      }
     }
   ]
 }
