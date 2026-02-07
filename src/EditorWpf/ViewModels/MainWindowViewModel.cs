@@ -508,8 +508,6 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         field.Setter?.Invoke(target, value);
 
         EnsurePrefabOverrideFlag(entity, componentType);
-        if (prefabComponent is not null && target is not null)
-            TryClearOverrideIfMatchesPrefab(entity, componentType, prefabComponent, target);
     }
 
     private static void CopyComponentValues(object source, object target, Type componentType)
@@ -551,16 +549,18 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             {
                 var prefabValue = field.Getter(prefabComponent);
                 field.Setter?.Invoke(target, prefabValue);
-                TryClearOverrideIfMatchesPrefab(entity, componentType, prefabComponent, target);
-                return;
+            }
+            else
+            {
+                field.Setter?.Invoke(target, field.DefaultValue);
             }
 
-            ClearOverrideAndRemoveComponent(entity, componentType);
+            EnsurePrefabOverrideFlag(entity, componentType);
             return;
         }
 
         field.Setter?.Invoke(target, field.DefaultValue);
-        TryClearOverrideIfMatchesPrefab(entity, componentType, null, target);
+        EnsurePrefabOverrideFlag(entity, componentType);
     }
 
     private static object ParseFieldValue(FieldKind kind, Type? enumType, string text)
@@ -648,62 +648,6 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             pi.OverrideDebugRender2D = true;
     }
 
-    private void TryClearOverrideIfMatchesPrefab(Entity entity, Type componentType, object? prefabComponent, object target)
-    {
-        if (!entity.TryGet<PrefabInstance>(out var pi) || pi is null)
-            return;
-
-        Prefab.PrefabEntity? prefabRoot = null;
-        if (prefabComponent is null)
-        {
-            if (!TryGetPrefabRoot(entity, out var root))
-                return;
-            prefabRoot = root;
-        }
-
-        prefabComponent ??= GetPrefabComponent(prefabRoot!, componentType);
-        if (prefabComponent is null)
-        {
-            ClearOverrideAndRemoveComponent(entity, componentType);
-            return;
-        }
-
-        if (!AreComponentFieldsEqual(prefabComponent, target, componentType))
-            return;
-
-        if (componentType == typeof(Transform))
-        {
-            pi.OverrideTransform = false;
-            pi.UsePrefabTransform = true;
-        }
-        else if (componentType == typeof(SpriteRenderer)) pi.OverrideSpriteRenderer = false;
-        else if (componentType == typeof(Animator)) pi.OverrideAnimator = false;
-        else if (componentType == typeof(BoxCollider2D)) pi.OverrideBoxCollider2D = false;
-        else if (componentType == typeof(PhysicsBody2D)) pi.OverridePhysicsBody2D = false;
-        else if (componentType == typeof(Rigidbody2D)) pi.OverrideRigidbody2D = false;
-        else if (componentType == typeof(DebugRender2D)) pi.OverrideDebugRender2D = false;
-    }
-
-    private void ClearOverrideAndRemoveComponent(Entity entity, Type componentType)
-    {
-        if (entity.TryGet<PrefabInstance>(out var pi) && pi is not null)
-        {
-            if (componentType == typeof(Transform))
-            {
-                pi.OverrideTransform = false;
-                pi.UsePrefabTransform = true;
-            }
-            else if (componentType == typeof(SpriteRenderer)) pi.OverrideSpriteRenderer = false;
-            else if (componentType == typeof(Animator)) pi.OverrideAnimator = false;
-            else if (componentType == typeof(BoxCollider2D)) pi.OverrideBoxCollider2D = false;
-            else if (componentType == typeof(PhysicsBody2D)) pi.OverridePhysicsBody2D = false;
-            else if (componentType == typeof(Rigidbody2D)) pi.OverrideRigidbody2D = false;
-            else if (componentType == typeof(DebugRender2D)) pi.OverrideDebugRender2D = false;
-        }
-
-        if (componentType != typeof(Transform))
-            entity.Remove(componentType);
-    }
 
     private static bool AreComponentFieldsEqual(object a, object b, Type componentType)
     {
