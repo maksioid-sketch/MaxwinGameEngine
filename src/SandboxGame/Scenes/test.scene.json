@@ -52,7 +52,9 @@
         ],
         "IsTrigger": false
       },
-      "PhysicsBody2D": null,
+      "PhysicsBody2D": {
+        "IsStatic": false
+      },
       "Rigidbody2D": {
         "Mass": 1,
         "Velocity": [
@@ -75,21 +77,64 @@
       "Transform": {
         "Position": [
           0,
-          0,
+          1,
           0
         ],
         "rotationZDegrees": 0,
         "Scale": [
-          5,
-          5,
+          3,
+          3,
           1
         ]
       },
-      "SpriteRenderer": null,
-      "Animator": null,
-      "BoxCollider2D": null,
-      "PhysicsBody2D": null,
-      "Rigidbody2D": null,
+      "SpriteRenderer": {
+        "SpriteId": "player_idle_0",
+        "Layer": 100,
+        "Tint": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "Flip": "None"
+      },
+      "Animator": {
+        "ControllerId": "",
+        "ClipId": "",
+        "Playing": true,
+        "Speed": 1,
+        "LoopOverride": false,
+        "Loop": true,
+        "FrameIndex": 0,
+        "TimeIntoFrame": 0,
+        "DefaultCrossFadeSeconds": 0,
+        "DefaultFreezeDuringCrossFade": false
+      },
+      "BoxCollider2D": {
+        "Size": [
+          0.6,
+          0.36
+        ],
+        "Offset": [
+          0,
+          0.06
+        ],
+        "IsTrigger": false
+      },
+      "PhysicsBody2D": {
+        "IsStatic": false
+      },
+      "Rigidbody2D": {
+        "Mass": 3,
+        "Velocity": [
+          0,
+          0
+        ],
+        "UseGravity": true,
+        "GravityScale": 1,
+        "LinearDrag": 0,
+        "Friction": 0.2
+      },
       "DebugRender2D": {
         "ShowCollider": true
       }
@@ -98,13 +143,58 @@
       "Id": "33333333-3333-3333-3333-333333333333",
       "Name": "BackgroundRoad",
       "PrefabId": "BackgroundRoad",
-      "Transform": null,
+      "Transform": {
+        "Position": [
+          0,
+          0.08,
+          0
+        ],
+        "rotationZDegrees": 0,
+        "Scale": [
+          3.5,
+          3.5,
+          1
+        ]
+      },
       "SpriteRenderer": null,
-      "Animator": null,
-      "BoxCollider2D": null,
+      "Animator": {
+        "ControllerId": "",
+        "ClipId": "",
+        "Playing": true,
+        "Speed": 1,
+        "LoopOverride": false,
+        "Loop": true,
+        "FrameIndex": 0,
+        "TimeIntoFrame": 0,
+        "DefaultCrossFadeSeconds": 0,
+        "DefaultFreezeDuringCrossFade": false
+      },
+      "BoxCollider2D": {
+        "Size": [
+          5,
+          0.2
+        ],
+        "Offset": [
+          0,
+          0.9
+        ],
+        "IsTrigger": false
+      },
       "PhysicsBody2D": null,
-      "Rigidbody2D": null,
-      "DebugRender2D": null
+      "Rigidbody2D": {
+        "Mass": 1,
+        "Velocity": [
+          0,
+          0
+        ],
+        "UseGravity": true,
+        "GravityScale": 1,
+        "LinearDrag": 0,
+        "Friction": 0.2
+      },
+      "DebugRender2D": {
+        "ShowCollider": false
+      }
     }
   ]
 }

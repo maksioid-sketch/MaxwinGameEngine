@@ -13,6 +13,7 @@ public sealed class PlayerMovementSystem : ISystem
     public float SpeedUnitsPerSecond { get; set; } = 3f;
     public float JumpSpeedUnitsPerSecond { get; set; } = 9f;
     public float GroundCheckDistance { get; set; } = 0.03f;
+    public float GroundedGraceSeconds { get; set; } = 0.08f;
 
     // Name of the float parameter written to Animator (used by controllers.json)
     public string SpeedParamName { get; set; } = "speed";
@@ -23,6 +24,7 @@ public sealed class PlayerMovementSystem : ISystem
     private bool _cachedCollider;
     private Vector2 defBoxSize;
     private Vector2 defBoxOffset;
+    private float _groundedTimer;
 
 
 
@@ -49,14 +51,26 @@ public sealed class PlayerMovementSystem : ISystem
         }
 
         bool grounded = IsGrounded(scene, player);
+        if (grounded)
+            _groundedTimer = GroundedGraceSeconds;
+        else
+            _groundedTimer = MathF.Max(0f, _groundedTimer - ctx.DeltaSeconds);
+        bool groundedStable = grounded || _groundedTimer > 0f;
 
-        // Apply movement (velocity if Rigidbody2D exists, otherwise direct position)
-        if (player.TryGet<Rigidbody2D>(out var rb) && rb is not null)
+        var isStatic = player.TryGet<PhysicsBody2D>(out var phys) && phys is not null && phys.IsStatic;
+
+        // Apply movement (velocity if Rigidbody2D exists and entity is not static, otherwise direct position)
+        if (isStatic)
+        {
+            if (player.TryGet<Rigidbody2D>(out var rbStatic) && rbStatic is not null)
+                rbStatic.Velocity = Vector2.Zero;
+        }
+        else if (player.TryGet<Rigidbody2D>(out var rb) && rb is not null)
         {
             var v = rb.Velocity;
             v.X = move.X * SpeedUnitsPerSecond;
 
-            if (grounded && ctx.Input.WasPressed(InputKey.W))
+            if (groundedStable && ctx.Input.WasPressed(InputKey.W))
                 v.Y = -JumpSpeedUnitsPerSecond;
 
             rb.Velocity = v;
@@ -123,7 +137,7 @@ public sealed class PlayerMovementSystem : ISystem
         if (player.TryGet<Animator>(out var anim) && anim != null)
         {
             anim.Floats[SpeedParamName] = speed;
-            anim.Bools["grounded"] = grounded;
+            anim.Bools["grounded"] = groundedStable;
             anim.Bools["crouch"] = crouch;
             anim.Bools["guard"] = guard;
 
@@ -156,8 +170,7 @@ public sealed class PlayerMovementSystem : ISystem
             if (box.IsTrigger)
                 continue;
 
-            if (e.TryGet<PhysicsBody2D>(out var phys) && phys is not null && !phys.IsStatic)
-                continue;
+        // Allow grounding on dynamic bodies too (e.g., moving platforms)
 
             var scale = e.Transform.Scale;
             var size = new Vector2(MathF.Abs(scale.X) * box.Size.X, MathF.Abs(scale.Y) * box.Size.Y);

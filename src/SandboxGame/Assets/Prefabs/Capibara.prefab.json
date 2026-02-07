@@ -38,7 +38,18 @@
         "PixelsPerUnitOverride": 100,
         "Flip": "None"
       },
-      "Animator": null,
+      "Animator": {
+        "ControllerId": "",
+        "ClipId": "",
+        "Playing": true,
+        "Speed": 1,
+        "LoopOverride": false,
+        "Loop": true,
+        "FrameIndex": 0,
+        "TimeIntoFrame": 0,
+        "DefaultCrossFadeSeconds": 0,
+        "DefaultFreezeDuringCrossFade": false
+      },
       "BoxCollider2D": {
         "Size": [
           0.6,
