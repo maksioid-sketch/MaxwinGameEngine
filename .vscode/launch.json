@@ -5,7 +5,7 @@
       "name": "EditorWpf",
       "type": "coreclr",
       "request": "launch",
-      "preLaunchTask": "build-editor",
+      "preLaunchTask": "rebuild-all",
       "program": "${workspaceFolder}/src/EditorWpf/bin/Debug/net9.0-windows/EditorWpf.exe",
       "cwd": "${workspaceFolder}",
       "stopAtEntry": false,

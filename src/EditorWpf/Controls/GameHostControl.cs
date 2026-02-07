@@ -89,6 +89,25 @@ public sealed class GameHostControl : HwndHost
         EnableWindow(_gameHwnd, enabled);
     }
 
+    public void FocusGameWindow()
+    {
+        if (_gameHwnd == IntPtr.Zero)
+            return;
+
+        var currentThread = GetCurrentThreadId();
+        var targetThread = GetWindowThreadProcessId(_gameHwnd, out _);
+        if (currentThread != targetThread)
+            AttachThreadInput(currentThread, targetThread, true);
+
+        SetForegroundWindow(_gameHwnd);
+        SetActiveWindow(_gameHwnd);
+        BringWindowToTop(_gameHwnd);
+        SetFocus(_gameHwnd);
+
+        if (currentThread != targetThread)
+            AttachThreadInput(currentThread, targetThread, false);
+    }
+
     protected override HandleRef BuildWindowCore(HandleRef hwndParent)
     {
         _hostHwnd = CreateWindowEx(
@@ -216,4 +235,25 @@ public sealed class GameHostControl : HwndHost
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool EnableWindow(IntPtr hWnd, bool bEnable);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern IntPtr SetFocus(IntPtr hWnd);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern IntPtr SetActiveWindow(IntPtr hWnd);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool BringWindowToTop(IntPtr hWnd);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
+    [DllImport("kernel32.dll")]
+    private static extern uint GetCurrentThreadId();
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
 }

@@ -10,6 +10,36 @@
         "${workspaceFolder}/src/EditorWpf/EditorWpf.csproj"
       ],
       "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "rebuild-solution",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "${workspaceFolder}/MaxwinGameEngine.slnx",
+        "-t:Rebuild"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "rebuild-editor",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/EditorWpf/EditorWpf.csproj",
+        "-t:Rebuild"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "rebuild-all",
+      "dependsOn": [
+        "rebuild-solution",
+        "rebuild-editor"
+      ],
+      "dependsOrder": "sequence"
     }
   ]
 }

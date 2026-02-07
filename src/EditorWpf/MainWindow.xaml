@@ -65,6 +65,8 @@
                                                   VerticalAlignment="Stretch"
                                                   SnapsToDevicePixels="True"
                                                   UseLayoutRounding="True"
+                                                  Focusable="True"
+                                                  PreviewMouseDown="GameHost_OnPreviewMouseDown"
                                                   MouseEnter="GameHost_OnMouseEnter"
                                                   MouseLeave="GameHost_OnMouseLeave"/>
                     </Border>

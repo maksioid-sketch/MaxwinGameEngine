@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/src/">
+    <Project Path="src/EditorWpf/EditorWpf.csproj" />
+  </Folder>
   <Project Path="src/Engine.Core/Engine.Core.csproj" />
   <Project Path="src/Engine.Runtime.MonoGame/Engine.Runtime.MonoGame.csproj" />
   <Project Path="src/SandboxGame/SandboxGame.csproj" />

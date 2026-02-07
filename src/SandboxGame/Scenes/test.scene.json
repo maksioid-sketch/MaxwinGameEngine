@@ -5,19 +5,7 @@
       "Id": "11111111-1111-1111-1111-111111111111",
       "Name": "Player",
       "PrefabId": "Player",
-      "Transform": {
-        "Position": [
-          0,
-          -5,
-          0
-        ],
-        "rotationZDegrees": 0,
-        "Scale": [
-          5,
-          5,
-          1
-        ]
-      },
+      "Transform": null,
       "SpriteRenderer": {
         "SpriteId": "player_idle_0",
         "Layer": 100,

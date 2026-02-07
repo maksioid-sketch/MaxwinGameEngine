@@ -15,6 +15,7 @@ public partial class MainWindow : Window
     public MainWindowViewModel ViewModel { get; }
     private bool _isPlayMode;
     private bool _isMouseOverGameHost;
+    private System.Diagnostics.Process? _playProcess;
 
     public MainWindow()
     {
@@ -25,7 +26,11 @@ public partial class MainWindow : Window
         DetailsTree.AddHandler(TreeViewItem.ExpandedEvent, new RoutedEventHandler(DetailsTree_OnExpanded));
         DetailsTree.AddHandler(TreeViewItem.CollapsedEvent, new RoutedEventHandler(DetailsTree_OnCollapsed));
         Loaded += (_, _) => TryStartGameHost();
-        Closed += (_, _) => GameHost.StopGame();
+        Closed += (_, _) =>
+        {
+            StopPlayProcess();
+            GameHost.StopGame();
+        };
     }
 
     private void TryStartGameHost()
@@ -46,6 +51,70 @@ public partial class MainWindow : Window
         ViewModel.StatusText = "Game started in Edit mode.";
     }
 
+    private bool StartPlayProcess()
+    {
+        var exePath = FindSandboxGameExe();
+        if (string.IsNullOrWhiteSpace(exePath) || !File.Exists(exePath))
+        {
+            ViewModel.StatusText = "SandboxGame executable not found. Build SandboxGame first.";
+            return false;
+        }
+
+        if (_playProcess is not null && !_playProcess.HasExited)
+            return true;
+
+        var startInfo = new System.Diagnostics.ProcessStartInfo
+        {
+            FileName = exePath,
+            WorkingDirectory = Path.GetDirectoryName(exePath) ?? string.Empty,
+            UseShellExecute = true,
+            Arguments = "--play"
+        };
+
+        _playProcess = System.Diagnostics.Process.Start(startInfo);
+        if (_playProcess is null)
+            return false;
+
+        _playProcess.EnableRaisingEvents = true;
+        _playProcess.Exited += (_, _) =>
+        {
+            Dispatcher.Invoke(() =>
+            {
+                _isPlayMode = false;
+                ViewModel.AutoSaveEnabled = true;
+                UpdatePlayToggleButton();
+                UpdateGameHostInputState();
+                ViewModel.StatusText = "Play window closed.";
+            });
+        };
+        return true;
+    }
+
+    private void StopPlayProcess()
+    {
+        if (_playProcess is null)
+            return;
+
+        try
+        {
+            if (!_playProcess.HasExited)
+            {
+                _playProcess.CloseMainWindow();
+                if (!_playProcess.WaitForExit(1500))
+                    _playProcess.Kill(entireProcessTree: true);
+            }
+        }
+        catch
+        {
+            // best effort
+        }
+        finally
+        {
+            _playProcess.Dispose();
+            _playProcess = null;
+        }
+    }
+
     private void PlayToggleButton_OnClick(object sender, RoutedEventArgs e)
     {
         var exePath = FindSandboxGameExe();
@@ -57,27 +126,41 @@ public partial class MainWindow : Window
 
         if (_isPlayMode)
         {
-            GameHost.StartGame(exePath, Path.GetDirectoryName(exePath), "--editor", restart: true);
+            StopPlayProcess();
             _isPlayMode = false;
             ViewModel.AutoSaveEnabled = true;
             UpdatePlayToggleButton();
             UpdateGameHostInputState();
-            ViewModel.StatusText = "Game stopped (Edit mode).";
+            ViewModel.StatusText = "Play window closed (Edit mode).";
             return;
         }
 
-        GameHost.StartGame(exePath, Path.GetDirectoryName(exePath), "--play", restart: true);
+        if (!StartPlayProcess())
+            return;
         _isPlayMode = true;
         ViewModel.AutoSaveEnabled = false;
         UpdatePlayToggleButton();
         UpdateGameHostInputState();
-        ViewModel.StatusText = "Game started in Play mode.";
+        ViewModel.StatusText = "Game started in Play window.";
     }
 
     private void GameHost_OnMouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
     {
         _isMouseOverGameHost = true;
         UpdateGameHostInputState();
+        if (_isPlayMode)
+        {
+            GameHost.Focus();
+            GameHost.FocusGameWindow();
+        }
+    }
+
+    private void GameHost_OnPreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        UpdateGameHostInputState();
+        GameHost.Focus();
+        GameHost.FocusGameWindow();
+        e.Handled = true;
     }
 
     private void GameHost_OnMouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
