@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Engine.Core.Rendering.Queue;
 using Engine.Core.Validation;
@@ -190,6 +191,74 @@ public sealed class GameApp : Game
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool GetClientRect(IntPtr hWnd, out Rect rect);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct Point
+    {
+        public int X;
+        public int Y;
+    }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool GetCursorPos(out Point pt);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool ScreenToClient(IntPtr hWnd, ref Point pt);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool IsWindow(IntPtr hWnd);
+
+    private IntPtr GetGameWindowHandle()
+    {
+        var handle = Window.Handle;
+        if (handle != IntPtr.Zero && IsWindow(handle))
+            return handle;
+
+        var mainHandle = Process.GetCurrentProcess().MainWindowHandle;
+        if (mainHandle != IntPtr.Zero && IsWindow(mainHandle))
+            return mainHandle;
+
+        return IntPtr.Zero;
+    }
+
+    private bool IsMouseInsideWindow()
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            var bounds = Window.ClientBounds;
+            return _curMouse.X >= 0 && _curMouse.Y >= 0 && _curMouse.X < bounds.Width && _curMouse.Y < bounds.Height;
+        }
+
+        var handle = GetGameWindowHandle();
+        if (handle == IntPtr.Zero)
+        {
+            var bounds = Window.ClientBounds;
+            return _curMouse.X >= 0 && _curMouse.Y >= 0 && _curMouse.X < bounds.Width && _curMouse.Y < bounds.Height;
+        }
+
+        if (!GetCursorPos(out var pt))
+        {
+            var bounds = Window.ClientBounds;
+            return _curMouse.X >= 0 && _curMouse.Y >= 0 && _curMouse.X < bounds.Width && _curMouse.Y < bounds.Height;
+        }
+
+        if (!ScreenToClient(handle, ref pt))
+        {
+            var bounds = Window.ClientBounds;
+            return _curMouse.X >= 0 && _curMouse.Y >= 0 && _curMouse.X < bounds.Width && _curMouse.Y < bounds.Height;
+        }
+
+        if (!GetClientRect(handle, out var rect))
+        {
+            var bounds = Window.ClientBounds;
+            return _curMouse.X >= 0 && _curMouse.Y >= 0 && _curMouse.X < bounds.Width && _curMouse.Y < bounds.Height;
+        }
+
+        int width = rect.Right - rect.Left;
+        int height = rect.Bottom - rect.Top;
+
+        return pt.X >= 0 && pt.Y >= 0 && pt.X < width && pt.Y < height;
+    }
 
     protected override void LoadContent()
     {
@@ -811,7 +880,7 @@ public sealed class GameApp : Game
 
     private void UpdateEditor(EngineContext ctx)
     {
-        if (WasLeftClick())
+        if (IsMouseInsideWindow() && WasLeftClick())
         {
             var world = _camera.ScreenToWorld(new System.Numerics.Vector2(_curMouse.X, _curMouse.Y));
             var picked = PickEntityAt(world);
@@ -985,8 +1054,8 @@ public sealed class GameApp : Game
         => value.ToString(format, System.Globalization.CultureInfo.InvariantCulture);
 
     private bool WasLeftClick()
-        => _curMouse.LeftButton == ButtonState.Pressed && _prevMouse.LeftButton == ButtonState.Released;
-
+        => _curMouse.LeftButton == ButtonState.Pressed
+           && _prevMouse.LeftButton == ButtonState.Released;
     private Entity? PickEntityAt(System.Numerics.Vector2 world)
     {
         for (int i = _scene.Entities.Count - 1; i >= 0; i--)

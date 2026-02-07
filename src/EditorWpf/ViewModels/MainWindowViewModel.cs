@@ -147,7 +147,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ApplyOverrideValue(entity, node.ComponentType, node.FieldDescriptor, valueText);
         UpdateDetails(entity);
         UpdateInspector(entity);
-        StatusText = "Scene override updated.";
+        var autoSaved = AutoSaveScene();
+        StatusText = autoSaved ? "Scene override updated (auto-saved)." : "Scene override updated.";
     }
 
     public void ResetFieldOverride(FieldNode node)
@@ -159,7 +160,26 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ResetFieldOverride(entity, node.ComponentType, node.FieldDescriptor);
         UpdateDetails(entity);
         UpdateInspector(entity);
-        StatusText = "Field reset.";
+        var autoSaved = AutoSaveScene();
+        StatusText = autoSaved ? "Field reset (auto-saved)." : "Field reset.";
+    }
+
+    private bool AutoSaveScene()
+    {
+        if (string.IsNullOrWhiteSpace(_currentScenePath) || _scene is null)
+            return false;
+
+        try
+        {
+            var json = SceneJson.Serialize(_scene);
+            File.WriteAllText(_currentScenePath, json);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            StatusText = "Auto-save failed: " + ex.Message;
+            return false;
+        }
     }
 
     public static string ComposeVectorValue(FieldNode node)

@@ -9,7 +9,7 @@
         Title="Maxwin Editor" Height="720" Width="1200"
         MinHeight="480" MinWidth="900"
         Background="#141416" Foreground="#E7E7E7">
-    <Grid>
+    <Grid PreviewMouseDown="Window_OnPreviewMouseDown">
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -56,8 +56,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" FontWeight="Bold">Game View</TextBlock>
                         <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button x:Name="PlayButton" Width="70" Margin="0,0,6,0" Click="PlayButton_OnClick">Play</Button>
-                            <Button x:Name="StopButton" Width="70" Click="StopButton_OnClick">Stop</Button>
+                            <Button x:Name="PlayToggleButton" Width="40" Height="24" Click="PlayToggleButton_OnClick"/>
                         </StackPanel>
                     </Grid>
                     <Border Background="#0B0C0F" BorderBrush="#1E2027" BorderThickness="1" CornerRadius="6" Padding="0">
@@ -65,7 +64,9 @@
                                                   HorizontalAlignment="Stretch"
                                                   VerticalAlignment="Stretch"
                                                   SnapsToDevicePixels="True"
-                                                  UseLayoutRounding="True"/>
+                                                  UseLayoutRounding="True"
+                                                  MouseEnter="GameHost_OnMouseEnter"
+                                                  MouseLeave="GameHost_OnMouseLeave"/>
                     </Border>
                 </DockPanel>
             </Border>

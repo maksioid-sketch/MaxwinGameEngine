@@ -7,9 +7,17 @@ public sealed class MonoGameInput : IInput
 {
     private KeyboardState _prev;
     private KeyboardState _cur;
+    public bool Enabled { get; set; } = true;
 
     public void Update()
     {
+        if (!Enabled)
+        {
+            _prev = _cur;
+            _cur = new KeyboardState();
+            return;
+        }
+
         _prev = _cur;
         _cur = Keyboard.GetState();
     }

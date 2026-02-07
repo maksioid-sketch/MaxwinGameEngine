@@ -13,6 +13,8 @@ namespace EditorWpf;
 public partial class MainWindow : Window
 {
     public MainWindowViewModel ViewModel { get; }
+    private bool _isPlayMode;
+    private bool _isMouseOverGameHost;
 
     public MainWindow()
     {
@@ -28,6 +30,9 @@ public partial class MainWindow : Window
 
     private void TryStartGameHost()
     {
+        _isPlayMode = false;
+        UpdatePlayToggleButton();
+
         var exePath = FindSandboxGameExe();
         if (string.IsNullOrWhiteSpace(exePath) || !File.Exists(exePath))
         {
@@ -36,33 +41,74 @@ public partial class MainWindow : Window
         }
 
         GameHost.StartGame(exePath, Path.GetDirectoryName(exePath), "--editor", restart: true);
+        UpdateGameHostInputState();
         ViewModel.StatusText = "Game started in Edit mode.";
     }
 
-    private void PlayButton_OnClick(object sender, RoutedEventArgs e)
+    private void PlayToggleButton_OnClick(object sender, RoutedEventArgs e)
     {
         var exePath = FindSandboxGameExe();
         if (string.IsNullOrWhiteSpace(exePath) || !File.Exists(exePath))
         {
             ViewModel.StatusText = "SandboxGame executable not found. Build SandboxGame first.";
+            return;
+        }
+
+        if (_isPlayMode)
+        {
+            GameHost.StartGame(exePath, Path.GetDirectoryName(exePath), "--editor", restart: true);
+            _isPlayMode = false;
+            UpdatePlayToggleButton();
+            UpdateGameHostInputState();
+            ViewModel.StatusText = "Game stopped (Edit mode).";
             return;
         }
 
         GameHost.StartGame(exePath, Path.GetDirectoryName(exePath), "--play", restart: true);
+        _isPlayMode = true;
+        UpdatePlayToggleButton();
+        UpdateGameHostInputState();
         ViewModel.StatusText = "Game started in Play mode.";
     }
 
-    private void StopButton_OnClick(object sender, RoutedEventArgs e)
+    private void GameHost_OnMouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
     {
-        var exePath = FindSandboxGameExe();
-        if (string.IsNullOrWhiteSpace(exePath) || !File.Exists(exePath))
-        {
-            ViewModel.StatusText = "SandboxGame executable not found. Build SandboxGame first.";
-            return;
-        }
+        _isMouseOverGameHost = true;
+        UpdateGameHostInputState();
+    }
 
-        GameHost.StartGame(exePath, Path.GetDirectoryName(exePath), "--editor", restart: true);
-        ViewModel.StatusText = "Game stopped (Edit mode).";
+    private void GameHost_OnMouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        _isMouseOverGameHost = false;
+        UpdateGameHostInputState();
+    }
+
+    private void UpdateGameHostInputState()
+    {
+        if (GameHost is null)
+            return;
+
+        var enable = _isPlayMode || _isMouseOverGameHost;
+        GameHost.SetInputEnabled(enable);
+    }
+
+    private void UpdatePlayToggleButton()
+    {
+        if (PlayToggleButton is null)
+            return;
+
+        var icon = _isPlayMode ? "■" : "▶";
+        var color = _isPlayMode ? "#E25555" : "#3BD671";
+        PlayToggleButton.ToolTip = _isPlayMode ? "Stop" : "Play";
+        PlayToggleButton.Content = new System.Windows.Controls.TextBlock
+        {
+            Text = icon,
+            FontSize = 14,
+            FontFamily = new System.Windows.Media.FontFamily("Segoe UI Symbol"),
+            Foreground = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString(color),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        };
     }
 
     private static string? FindSandboxGameExe()
@@ -169,6 +215,11 @@ public partial class MainWindow : Window
         e.Handled = true;
     }
 
+    private void Window_OnPreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        CommitFocusedDetailEdit(e.OriginalSource as DependencyObject);
+    }
+
     private static ScrollViewer? FindScrollViewer(DependencyObject root)
     {
         if (root is ScrollViewer sv)
@@ -210,6 +261,41 @@ public partial class MainWindow : Window
             var child = System.Windows.Media.VisualTreeHelper.GetChild(root, i);
             CloseOpenComboBoxes(child);
         }
+    }
+
+    private void CommitFocusedDetailEdit(DependencyObject? clickSource)
+    {
+        if (System.Windows.Input.Keyboard.FocusedElement is not TextBox box)
+            return;
+
+        if (clickSource is not null && IsDescendantOf(box, clickSource))
+            return;
+
+        if (box.DataContext is not FieldNode node)
+            return;
+
+        var value = node.Kind switch
+        {
+            Engine.Core.Inspection.FieldKind.Vector2 => MainWindowViewModel.ComposeVectorValue(node),
+            Engine.Core.Inspection.FieldKind.Vector3 => MainWindowViewModel.ComposeVectorValue(node),
+            Engine.Core.Inspection.FieldKind.Color4 => MainWindowViewModel.ComposeVectorValue(node),
+            _ => box.Text ?? string.Empty
+        };
+
+        ViewModel.ApplyDetailEdit(node, value);
+    }
+
+    private static bool IsDescendantOf(DependencyObject ancestor, DependencyObject child)
+    {
+        var current = child;
+        while (current is not null)
+        {
+            if (ReferenceEquals(current, ancestor))
+                return true;
+            current = System.Windows.Media.VisualTreeHelper.GetParent(current);
+        }
+
+        return false;
     }
 
     private static string? TryFindRepoRoot(string startDir)

@@ -81,6 +81,14 @@ public sealed class GameHostControl : HwndHost
         }
     }
 
+    public void SetInputEnabled(bool enabled)
+    {
+        if (_gameHwnd == IntPtr.Zero)
+            return;
+
+        EnableWindow(_gameHwnd, enabled);
+    }
+
     protected override HandleRef BuildWindowCore(HandleRef hwndParent)
     {
         _hostHwnd = CreateWindowEx(
@@ -205,4 +213,7 @@ public sealed class GameHostControl : HwndHost
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool EnableWindow(IntPtr hWnd, bool bEnable);
 }
