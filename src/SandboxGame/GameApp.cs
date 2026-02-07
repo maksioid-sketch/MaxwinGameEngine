@@ -1,4 +1,4 @@
-﻿using Engine.Core.Assets;
+using Engine.Core.Assets;
 using Engine.Core.Components;
 using Engine.Core.Rendering;
 using Engine.Core.Scene;
@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Engine.Core.Rendering.Queue;
 using Engine.Core.Validation;
 using Engine.Core.Inspection;
@@ -59,7 +60,7 @@ public sealed class GameApp : Game
     private readonly OnScreenDebug _onScreenDebug = new(maxTransientLines: 18);
     private readonly System.Collections.Generic.List<string> _debugLineBuffer = new();
 
-    private bool _editorMode = false;
+    private bool _editorMode = true;
     private Guid? _selectedEntityId = null;
     private MouseState _prevMouse;
     private MouseState _curMouse;
@@ -86,11 +87,109 @@ public sealed class GameApp : Game
         _gdm = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
+        Window.AllowUserResizing = true;
+        Window.ClientSizeChanged += OnClientSizeChanged;
 
         // Optional initial window size:
         _gdm.PreferredBackBufferWidth = 1280;
         _gdm.PreferredBackBufferHeight = 720;
+
+        ApplyStartupModeFromArgs();
     }
+
+    private void ApplyStartupModeFromArgs()
+    {
+        var args = Environment.GetCommandLineArgs();
+        for (int i = 0; i < args.Length; i++)
+        {
+            if (string.Equals(args[i], "--play", StringComparison.OrdinalIgnoreCase))
+            {
+                _editorMode = false;
+                return;
+            }
+
+            if (string.Equals(args[i], "--editor", StringComparison.OrdinalIgnoreCase))
+            {
+                _editorMode = true;
+                return;
+            }
+        }
+    }
+
+    private void OnClientSizeChanged(object? sender, EventArgs e)
+    {
+        var (width, height) = GetEffectiveClientSize();
+        if (_gdm.PreferredBackBufferWidth == width && _gdm.PreferredBackBufferHeight == height)
+            return;
+
+        _gdm.PreferredBackBufferWidth = width;
+        _gdm.PreferredBackBufferHeight = height;
+        _gdm.ApplyChanges();
+    }
+
+
+    private void SyncBackBufferToWindow()
+    {
+        var (width, height) = GetEffectiveClientSize();
+        if (_gdm.PreferredBackBufferWidth == width && _gdm.PreferredBackBufferHeight == height)
+            return;
+
+        _gdm.PreferredBackBufferWidth = width;
+        _gdm.PreferredBackBufferHeight = height;
+        _gdm.ApplyChanges();
+
+        try
+        {
+            GraphicsDevice.Viewport = new Viewport(0, 0, width, height);
+        }
+        catch
+        {
+            // ignore if GraphicsDevice not ready
+        }
+    }
+
+    private (int width, int height) GetEffectiveClientSize()
+    {
+        var width = Math.Max(1, Window.ClientBounds.Width);
+        var height = Math.Max(1, Window.ClientBounds.Height);
+
+        if (OperatingSystem.IsWindows() && TryGetNativeClientSize(out var nativeW, out var nativeH))
+        {
+            width = nativeW;
+            height = nativeH;
+        }
+
+        return (width, height);
+    }
+
+    private bool TryGetNativeClientSize(out int width, out int height)
+    {
+        width = 0;
+        height = 0;
+
+        var handle = Window.Handle;
+        if (handle == IntPtr.Zero)
+            return false;
+
+        if (!GetClientRect(handle, out var rect))
+            return false;
+
+        width = Math.Max(1, rect.Right - rect.Left);
+        height = Math.Max(1, rect.Bottom - rect.Top);
+        return true;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct Rect
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+    }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool GetClientRect(IntPtr hWnd, out Rect rect);
 
     protected override void LoadContent()
     {
@@ -175,6 +274,8 @@ public sealed class GameApp : Game
 
         if (_input.WasPressed(InputKey.Escape))
             Exit();
+
+        SyncBackBufferToWindow();
 
         if (_input.WasPressed(InputKey.F1))
         {

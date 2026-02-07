@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EditorWpf"
+        xmlns:controls="clr-namespace:EditorWpf.Controls"
         mc:Ignorable="d"
         Title="Maxwin Editor" Height="720" Width="1200"
         MinHeight="480" MinWidth="900"
@@ -48,12 +49,23 @@
 
             <Border Grid.Column="2" Background="#0F1013" BorderBrush="{StaticResource PanelBorder}" BorderThickness="1" Padding="8">
                 <DockPanel LastChildFill="True">
-                    <TextBlock DockPanel.Dock="Top" FontWeight="Bold" Margin="0,0,0,6">Game View</TextBlock>
-                    <Border Background="#0B0C0F" BorderBrush="#1E2027" BorderThickness="1" CornerRadius="6">
-                        <Grid>
-                            <TextBlock Text="Game Window (placeholder)" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                       Foreground="#8B8E98"/>
-                        </Grid>
+                    <Grid DockPanel.Dock="Top" Margin="0,0,0,6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" FontWeight="Bold">Game View</TextBlock>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button x:Name="PlayButton" Width="70" Margin="0,0,6,0" Click="PlayButton_OnClick">Play</Button>
+                            <Button x:Name="StopButton" Width="70" Click="StopButton_OnClick">Stop</Button>
+                        </StackPanel>
+                    </Grid>
+                    <Border Background="#0B0C0F" BorderBrush="#1E2027" BorderThickness="1" CornerRadius="6" Padding="0">
+                        <controls:GameHostControl x:Name="GameHost"
+                                                  HorizontalAlignment="Stretch"
+                                                  VerticalAlignment="Stretch"
+                                                  SnapsToDevicePixels="True"
+                                                  UseLayoutRounding="True"/>
                     </Border>
                 </DockPanel>
             </Border>

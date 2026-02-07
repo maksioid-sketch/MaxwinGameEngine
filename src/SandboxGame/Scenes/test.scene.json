@@ -7,22 +7,31 @@
       "PrefabId": "Player",
       "Transform": {
         "Position": [
-          -3.4865868,
-          0.21319394,
+          0,
+          0,
           0
         ],
         "rotationZDegrees": 0,
         "Scale": [
-          3.8666801,
-          3.8666801,
+          3,
+          3,
           1
         ]
       },
-      "SpriteRenderer": null,
+      "SpriteRenderer": {
+        "SpriteId": "player_idle_0",
+        "Layer": 100,
+        "Tint": [
+          1,
+          1,
+          1,
+          1
+        ]
+      },
       "Animator": {
         "ControllerId": "player",
-        "ClipId": "",
-        "Playing": true,
+        "ClipId": "human_idle",
+        "Playing": false,
         "Speed": 1,
         "LoopOverride": false,
         "Loop": true,

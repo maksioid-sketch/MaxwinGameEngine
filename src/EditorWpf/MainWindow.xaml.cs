@@ -1,6 +1,7 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.IO;
 using EditorWpf.ViewModels;
 using Microsoft.Win32;
 
@@ -21,6 +22,64 @@ public partial class MainWindow : Window
         ViewModel.Initialize(AppContext.BaseDirectory);
         DetailsTree.AddHandler(TreeViewItem.ExpandedEvent, new RoutedEventHandler(DetailsTree_OnExpanded));
         DetailsTree.AddHandler(TreeViewItem.CollapsedEvent, new RoutedEventHandler(DetailsTree_OnCollapsed));
+        Loaded += (_, _) => TryStartGameHost();
+        Closed += (_, _) => GameHost.StopGame();
+    }
+
+    private void TryStartGameHost()
+    {
+        var exePath = FindSandboxGameExe();
+        if (string.IsNullOrWhiteSpace(exePath) || !File.Exists(exePath))
+        {
+            ViewModel.StatusText = "SandboxGame executable not found. Build SandboxGame first.";
+            return;
+        }
+
+        GameHost.StartGame(exePath, Path.GetDirectoryName(exePath), "--editor", restart: true);
+        ViewModel.StatusText = "Game started in Edit mode.";
+    }
+
+    private void PlayButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        var exePath = FindSandboxGameExe();
+        if (string.IsNullOrWhiteSpace(exePath) || !File.Exists(exePath))
+        {
+            ViewModel.StatusText = "SandboxGame executable not found. Build SandboxGame first.";
+            return;
+        }
+
+        GameHost.StartGame(exePath, Path.GetDirectoryName(exePath), "--play", restart: true);
+        ViewModel.StatusText = "Game started in Play mode.";
+    }
+
+    private void StopButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        var exePath = FindSandboxGameExe();
+        if (string.IsNullOrWhiteSpace(exePath) || !File.Exists(exePath))
+        {
+            ViewModel.StatusText = "SandboxGame executable not found. Build SandboxGame first.";
+            return;
+        }
+
+        GameHost.StartGame(exePath, Path.GetDirectoryName(exePath), "--editor", restart: true);
+        ViewModel.StatusText = "Game stopped (Edit mode).";
+    }
+
+    private static string? FindSandboxGameExe()
+    {
+        var root = TryFindRepoRoot(AppContext.BaseDirectory);
+        if (root is null)
+            return null;
+
+        var debugExe = Path.Combine(root, "src", "SandboxGame", "bin", "Debug", "net9.0", "SandboxGame.exe");
+        if (File.Exists(debugExe))
+            return debugExe;
+
+        var releaseExe = Path.Combine(root, "src", "SandboxGame", "bin", "Release", "net9.0", "SandboxGame.exe");
+        if (File.Exists(releaseExe))
+            return releaseExe;
+
+        return null;
     }
 
     private void OpenButton_OnClick(object sender, RoutedEventArgs e)
@@ -151,5 +210,19 @@ public partial class MainWindow : Window
             var child = System.Windows.Media.VisualTreeHelper.GetChild(root, i);
             CloseOpenComboBoxes(child);
         }
+    }
+
+    private static string? TryFindRepoRoot(string startDir)
+    {
+        var dir = new DirectoryInfo(startDir);
+        while (dir is not null)
+        {
+            var slnx = Path.Combine(dir.FullName, "MaxwinGameEngine.slnx");
+            if (File.Exists(slnx))
+                return dir.FullName;
+            dir = dir.Parent;
+        }
+
+        return null;
     }
 }
