@@ -30,6 +30,8 @@ using Engine.Core.Rendering.Queue;
 using Engine.Core.Validation;
 using Engine.Core.Inspection;
 using Engine.Core.Math;
+using Engine.Core.Editor;
+using System.Collections.Concurrent;
 
 
 namespace SandboxGame;
@@ -63,6 +65,10 @@ public sealed class GameApp : Game
 
     private bool _editorMode = true;
     private Guid? _selectedEntityId = null;
+    private string? _editorIpcToken;
+    private EditorIpcClient? _editorIpcClient;
+    private EditorIpcServer? _editorIpcServer;
+    private readonly ConcurrentQueue<EditorIpcMessage> _editorIpcInbox = new();
     private MouseState _prevMouse;
     private MouseState _curMouse;
 
@@ -101,20 +107,27 @@ public sealed class GameApp : Game
     private void ApplyStartupModeFromArgs()
     {
         var args = Environment.GetCommandLineArgs();
+        bool? editorMode = null;
         for (int i = 0; i < args.Length; i++)
         {
             if (string.Equals(args[i], "--play", StringComparison.OrdinalIgnoreCase))
             {
-                _editorMode = false;
-                return;
+                editorMode = false;
+                continue;
             }
 
             if (string.Equals(args[i], "--editor", StringComparison.OrdinalIgnoreCase))
             {
-                _editorMode = true;
-                return;
+                editorMode = true;
+                continue;
             }
+
+            if (string.Equals(args[i], EditorIpc.ArgName, StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                _editorIpcToken = args[i + 1];
         }
+
+        if (editorMode.HasValue)
+            _editorMode = editorMode.Value;
     }
 
     private void OnClientSizeChanged(object? sender, EventArgs e)
@@ -324,6 +337,11 @@ public sealed class GameApp : Game
 
         _hotReloadStatus = $"{_hotReloadStatus}\nScene path: {_scenePath}";
 
+        if (!string.IsNullOrWhiteSpace(_editorIpcToken))
+        {
+            _editorIpcServer = new EditorIpcServer(_editorIpcToken, EditorIpcChannel.EditorToGame, OnEditorIpcMessage);
+            _editorIpcServer.Start();
+        }
 
         DebugPrint.Initialize(_onScreenDebug);
         DebugPrint.Print("DebugPrint ready (Unreal-style).", 2f);
@@ -350,7 +368,10 @@ public sealed class GameApp : Game
         {
             _editorMode = !_editorMode;
             if (!_editorMode)
+            {
                 _selectedEntityId = null;
+                SendEditorSelection(null);
+            }
         }
 
         // Hot reload first
@@ -375,6 +396,8 @@ public sealed class GameApp : Game
 
         _services.Events.Clear();
         var ctx = new EngineContext(_services);
+
+        ProcessEditorIpcMessages();
 
         UpdateEditorOverlay();
 
@@ -592,7 +615,11 @@ public sealed class GameApp : Game
     protected override void Dispose(bool disposing)
     {
         if (disposing)
+        {
             _hotReload?.Dispose();
+            _editorIpcClient?.Dispose();
+            _editorIpcServer?.Dispose();
+        }
 
         base.Dispose(disposing);
     }
@@ -884,7 +911,7 @@ public sealed class GameApp : Game
         {
             var world = _camera.ScreenToWorld(new System.Numerics.Vector2(_curMouse.X, _curMouse.Y));
             var picked = PickEntityAt(world);
-            _selectedEntityId = picked?.Id;
+            SetSelectedEntity(picked);
         }
 
         var selected = GetSelectedEntity();
@@ -1104,6 +1131,59 @@ public sealed class GameApp : Game
             return null;
 
         return _scene.Entities.FirstOrDefault(e => e.Id == _selectedEntityId.Value);
+    }
+
+    private void SetSelectedEntity(Entity? entity, bool sendToEditor = true)
+    {
+        var nextId = entity?.Id;
+        if (_selectedEntityId == nextId)
+            return;
+
+        _selectedEntityId = nextId;
+        if (sendToEditor)
+            SendEditorSelection(nextId);
+    }
+
+    private void SendEditorSelection(Guid? entityId)
+    {
+        if (!_editorMode)
+            return;
+
+        if (string.IsNullOrWhiteSpace(_editorIpcToken))
+            return;
+
+        _editorIpcClient ??= new EditorIpcClient(_editorIpcToken, EditorIpcChannel.GameToEditor);
+        _editorIpcClient.SendSelection(entityId);
+    }
+
+    private void OnEditorIpcMessage(EditorIpcMessage msg)
+    {
+        _editorIpcInbox.Enqueue(msg);
+    }
+
+    private void ProcessEditorIpcMessages()
+    {
+        if (!_editorMode)
+        {
+            while (_editorIpcInbox.TryDequeue(out _)) { }
+            return;
+        }
+
+        while (_editorIpcInbox.TryDequeue(out var msg))
+        {
+            if (!string.Equals(msg.Type, EditorIpc.SelectionMessageType, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            if (msg.EntityId is null)
+            {
+                SetSelectedEntity(null, sendToEditor: false);
+                continue;
+            }
+
+            var entity = _scene.Entities.FirstOrDefault(e => e.Id == msg.EntityId.Value);
+            if (entity is not null)
+                SetSelectedEntity(entity, sendToEditor: false);
+        }
     }
 
     private void EnsureTransformOverride(Entity e)

@@ -65,7 +65,7 @@
       "Transform": {
         "Position": [
           0,
-          1,
+          0,
           0
         ],
         "rotationZDegrees": 0,
@@ -157,17 +157,7 @@
         "DefaultCrossFadeSeconds": 0,
         "DefaultFreezeDuringCrossFade": false
       },
-      "BoxCollider2D": {
-        "Size": [
-          5,
-          0.2
-        ],
-        "Offset": [
-          0,
-          0.9
-        ],
-        "IsTrigger": false
-      },
+      "BoxCollider2D": null,
       "PhysicsBody2D": null,
       "Rigidbody2D": {
         "Mass": 1,

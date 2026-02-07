@@ -4,6 +4,8 @@ using System.Windows.Controls;
 using System.IO;
 using EditorWpf.ViewModels;
 using Microsoft.Win32;
+using Engine.Core.Editor;
+using System.Linq;
 
 namespace EditorWpf;
 
@@ -16,6 +18,10 @@ public partial class MainWindow : Window
     private bool _isPlayMode;
     private bool _isMouseOverGameHost;
     private System.Diagnostics.Process? _playProcess;
+    private string? _editorIpcToken;
+    private EditorIpcServer? _editorIpcServer;
+    private EditorIpcClient? _editorIpcClient;
+    private bool _suppressOutboundSelection;
 
     public MainWindow()
     {
@@ -25,12 +31,67 @@ public partial class MainWindow : Window
         ViewModel.Initialize(AppContext.BaseDirectory);
         DetailsTree.AddHandler(TreeViewItem.ExpandedEvent, new RoutedEventHandler(DetailsTree_OnExpanded));
         DetailsTree.AddHandler(TreeViewItem.CollapsedEvent, new RoutedEventHandler(DetailsTree_OnCollapsed));
-        Loaded += (_, _) => TryStartGameHost();
+        Loaded += (_, _) => StartEditorSession();
         Closed += (_, _) =>
         {
             StopPlayProcess();
             GameHost.StopGame();
+            _editorIpcServer?.Dispose();
+            _editorIpcClient?.Dispose();
         };
+    }
+
+    private void StartEditorSession()
+    {
+        StartEditorIpc();
+        TryStartGameHost();
+    }
+
+    private void StartEditorIpc()
+    {
+        _editorIpcToken = EditorIpc.CreateSessionToken();
+        _editorIpcServer = new EditorIpcServer(_editorIpcToken, EditorIpcChannel.GameToEditor, OnEditorIpcMessage);
+        _editorIpcServer.Start();
+        _editorIpcClient = new EditorIpcClient(_editorIpcToken, EditorIpcChannel.EditorToGame);
+    }
+
+    private void OnEditorIpcMessage(EditorIpcMessage message)
+    {
+        if (!string.Equals(message.Type, EditorIpc.SelectionMessageType, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        Dispatcher.BeginInvoke(new Action(() =>
+        {
+            ApplyEditorSelection(message.EntityId);
+        }));
+    }
+
+    private void ApplyEditorSelection(Guid? entityId)
+    {
+        if (EntitiesList is null)
+            return;
+
+        if (entityId is null)
+        {
+            if (EntitiesList.SelectedItem is null)
+                return;
+
+            _suppressOutboundSelection = true;
+            EntitiesList.SelectedItem = null;
+            return;
+        }
+
+        var match = ViewModel.Entities.FirstOrDefault(e => e.Entity.Id == entityId.Value);
+        if (match is null)
+            return;
+
+        if (!ReferenceEquals(EntitiesList.SelectedItem, match))
+        {
+            _suppressOutboundSelection = true;
+            EntitiesList.SelectedItem = match;
+        }
+
+        EntitiesList.ScrollIntoView(match);
     }
 
     private void TryStartGameHost()
@@ -46,7 +107,10 @@ public partial class MainWindow : Window
             return;
         }
 
-        GameHost.StartGame(exePath, Path.GetDirectoryName(exePath), "--editor", restart: true);
+        var args = "--editor";
+        if (!string.IsNullOrWhiteSpace(_editorIpcToken))
+            args += $" {EditorIpc.ArgName} {_editorIpcToken}";
+        GameHost.StartGame(exePath, Path.GetDirectoryName(exePath), args, restart: true);
         UpdateGameHostInputState();
         ViewModel.StatusText = "Game started in Edit mode.";
     }
@@ -267,6 +331,22 @@ public partial class MainWindow : Window
         var selected = EntitiesList.SelectedItem as EntityView;
         ViewModel.SelectEntity(selected);
         RestoreExpandedState();
+
+        if (_suppressOutboundSelection)
+        {
+            _suppressOutboundSelection = false;
+            return;
+        }
+
+        SendSelectionToGame(selected?.Entity.Id);
+    }
+
+    private void SendSelectionToGame(Guid? entityId)
+    {
+        if (_editorIpcClient is null)
+            return;
+
+        _editorIpcClient.SendSelection(entityId);
     }
 
     private void DetailsTree_OnExpanded(object sender, RoutedEventArgs e)
